@@ -156,6 +156,7 @@
       "newAlbum": "Neues Album",
       "newGroup": "Neue Gruppe",
       "renameAlbum": "Album umbenennen",
+      "renameGroup": "Gruppe umbenennen",
       "rootDir": "Stammverzeichnis"
     },
     "colors": {
@@ -176,6 +177,7 @@
       "copyAdjustments": "Einstellungen kopieren",
       "cullImage": "Bild aussortieren",
       "denoise": "Bild entrauschen",
+      "editImage": "Bild bearbeiten",
       "exportImage": "Bild exportieren",
       "frameImage": "Bild rahmen",
       "mergeHdr": "Zu HDR zusammenfügen",
@@ -357,12 +359,12 @@
       },
       "patches": {
         "aiEdit": "KI-Bearbeitung {{count}}",
-        "aiEdit_one": "",
-        "aiEdit_other": "",
+        "aiEdit_one": "KI-Bearbeitung {{count}}",
+        "aiEdit_other": "KI-Bearbeitung {{count}}",
         "invertedName": "{{name}} umgekehrt",
         "quickErase": "Schnelles Löschen {{count}}",
-        "quickErase_one": "",
-        "quickErase_other": ""
+        "quickErase_one": "Schnelles Löschen {{count}}",
+        "quickErase_other": "Schnelles Löschen {{count}}"
       },
       "resetInpaintingTooltip": "Reparieren zurücksetzen",
       "settings": {
@@ -553,8 +555,8 @@
         "copyName": "{{name}} Kopie",
         "invertedName": "{{name}} umgekehrt",
         "maskName": "Maske {{count}}",
-        "maskName_one": "",
-        "maskName_other": ""
+        "maskName_one": "Maske {{count}}",
+        "maskName_other": "Maske {{count}}"
       },
       "resetMaskingTooltip": "Maskierung zurücksetzen",
       "settings": {
@@ -594,6 +596,8 @@
         "title": "Kamera-Details"
       },
       "clickToEdit": "Zum Bearbeiten klicken",
+      "copied": "Kopiert",
+      "copy": "Kopieren",
       "emptyClickToAdd": "Leer (Klicken zum Hinzufügen)",
       "extendedExif": {
         "title": "Erweiterte EXIF"
@@ -721,8 +725,8 @@
     "dialog": {
       "saveEditedImageTitle": "Bearbeitetes Bild speichern",
       "selectFolderTitle": "Ordner zum Exportieren von {{count}} Bild(ern) auswählen",
-      "selectFolderTitle_one": "",
-      "selectFolderTitle_other": ""
+      "selectFolderTitle_one": "Ordner zum Exportieren von {{count}} Bild auswählen",
+      "selectFolderTitle_other": "Ordner zum Exportieren von {{count}} Bildern auswählen"
     },
     "file": {
       "quality": "Qualität",
@@ -767,8 +771,8 @@
       "exporting": "Wird exportiert…",
       "exportingProgress": "Wird exportiert… ({{current}}/{{total}})",
       "exportMultiple": "Exportiere {{count}} {{label}}",
-      "exportMultiple_one": "",
-      "exportMultiple_other": "",
+      "exportMultiple_one": "Exportiere {{count}} {{label}}",
+      "exportMultiple_other": "Exportiere {{count}} {{label}}",
       "exportSingle": "{{label}} exportieren",
       "failed": "Export fehlgeschlagen",
       "noImageSelected": "Kein Bild zum Exportieren ausgewählt.",
@@ -815,12 +819,19 @@
       }
     },
     "filters": {
+      "edited": {
+        "all": "Alle Bilder",
+        "editedOnly": "Nur bearbeitete",
+        "uneditedOnly": "Nur unbearbeitete"
+      },
       "noMatch": "Keine Bilder gefunden, die Ihrem Filter entsprechen.",
       "rating": {
         "all": "Alle anzeigen",
+        "andUpSuffix": "& höher",
         "fiveOnly": "Nur 5",
         "fourAndUp": "4 & höher",
         "oneAndUp": "1 & höher",
+        "onlySuffix": "nur",
         "threeAndUp": "3 & höher",
         "twoAndUp": "2 & höher",
         "unrated": "Nur unbewertete"
@@ -882,6 +893,7 @@
         "displayMode": "Anzeigemodus",
         "exifDisabledTooltip": "EXIF-Lesen in den Einstellungen aktivieren, um diese Option zu nutzen.",
         "filterByColorLabel": "Nach Farbmarkierung filtern",
+        "filterByEdited": "Nach Bearbeitungsstatus filtern",
         "filterByFileType": "Nach Dateityp filtern",
         "filterByRating": "Nach Bewertung filtern",
         "metadataAlways": "Immer",
@@ -924,6 +936,7 @@
       "aperture": "Blende",
       "dateModified": "Änderungsdatum",
       "dateTaken": "Aufnahmedatum",
+      "editedStatus": "Bearbeitungsstatus",
       "fileName": "Dateiname",
       "focalLength": "Brennweite",
       "iso": "ISO",
@@ -993,11 +1006,11 @@
   },
   "menus": {
     "tagging": {
-      "addTagTooltip": "",
-      "noTags": "",
-      "placeholder": "",
-      "removeTooltip": "",
-      "shortcutsHeading": ""
+      "addTagTooltip": "Tag hinzufügen",
+      "noTags": "Keine Tags hinzugefügt",
+      "placeholder": "Tag hinzufügen...",
+      "removeTooltip": "Tag \"{{tag}}\" entfernen",
+      "shortcutsHeading": "TASTENKÜRZEL"
     }
   },
   "modals": {
@@ -1071,11 +1084,17 @@
       "selectNone": "Keine auswählen",
       "title": "Einstellungen kopieren & einfügen"
     },
+    "createAlbum": {
+      "placeholder": "Albumnamen eingeben..."
+    },
     "createFolder": {
       "cancel": "Abbrechen",
       "create": "Erstellen",
       "placeholder": "Ordnernamen eingeben...",
       "title": "Neuen Ordner erstellen"
+    },
+    "createGroup": {
+      "placeholder": "Gruppennamen eingeben..."
     },
     "culling": {
       "actionDelete": "In den Papierkorb verschieben",
@@ -1093,8 +1112,8 @@
       "cullingSuggestions": "Vorschläge zum Aussortieren",
       "done": "Fertig",
       "duplicatesHeader": "Duplikate ({{count}})",
-      "duplicatesHeader_one": "",
-      "duplicatesHeader_other": "",
+      "duplicatesHeader_one": "Duplikate ({{count}})",
+      "duplicatesHeader_other": "Duplikate ({{count}})",
       "filterBlurry": "Unscharfe Bilder filtern",
       "groupHeader": "Gruppe {{index}}",
       "groupSimilar": "Ähnliche Bilder gruppieren",
@@ -1143,8 +1162,8 @@
       "close": "Schließen",
       "description": "Kombinieren Sie Ihre Belichtungsreihen zu einem einzigen High Dynamic Range Bild.",
       "descriptionWithCount": "Kombinieren Sie {{count}} Belichtungen zu einem einzigen High Dynamic Range Bild.",
-      "descriptionWithCount_one": "",
-      "descriptionWithCount_other": "",
+      "descriptionWithCount_one": "Kombinieren Sie {{count}} Belichtung zu einem einzigen High Dynamic Range Bild.",
+      "descriptionWithCount_other": "Kombinieren Sie {{count}} Belichtungen zu einem einzigen High Dynamic Range Bild.",
       "failed": "HDR-Zusammenfügung fehlgeschlagen",
       "initializing": "Wird initialisiert...",
       "merging": "HDR wird zusammengefügt",
@@ -1210,8 +1229,8 @@
       "contrast": "Kontrast (Grade)",
       "convertAndSave": "Umwandeln & Speichern",
       "convertAndSaveAll": "Alle umwandeln & speichern ({{count}})",
-      "convertAndSaveAll_one": "",
-      "convertAndSaveAll_other": "",
+      "convertAndSaveAll_one": "Alle umwandeln & speichern ({{count}})",
+      "convertAndSaveAll_other": "Alle umwandeln & speichern ({{count}})",
       "converting": "Wird umgewandelt",
       "convertingProgress": "Wird umgewandelt {{current}}/{{total}}",
       "exposure": "Belichtung",
@@ -1230,8 +1249,8 @@
       "cancel": "Abbrechen",
       "close": "Schließen",
       "descCount": "Kombinieren Sie {{count}} überlappende Bilder zu einem nahtlosen Panorama.",
-      "descCount_one": "",
-      "descCount_other": "",
+      "descCount_one": "Kombinieren Sie {{count}} überlappendes Bild zu einem nahtlosen Panorama.",
+      "descCount_other": "Kombinieren Sie {{count}} überlappende Bilder zu einem nahtlosen Panorama.",
       "descGeneric": "Kombinieren Sie Ihre überlappenden Bilder zu einem nahtlosen Panorama.",
       "failed": "Panorama fehlgeschlagen",
       "initializing": "Wird initialisiert...",
@@ -1244,14 +1263,17 @@
       "stitchingProgress": "Panorama wird zusammengefügt",
       "title": "Panorama zusammenfügen"
     },
+    "renameAlbum": {
+      "placeholder": "Neuen Albumnamen eingeben..."
+    },
     "renameFile": {
       "cancel": "Abbrechen",
       "fileNamingTemplate": "Dateibenennungsvorlage",
       "newName": "Neuer Name",
       "save": "Speichern",
       "titleMultiple": "{{count}} Bilder umbenennen",
-      "titleMultiple_one": "",
-      "titleMultiple_other": "",
+      "titleMultiple_one": "{{count}} Bild umbenennen",
+      "titleMultiple_other": "{{count}} Bilder umbenennen",
       "titleSingle": "Bild umbenennen"
     },
     "renameFolder": {
@@ -1259,6 +1281,9 @@
       "placeholder": "Neuen Ordnernamen eingeben...",
       "save": "Speichern",
       "title": "Ordner umbenennen"
+    },
+    "renameGroup": {
+      "placeholder": "Neuen Gruppennamen eingeben..."
     },
     "transform": {
       "amount": "Betrag",
@@ -1345,11 +1370,11 @@
       "noFolders": "Keine Ordner ausgewählt",
       "statuses": {
         "aiSuccess": "{{count}} Dateien aktualisiert. KI-Tags entfernt.",
-        "aiSuccess_one": "",
-        "aiSuccess_other": "",
+        "aiSuccess_one": "{{count}} Datei aktualisiert. KI-Tags entfernt.",
+        "aiSuccess_other": "{{count}} Dateien aktualisiert. KI-Tags entfernt.",
         "allSuccess": "{{count}} Dateien aktualisiert. Alle nicht-farbigen Tags entfernt.",
-        "allSuccess_one": "",
-        "allSuccess_other": "",
+        "allSuccess_one": "{{count}} Datei aktualisiert. Alle nicht-farbigen Tags entfernt.",
+        "allSuccess_other": "{{count}} Dateien aktualisiert. Alle nicht-farbigen Tags entfernt.",
         "cacheSuccess": "Miniaturbild-Cache erfolgreich gelöscht.",
         "clearingAi": "KI-Tags aus allen Filialdateien löschen...",
         "clearingAll": "Alle Tags aus Filialdateien löschen...",
@@ -1358,8 +1383,8 @@
         "failedToGetPath": "Protokolldateipfad konnte nicht abgerufen werden.",
         "processing": "Wird verarbeitet...",
         "sidecarSuccess": "{{count}} Filialdateien erfolgreich gelöscht.",
-        "sidecarSuccess_one": "",
-        "sidecarSuccess_other": ""
+        "sidecarSuccess_one": "{{count}} Filialdatei erfolgreich gelöscht.",
+        "sidecarSuccess_other": "{{count}} Filialdateien erfolgreich gelöscht."
       },
       "title": "Datenverwaltung"
     },
@@ -1367,6 +1392,8 @@
       "createXmp": "Fehlende XMP-Dateien erstellen",
       "createXmpDesc": "Erstellt automatisch eine neue XMP-Filialdatei, falls noch keine für ein Bild existiert.",
       "createXmpMissing": "XMP erstellen, falls fehlend",
+      "displayEditIcon": "Bearbeitungssymbol anzeigen",
+      "displayEditIconDesc": "Zeigt ein kleines Schieberegler-Symbol auf Miniaturbildern an, die bearbeitet wurden.",
       "enableFocusMode": "Fokusmodus aktivieren",
       "enableOsTitlebar": "OS-Titelleiste aktivieren",
       "enableXmpSync": "XMP-Sync aktivieren",
@@ -1387,8 +1414,65 @@
       "xmpSync": "XMP-Metadaten-Sync",
       "xmpSyncDesc": "Synchronisieren Sie Bewertungen, Farbmarkierungen und Tags in Standard-XMP-Filialdateien für Kompatibilität mit anderen Foto-Editoren."
     },
+    "keybinds": {
+      "actions": {
+        "brush_size_down": "Pinselgröße verringern",
+        "brush_size_up": "Pinselgröße erhöhen",
+        "color_label_blue": "Farbmarkierung: Blau",
+        "color_label_green": "Farbmarkierung: Grün",
+        "color_label_none": "Farbmarkierung: Keine",
+        "color_label_purple": "Farbmarkierung: Lila",
+        "color_label_red": "Farbmarkierung: Rot",
+        "color_label_yellow": "Farbmarkierung: Gelb",
+        "copy_adjustments": "Ausgewählte Anpassungen kopieren",
+        "copy_files": "Ausgewählte Datei(en) kopieren",
+        "cycle_zoom": "Zoom durchwechseln (Einpassen, 2x Einpassen, 100%)",
+        "delete_selected": "Ausgewählte Datei(en) löschen",
+        "open_image": "Ausgewähltes Bild öffnen",
+        "paste_adjustments": "Kopierte Anpassungen einfügen",
+        "paste_files": "Datei(en) in aktuellen Ordner einfügen",
+        "preview_next": "Nächstes Bild",
+        "preview_prev": "Vorheriges Bild",
+        "rate_0": "Sternbewertung: 0",
+        "rate_1": "Sternbewertung: 1",
+        "rate_2": "Sternbewertung: 2",
+        "rate_3": "Sternbewertung: 3",
+        "rate_4": "Sternbewertung: 4",
+        "rate_5": "Sternbewertung: 5",
+        "redo": "Bearbeitung wiederholen",
+        "rotate_left": "90° gegen den Uhrzeigersinn drehen",
+        "rotate_right": "90° im Uhrzeigersinn drehen",
+        "select_all": "Alle Bilder auswählen",
+        "show_original": "Original anzeigen (Vorher/Nachher)",
+        "toggle_adjustments": "Anpassungen-Panel ein-/ausblenden",
+        "toggle_ai": "KI-Panel ein-/ausblenden",
+        "toggle_analytics": "Analyseanzeige ein-/ausblenden",
+        "toggle_crop": "Zuschnitt / Gerade ausrichten umschalten",
+        "toggle_crop_panel": "Zuschneiden-Panel ein-/ausblenden",
+        "toggle_export": "Exportieren-Panel ein-/ausblenden",
+        "toggle_fullscreen": "Vollbild umschalten",
+        "toggle_library_exif": "EXIF-Überlagerung ein-/ausblenden",
+        "toggle_masks": "Maskieren-Panel ein-/ausblenden",
+        "toggle_metadata": "Metadaten-Panel ein-/ausblenden",
+        "toggle_presets": "Vorgaben-Panel ein-/ausblenden",
+        "undo": "Bearbeitung rückgängig machen",
+        "zoom_100": "Auf 100% zoomen",
+        "zoom_fit": "Auf Fenstergröße einpassen",
+        "zoom_in": "Vergrößern",
+        "zoom_in_step": "Vergrößern (schrittweise)",
+        "zoom_out": "Verkleinern",
+        "zoom_out_step": "Verkleinern (schrittweise)"
+      },
+      "sections": {
+        "editing": "Bearbeitung",
+        "library": "Bibliothek",
+        "panels": "Panels",
+        "rating": "Bewertungen & Markierungen",
+        "view": "Ansicht"
+      }
+    },
     "language": "Sprache",
-    "languageDesc": "Ändern Sie die Sprache der Anwendung. Fällt auf Englisch zurück, wenn Übersetzungen fehlen.",
+    "languageDesc": "Ändern Sie die Sprache der Anwendung.",
     "lenses": {
       "addButton": "Zu meinen Objektiven hinzufügen",
       "addNew": "Neues Objektiv hinzufügen",
@@ -1582,6 +1666,11 @@
         "youLabel": "Ihnen"
       },
       "title": "Besonderer Dank"
+    },
+    "themes": {
+      "dark": "Dunkel",
+      "grey": "Grau",
+      "light": "Hell"
     },
     "title": "Einstellungen",
     "tooltips": {

@@ -12,6 +12,7 @@ import {
   Invokes,
   LibraryViewMode,
   RawStatus,
+  EditedStatus,
   Theme,
   ThumbnailSize,
   ThumbnailAspectRatio,
@@ -37,7 +38,12 @@ const getDefaultLanguage = (i18nInstance: any): string => {
       ? i18nInstance.options.fallbackLng
       : i18nInstance.options.fallbackLng?.[0] || 'en';
 
-  return supportedLanguages.includes(shortLang) ? shortLang : fallbackLang;
+  // Check full locale first (e.g., 'zh-CN'), then short code (e.g., 'zh')
+  return supportedLanguages.includes(browserLang)
+    ? browserLang
+    : supportedLanguages.includes(shortLang)
+    ? shortLang
+    : fallbackLang;
 };
 
 export const useAppInitialization = ({
@@ -151,6 +157,7 @@ export const useAppInitialization = ({
             ...prev,
             ...settings.filterCriteria,
             rawStatus: settings.filterCriteria.rawStatus || RawStatus.All,
+            editedStatus: settings.filterCriteria.editedStatus || EditedStatus.All,
             colors: settings.filterCriteria.colors || [],
           }));
         }

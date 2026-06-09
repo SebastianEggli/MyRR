@@ -57,16 +57,6 @@ import { useEditorActions } from './useEditorActions';
 import { useLibraryActions } from './useLibraryActions';
 import { globalImageCache } from '../utils/ImageLRUCache';
 
-const RIGHT_PANEL_ORDER = [
-  Panel.Metadata,
-  Panel.Adjustments,
-  Panel.Crop,
-  Panel.Masks,
-  Panel.Ai,
-  Panel.Presets,
-  Panel.Export,
-];
-
 export interface UseAppContextMenusProps {
   handleImageSelect: (path: string) => void;
   handleBackToLibrary: () => void;
@@ -186,13 +176,17 @@ export function useAppContextMenus(props: UseAppContextMenusProps) {
         {
           label: t('contextMenus.editor.exportImage'),
           icon: FileInput,
-          onClick: () => setRightPanel(Panel.Export, RIGHT_PANEL_ORDER),
+          onClick: () => setRightPanel(Panel.Export),
         },
         { type: OPTION_SEPARATOR },
         { label: t('contextMenus.editor.undo'), icon: Undo, onClick: undo, disabled: !canUndo },
         { label: t('contextMenus.editor.redo'), icon: Redo, onClick: redo, disabled: !canRedo },
         { type: OPTION_SEPARATOR },
-        { label: t('contextMenus.editor.copyAdjustments'), icon: Copy, onClick: handleCopyAdjustments },
+        {
+          label: t('contextMenus.editor.copyAdjustments'),
+          icon: Copy,
+          onClick: () => handleCopyAdjustments(),
+        },
         {
           label: t('contextMenus.editor.pasteAdjustments'),
           icon: ClipboardPaste,
@@ -265,7 +259,7 @@ export function useAppContextMenus(props: UseAppContextMenusProps) {
           submenu: [
             { label: t('contextMenus.editor.noLabel'), onClick: () => handleSetColorLabel(null) },
             ...COLOR_LABELS.map((label: Color) => ({
-              label: t(`menus.colors.${label.name}`),
+              label: t(`contextMenus.colors.${label.name}`),
               color: label.color,
               onClick: () => handleSetColorLabel(label.name),
             })),
@@ -472,7 +466,7 @@ export function useAppContextMenus(props: UseAppContextMenusProps) {
             props.handleImageSelect(path);
           }
           setLibrary({ multiSelectedPaths: finalSelection });
-          setRightPanel(Panel.Export, RIGHT_PANEL_ORDER);
+          setRightPanel(Panel.Export);
         } else {
           setLibrary({ multiSelectedPaths: finalSelection });
           setUI({ isLibraryExportPanelVisible: true });
@@ -526,7 +520,7 @@ export function useAppContextMenus(props: UseAppContextMenusProps) {
               {
                 disabled: !isSingleSelection,
                 icon: Edit,
-                label: t('contextMenus.editor.frameImage'),
+                label: t('contextMenus.editor.editImage'),
                 onClick: () => props.handleImageSelect(finalSelection[0]),
               },
               { icon: FileInput, label: exportLabel, onClick: onExportClick },
@@ -537,7 +531,7 @@ export function useAppContextMenus(props: UseAppContextMenusProps) {
           disabled: !isSingleSelection,
           icon: Copy,
           label: t('contextMenus.editor.copyAdjustments'),
-          onClick: handleCopyAdjustments,
+          onClick: () => handleCopyAdjustments(),
         },
         {
           disabled: copiedAdjustments === null,
@@ -695,7 +689,7 @@ export function useAppContextMenus(props: UseAppContextMenusProps) {
           submenu: [
             { label: t('contextMenus.editor.noLabel'), onClick: () => handleSetColorLabel(null, finalSelection) },
             ...COLOR_LABELS.map((label: Color) => ({
-              label: t(`menus.colors.${label.name}`),
+              label: t(`contextMenus.colors.${label.name}`),
               color: label.color,
               onClick: () => handleSetColorLabel(label.name, finalSelection),
             })),
@@ -784,18 +778,26 @@ export function useAppContextMenus(props: UseAppContextMenusProps) {
   );
 
   const handleFolderTreeContextMenu = useCallback(
-    (event: any, path: string, isCurrentlyPinned?: boolean) => {
+    (event: any, path: string | null, isCurrentlyPinned?: boolean) => {
       event.preventDefault();
       event.stopPropagation();
+
+      if (!path) {
+        showContextMenu(event.clientX, event.clientY, [
+          {
+            icon: RefreshCw,
+            label: t('contextMenus.folders.refresh'),
+            onClick: () => props.refreshAllFolderTrees(),
+          },
+        ]);
+        return;
+      }
 
       const { rootPaths, currentFolderPath, folderTrees, setLibrary } = useLibraryStore.getState();
       const { copiedFilePaths, setProcess } = useProcessStore.getState();
       const { appSettings, handleSettingsChange } = useSettingsStore.getState();
       const { setUI } = useUIStore.getState();
-
-      const targetPath = path || currentFolderPath || rootPaths?.[0];
-      if (!targetPath) return;
-
+      const targetPath = path;
       const isRoot = rootPaths.includes(targetPath);
       const numCopied = copiedFilePaths.length;
       const copyPastedLabel = t('contextMenus.folders.copyHere', { count: numCopied });
@@ -953,54 +955,50 @@ export function useAppContextMenus(props: UseAppContextMenusProps) {
           label: t('contextMenus.folders.refresh'),
           onClick: () => props.refreshAllFolderTrees(),
         },
-        ...(path
-          ? [
-              {
-                disabled: isRoot,
-                icon: Trash2,
-                isDestructive: true,
-                label: t('contextMenus.folders.deleteFolder'),
-                submenu: [
-                  { label: t('contextMenus.editor.cancel'), icon: X, onClick: () => {} },
-                  {
-                    label: t('contextMenus.folders.confirm'),
-                    icon: Check,
-                    isDestructive: true,
-                    onClick: async () => {
-                      try {
-                        await invoke(Invokes.DeleteFolder, { path: targetPath });
+        {
+          disabled: isRoot,
+          icon: Trash2,
+          isDestructive: true,
+          label: t('contextMenus.folders.deleteFolder'),
+          submenu: [
+            { label: t('contextMenus.editor.cancel'), icon: X, onClick: () => {} },
+            {
+              label: t('contextMenus.folders.confirm'),
+              icon: Check,
+              isDestructive: true,
+              onClick: async () => {
+                try {
+                  await invoke(Invokes.DeleteFolder, { path: targetPath });
 
-                        const isCurrentInTarget =
-                          currentFolderPath === targetPath ||
-                          currentFolderPath?.startsWith(targetPath + '/') ||
-                          currentFolderPath?.startsWith(targetPath + '\\');
+                  const isCurrentInTarget =
+                    currentFolderPath === targetPath ||
+                    currentFolderPath?.startsWith(targetPath + '/') ||
+                    currentFolderPath?.startsWith(targetPath + '\\');
 
-                        if (isCurrentInTarget) {
-                          props.handleBackToLibrary();
-                          setLibrary({
-                            currentFolderPath: null,
-                            imageList: [],
-                            libraryActivePath: null,
-                            multiSelectedPaths: [],
-                            selectionAnchorPath: null,
-                          });
+                  if (isCurrentInTarget) {
+                    props.handleBackToLibrary();
+                    setLibrary({
+                      currentFolderPath: null,
+                      imageList: [],
+                      libraryActivePath: null,
+                      multiSelectedPaths: [],
+                      selectionAnchorPath: null,
+                    });
 
-                          const { appSettings, handleSettingsChange } = useSettingsStore.getState();
-                          if (appSettings) {
-                            handleSettingsChange({ ...appSettings, lastFolderState: null } as any);
-                          }
-                        }
+                    const { appSettings, handleSettingsChange } = useSettingsStore.getState();
+                    if (appSettings) {
+                      handleSettingsChange({ ...appSettings, lastFolderState: null } as any);
+                    }
+                  }
 
-                        props.refreshAllFolderTrees();
-                      } catch (err) {
-                        toast.error(t('contextMenus.toasts.failedDeleteFolder', { err }));
-                      }
-                    },
-                  },
-                ],
+                  props.refreshAllFolderTrees();
+                } catch (err) {
+                  toast.error(t('contextMenus.toasts.failedDeleteFolder', { err }));
+                }
               },
-            ]
-          : []),
+            },
+          ],
+        },
       ];
       showContextMenu(event.clientX, event.clientY, options);
     },
@@ -1140,7 +1138,8 @@ export function useAppContextMenus(props: UseAppContextMenusProps) {
           ? [
               { type: OPTION_SEPARATOR },
               {
-                label: t('contextMenus.albums.renameAlbum'),
+                label:
+                  item.type === 'group' ? t('contextMenus.albums.renameGroup') : t('contextMenus.albums.renameAlbum'),
                 icon: FileEdit,
                 onClick: () => setUI({ albumActionTarget: item.id, isRenameAlbumModalOpen: true }),
               },
