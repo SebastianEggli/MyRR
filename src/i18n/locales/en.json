@@ -352,7 +352,9 @@
       "dropzoneText": "Drop here to create a new edit",
       "editSettingsTitle": "Edit Settings",
       "editsTitle": "Edits",
+      "generativeEditTitle": "Generative Edit",
       "inpaintingTitle": "Inpainting",
+      "manualCleanupTitle": "Manual Cleanup",
       "noImageSelected": "No image selected.",
       "params": {
         "feather": "Feather",
@@ -362,6 +364,12 @@
         "aiEdit": "AI Edit {{count}}",
         "aiEdit_one": "AI Edit {{count}}",
         "aiEdit_other": "AI Edit {{count}}",
+        "clone": "Clone {{count}}",
+        "clone_one": "Clone {{count}}",
+        "clone_other": "Clone {{count}}",
+        "heal": "Heal {{count}}",
+        "heal_one": "Heal {{count}}",
+        "heal_other": "Heal {{count}}",
         "invertedName": "{{name}} Inverted",
         "quickErase": "Quick Erase {{count}}",
         "quickErase_one": "Quick Erase {{count}}",
@@ -585,6 +593,7 @@
       "tooltips": {
         "addToCurrent": "Add {{name}} to Current Mask or Create New (Right-click)",
         "createNew": "Create New {{name}} Mask",
+        "selectNewSourcePoint": "{{modifier}} + Click to select a new source point",
         "showMore": "Show More Mask Types"
       }
     },
@@ -825,6 +834,31 @@
         "name": "Name (A-Z)"
       }
     },
+    "culling": {
+      "addTagPlaceholder": "Add tag...",
+      "altCullingPreviewHighRes": "Culling Preview High Res",
+      "altThumbnailLoading": "Thumbnail Loading",
+      "aperture": "Aperture",
+      "cameraSettings": "Camera Settings",
+      "clickThumbnailsHint": "Click thumbnails in the right sidebar to add them to the comparison view.",
+      "colorLabel": "Color Label",
+      "dimensions": "Dimensions",
+      "editImage": "Edit Image",
+      "focalLength": "Focal Length",
+      "iso": "ISO",
+      "metadata": "Metadata",
+      "noMetadataAvailable": "No metadata available",
+      "noTagsAdded": "No tags added",
+      "none": "None",
+      "rateAndLabel": "Rate & Label",
+      "rating": "Rating",
+      "selectImagesToCompare": "Select images to compare",
+      "shutterSpeed": "Shutter Speed",
+      "syncZoomAndPan": "Sync Zoom and Pan",
+      "tags": "Tags",
+      "toggleFit": "Toggle 1:1 / Fit",
+      "vc": "VC"
+    },
     "filters": {
       "edited": {
         "all": "All Images",
@@ -930,6 +964,7 @@
       "progress": "Importing... ({{current}}/{{total}})"
     },
     "items": {
+      "cloudPlaceholder": "Stored in iCloud — not downloaded",
       "collapseFolder": "Collapse Folder",
       "currentFolder": "Current Folder",
       "expandFolder": "Expand Folder",
@@ -1004,10 +1039,12 @@
     "types": {
       "all": "Whole Image",
       "brush": "Brush",
+      "clone": "Clone",
       "color": "Color",
       "depth": "Depth",
       "flow": "Flow",
       "foreground": "Foreground",
+      "heal": "Heal",
       "linear": "Linear",
       "luminance": "Luminance",
       "others": "Others",
@@ -1064,6 +1101,9 @@
       "confirm": "Confirm"
     },
     "copyPaste": {
+      "autoSyncDesc": "Automatically apply adjustments to all selected images.",
+      "autoSyncLabel": "Enable auto-sync",
+      "autoSyncTitle": "Auto-sync adjustments",
       "cancel": "Cancel",
       "descMerge": "Adds your copied changes, leaving other settings untouched.",
       "descReplace": "Overwrites all selected settings, resetting the rest to their defaults.",
@@ -1444,6 +1484,7 @@
         "cycle_zoom": "Cycle zoom (Fit, 2x Fit, 100%)",
         "delete_selected": "Delete selected file(s)",
         "open_image": "Open selected image",
+        "open_settings": "Open settings",
         "paste_adjustments": "Paste copied adjustments",
         "paste_files": "Paste file(s) to current folder",
         "preview_next": "Next image",

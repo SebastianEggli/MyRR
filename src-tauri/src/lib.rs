@@ -23,9 +23,11 @@ mod gpu_processing;
 mod hdr_deghosting;
 mod image_loader;
 mod image_processing;
+mod inpainting;
 mod lens_correction;
 mod lut_processing;
 mod mask_generation;
+mod multi_exposure;
 mod negative_conversion;
 mod panorama_stitching;
 mod panorama_utils;
@@ -252,11 +254,14 @@ pub fn get_cached_full_warped_image(
         }
     }
 
-    let (mut full_image, is_raw) = get_full_image_for_processing(state)?;
+    let (base_arc, is_raw) = get_original_image(state)?;
+    let mut cow_image = Cow::Borrowed(base_arc.as_ref());
+
     if is_raw {
-        apply_cpu_default_raw_processing(&mut full_image);
+        apply_cpu_default_raw_processing(cow_image.to_mut());
     }
-    let warped_image = apply_geometry_warp(Cow::Borrowed(&full_image), js_adjustments).into_owned();
+
+    let warped_image = apply_geometry_warp(cow_image, js_adjustments).into_owned();
     let warped_arc = Arc::new(warped_image);
 
     {
@@ -1078,15 +1083,15 @@ async fn preview_geometry_transform(
     Ok(format!("data:image/jpeg;base64,{}", base64_str))
 }
 
-pub fn get_full_image_for_processing(
+pub fn get_original_image(
     state: &tauri::State<AppState>,
-) -> Result<(DynamicImage, bool), String> {
+) -> Result<(std::sync::Arc<image::DynamicImage>, bool), String> {
     let original_image_lock = state.original_image.lock().unwrap();
     let loaded_image = original_image_lock
         .as_ref()
         .ok_or("No original image loaded")?;
     Ok((
-        loaded_image.image.clone().as_ref().clone(),
+        std::sync::Arc::clone(&loaded_image.image),
         loaded_image.is_raw,
     ))
 }
@@ -1506,97 +1511,104 @@ async fn save_collage(base64_data: String, first_path_str: String) -> Result<Str
 }
 
 #[tauri::command]
-fn generate_preview_for_path(
+async fn generate_preview_for_path(
     path: String,
     js_adjustments: Value,
-    state: tauri::State<AppState>,
     app_handle: tauri::AppHandle,
 ) -> Result<Response, String> {
-    let context = get_or_init_gpu_context(&state, &app_handle)?;
-    let (source_path, _) = parse_virtual_path(&path);
-    let source_path_str = source_path.to_string_lossy().to_string();
-    let is_raw = is_raw_file(&source_path_str);
-    let settings = load_settings(app_handle.clone()).unwrap_or_default();
+    tokio::task::spawn_blocking(move || {
+        let state = app_handle.state::<AppState>();
+        let context = get_or_init_gpu_context(&state, &app_handle)?;
+        let (source_path, _) = parse_virtual_path(&path);
+        let source_path_str = source_path.to_string_lossy().to_string();
+        let is_raw = is_raw_file(&source_path_str);
+        let settings = load_settings(app_handle.clone()).unwrap_or_default();
 
-    let base_image = match read_file_mapped(&source_path) {
-        Ok(mmap) => load_and_composite(
-            &mmap,
-            &source_path_str,
-            &js_adjustments,
-            false,
-            &settings,
-            None,
-        )
-        .map_err(|e| e.to_string())?,
-        Err(e) => {
-            log::warn!(
-                "Failed to memory-map file '{}': {}. Falling back to standard read.",
-                source_path_str,
-                e
-            );
-            let bytes = fs::read(&source_path).map_err(|io_err| io_err.to_string())?;
-            load_and_composite(
-                &bytes,
+        let base_image = match read_file_mapped(&source_path) {
+            Ok(mmap) => load_and_composite(
+                &mmap,
                 &source_path_str,
                 &js_adjustments,
                 false,
                 &settings,
                 None,
             )
-            .map_err(|e| e.to_string())?
-        }
-    };
+            .map_err(|e| e.to_string())?,
+            Err(e) => {
+                log::warn!(
+                    "Failed to memory-map file '{}': {}. Falling back to standard read.",
+                    source_path_str,
+                    e
+                );
+                let bytes = fs::read(&source_path).map_err(|io_err| io_err.to_string())?;
+                load_and_composite(
+                    &bytes,
+                    &source_path_str,
+                    &js_adjustments,
+                    false,
+                    &settings,
+                    None,
+                )
+                .map_err(|e| e.to_string())?
+            }
+        };
 
-    let (transformed_image, unscaled_crop_offset) =
-        apply_all_transformations(Cow::Borrowed(&base_image), &js_adjustments);
-    let (img_w, img_h) = transformed_image.dimensions();
-    let mask_definitions: Vec<MaskDefinition> = js_adjustments
-        .get("masks")
-        .and_then(|m| serde_json::from_value(m.clone()).ok())
-        .unwrap_or_default();
+        let (transformed_image, unscaled_crop_offset) =
+            apply_all_transformations(Cow::Borrowed(&base_image), &js_adjustments);
+        let (img_w, img_h) = transformed_image.dimensions();
+        let mask_definitions: Vec<MaskDefinition> = js_adjustments
+            .get("masks")
+            .and_then(|m| serde_json::from_value(m.clone()).ok())
+            .unwrap_or_default();
 
-    let warped_image = resolve_warped_image_for_masks(&state, &js_adjustments, &mask_definitions);
-    let mask_bitmaps: Vec<ImageBuffer<Luma<u8>, Vec<u8>>> = mask_definitions
-        .iter()
-        .filter_map(|def| {
-            generate_mask_bitmap(
-                def,
-                img_w,
-                img_h,
-                1.0,
-                unscaled_crop_offset,
-                warped_image.as_deref(),
-            )
-        })
-        .collect();
+        let warped_image =
+            resolve_warped_image_for_masks(&state, &js_adjustments, &mask_definitions);
+        let mask_bitmaps: Vec<ImageBuffer<Luma<u8>, Vec<u8>>> = mask_definitions
+            .iter()
+            .filter_map(|def| {
+                generate_mask_bitmap(
+                    def,
+                    img_w,
+                    img_h,
+                    1.0,
+                    unscaled_crop_offset,
+                    warped_image.as_deref(),
+                )
+            })
+            .collect();
 
-    let tm_override = resolve_tonemapper_override(&settings, is_raw);
-    let all_adjustments = get_all_adjustments_from_json(&js_adjustments, is_raw, tm_override);
-    let lut_path = js_adjustments["lutPath"].as_str();
-    let lut = lut_path.and_then(|p| lut_processing::get_or_load_lut(&state, p).ok());
-    let unique_hash = calculate_full_job_hash(&source_path_str, &js_adjustments);
-    let final_image = process_and_get_dynamic_image(
-        &context,
-        &state,
-        transformed_image.as_ref(),
-        unique_hash,
-        RenderRequest {
-            adjustments: all_adjustments,
-            mask_bitmaps: &mask_bitmaps,
-            lut,
-            roi: None,
-        },
-        "generate_preview_for_path",
-    )?;
-    let (width, height) = final_image.dimensions();
-    let rgb_pixels = final_image.to_rgb8().into_vec();
+        let tm_override = resolve_tonemapper_override(&settings, is_raw);
+        let all_adjustments = get_all_adjustments_from_json(&js_adjustments, is_raw, tm_override);
+        let lut_path = js_adjustments["lutPath"].as_str();
+        let lut = lut_path.and_then(|p| lut_processing::get_or_load_lut(&state, p).ok());
+        let unique_hash = calculate_full_job_hash(&source_path_str, &js_adjustments);
 
-    let bytes = Encoder::new(Preset::BaselineFastest)
-        .quality(92)
-        .encode_rgb(&rgb_pixels, width, height)
-        .map_err(|e| format!("Failed to encode with mozjpeg-rs: {}", e))?;
+        let final_image = process_and_get_dynamic_image(
+            &context,
+            &state,
+            transformed_image.as_ref(),
+            unique_hash,
+            RenderRequest {
+                adjustments: all_adjustments,
+                mask_bitmaps: &mask_bitmaps,
+                lut,
+                roi: None,
+            },
+            "generate_preview_for_path",
+        )?;
 
-    Ok(Response::new(bytes))
+        let (width, height) = final_image.dimensions();
+        let rgb_pixels = final_image.to_rgb8().into_vec();
+
+        let bytes = Encoder::new(Preset::BaselineFastest)
+            .quality(92)
+            .encode_rgb(&rgb_pixels, width, height)
+            .map_err(|e| format!("Failed to encode with mozjpeg-rs: {}", e))?;
+
+        Ok(Response::new(bytes))
+    })
+    .await
+    .map_err(|e| format!("Task execution failed: {}", e))?
 }
 
 fn setup_logging(app_handle: &tauri::AppHandle) {
@@ -1783,6 +1795,68 @@ fn emit_launch_request(app_handle: &tauri::AppHandle, request: LaunchRequest) {
 struct LaunchPayload {
     open_with_file: Option<String>,
     edit_session: Option<ExternalEditSession>,
+}
+
+#[derive(Clone, Copy, Debug)]
+struct MonitorBounds {
+    x: i32,
+    y: i32,
+    width: u32,
+    height: u32,
+}
+
+fn saved_window_state_is_usable(state: &WindowState, monitors: &[MonitorBounds]) -> bool {
+    if state.width < 800 || state.height < 600 {
+        return false;
+    }
+
+    if monitors.is_empty() {
+        return true;
+    }
+
+    let window_left = state.x as i64;
+    let window_top = state.y as i64;
+    let window_right = window_left + state.width as i64;
+    let window_bottom = window_top + state.height as i64;
+
+    monitors.iter().any(|monitor| {
+        let monitor_left = monitor.x as i64;
+        let monitor_top = monitor.y as i64;
+        let monitor_right = monitor_left + monitor.width as i64;
+        let monitor_bottom = monitor_top + monitor.height as i64;
+
+        let overlap_width = window_right.min(monitor_right) - window_left.max(monitor_left);
+        let overlap_height = window_bottom.min(monitor_bottom) - window_top.max(monitor_top);
+
+        overlap_width >= 100 && overlap_height >= 100
+    })
+}
+
+#[cfg(not(target_os = "android"))]
+fn available_monitor_bounds(window: &tauri::WebviewWindow) -> Vec<MonitorBounds> {
+    window
+        .available_monitors()
+        .map(|monitors| {
+            monitors
+                .into_iter()
+                .map(|monitor| {
+                    let position = monitor.position();
+                    let size = monitor.size();
+                    MonitorBounds {
+                        x: position.x,
+                        y: position.y,
+                        width: size.width,
+                        height: size.height,
+                    }
+                })
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
+#[cfg(target_os = "android")]
+fn available_monitor_bounds(_window: &tauri::WebviewWindow) -> Vec<MonitorBounds> {
+    Vec::new()
 }
 
 #[tauri::command]
@@ -2024,6 +2098,7 @@ pub fn run() {
             start_preview_worker(app_handle.clone());
             start_analytics_worker(app_handle.clone());
             file_management::start_thumbnail_workers(app_handle.clone());
+            file_management::start_metadata_workers(app_handle.clone());
             jxl_oxide::integration::register_image_decoding_hook();
 
             let window_cfg = app.config().app.windows.first().unwrap().clone();
@@ -2068,7 +2143,8 @@ pub fn run() {
                     let path = config_dir.join("window_state.json");
                     if let Ok(contents) = std::fs::read_to_string(&path) {
                         if let Ok(state) = serde_json::from_str::<WindowState>(&contents) {
-                            if state.width >= 800  && state.height >= 600 {
+                            let monitor_bounds = available_monitor_bounds(&window);
+                            if saved_window_state_is_usable(&state, &monitor_bounds) {
                                 let _ = window.set_size(tauri::Size::Physical(
                                     tauri::PhysicalSize::new(state.width, state.height),
                                 ));
@@ -2077,9 +2153,11 @@ pub fn run() {
                                 ));
                             } else {
                                 log::warn!(
-                                    "Saved window state had unreasonable dimensions ({}x{}), centering instead.",
+                                    "Saved window state was unusable ({}x{} at {},{}), centering instead.",
                                     state.width,
-                                    state.height
+                                    state.height,
+                                    state.x,
+                                    state.y
                                 );
                                 let _ = window.center();
                             }
@@ -2215,6 +2293,7 @@ pub fn run() {
             full_transformed_cache: Mutex::new(None),
             decoded_image_cache: Mutex::new(DecodedImageCache::new(5)),
             thumbnail_manager: ThumbnailManager::new(),
+            metadata_manager: MetadataManager::new(),
         })
         .invoke_handler(tauri::generate_handler![
             apply_adjustments,
@@ -2252,7 +2331,8 @@ pub fn run() {
             ai_commands::generate_ai_depth_mask,
             ai_commands::check_ai_connector_status,
             ai_commands::test_ai_connector_connection,
-            ai_commands::invoke_generative_replace_with_mask_def,
+            inpainting::invoke_generative_replace_with_mask_def,
+            inpainting::generate_manual_cleanup_patch,
             denoising::apply_denoising,
             denoising::batch_denoise_images,
             denoising::save_denoised_image,

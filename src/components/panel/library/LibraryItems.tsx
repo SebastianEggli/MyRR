@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { Image as ImageIcon, Folder, FolderOpen, Star as StarIcon, SlidersHorizontal } from 'lucide-react';
+import { Image as ImageIcon, Folder, FolderOpen, Star as StarIcon, SlidersHorizontal, CloudOff } from 'lucide-react';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import { COLOR_LABELS, Color } from '../../../utils/adjustments';
@@ -20,6 +20,7 @@ interface ImageLayer {
 const ThumbnailComponent = ({
   isActive,
   isSelected,
+  isForcedHover,
   onContextMenu,
   onImageClick,
   onImageDoubleClick,
@@ -30,6 +31,7 @@ const ThumbnailComponent = ({
   aspectRatio: thumbnailAspectRatio,
   isEdited,
   exif,
+  isCloudPlaceholder,
 }: any) => {
   const { t } = useTranslation();
   const data = useProcessStore((s) => s.thumbnails[path]);
@@ -129,7 +131,9 @@ const ThumbnailComponent = ({
     ? 'ring-2 ring-inset ring-accent'
     : isSelected
       ? 'ring-2 ring-inset ring-gray-400'
-      : 'group-hover:ring-2 group-hover:ring-inset group-hover:ring-hover-color';
+      : isForcedHover
+        ? 'ring-2 ring-inset ring-hover-color'
+        : 'group-hover:ring-2 group-hover:ring-inset group-hover:ring-hover-color';
 
   const colorTag = tags?.find((t: string) => t.startsWith('color:'))?.substring(6);
   const colorLabel = COLOR_LABELS.find((c: Color) => c.name === colorTag);
@@ -145,6 +149,7 @@ const ThumbnailComponent = ({
   return (
     <div
       className="aspect-square bg-surface rounded-md overflow-hidden cursor-pointer group relative flex flex-col transition-all duration-150 transform-gpu [-webkit-mask-image:-webkit-radial-gradient(white,black)]"
+      data-bench-id="thumbnail"
       onClick={(e: any) => {
         e.stopPropagation();
         onImageClick(path, e);
@@ -167,9 +172,11 @@ const ThumbnailComponent = ({
               >
                 <img
                   alt={path.split(/[\\/]/).pop()}
-                  className={`w-full h-full group-hover:scale-[1.02] transition-transform duration-300 will-change-transform ${
-                    thumbnailAspectRatio === ThumbnailAspectRatio.Contain ? 'object-contain' : 'object-cover'
-                  } relative`}
+                  className={clsx(
+                    'w-full h-full transition-transform duration-300 will-change-transform relative',
+                    thumbnailAspectRatio === ThumbnailAspectRatio.Contain ? 'object-contain' : 'object-cover',
+                    isForcedHover ? 'scale-[1.02]' : 'group-hover:scale-[1.02]',
+                  )}
                   decoding="async"
                   loading="lazy"
                   src={layer.url}
@@ -180,9 +187,27 @@ const ThumbnailComponent = ({
           </div>
         )}
 
-        {layers.length === 0 && showPlaceholder && (
-          <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-surface">
-            <ImageIcon className="text-text-secondary animate-pulse" />
+        {layers.length === 0 &&
+          showPlaceholder &&
+          (isCloudPlaceholder ? (
+            <div
+              className="absolute inset-0 w-full h-full flex items-center justify-center bg-surface"
+              data-tooltip={t('library.items.cloudPlaceholder')}
+            >
+              <CloudOff className="text-text-secondary" />
+            </div>
+          ) : (
+            <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-surface">
+              <ImageIcon className="text-text-secondary animate-pulse" />
+            </div>
+          ))}
+
+        {isCloudPlaceholder && layers.length > 0 && (
+          <div
+            className="absolute top-1.5 left-1.5 z-10 rounded-full h-5 w-5 flex items-center justify-center bg-black/40 shadow-md pointer-events-none"
+            data-tooltip={t('library.items.cloudPlaceholder')}
+          >
+            <CloudOff size={12} className="text-white" />
           </div>
         )}
       </div>
@@ -411,6 +436,9 @@ const ListItemComponent = ({
   aspectRatio: thumbnailAspectRatio,
   columnWidths,
   exif,
+  isCloudPlaceholder,
+  isPrevSelected,
+  isNextSelected,
 }: any) => {
   const { t } = useTranslation();
   const data = useProcessStore((s) => s.thumbnails[path]);
@@ -523,15 +551,29 @@ const ListItemComponent = ({
     ' ' +
     dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
+  let roundingClass = 'rounded-md';
+  if (isSelected || isActive) {
+    if (isPrevSelected && isNextSelected) {
+      roundingClass = 'rounded-none';
+    } else if (isPrevSelected) {
+      roundingClass = 'rounded-b-md';
+    } else if (isNextSelected) {
+      roundingClass = 'rounded-t-md';
+    }
+  }
+
+  const borderClass =
+    (isSelected || isActive) && isNextSelected ? 'border-b border-transparent' : 'border-b border-border-color/30';
+
   const stateClass = isActive
-    ? 'ring-1 ring-inset ring-accent bg-accent/10'
+    ? `ring-1 ring-inset ring-accent bg-accent/10 ${roundingClass}`
     : isSelected
-      ? 'ring-1 ring-inset ring-accent/50 bg-accent/5'
-      : 'hover:bg-surface/80';
+      ? `ring-1 ring-inset ring-accent/50 bg-accent/5 ${roundingClass}`
+      : 'hover:bg-surface/80 hover:rounded-md';
 
   return (
     <div
-      className={`flex items-center w-full h-full border-b border-border-color/30 cursor-pointer transition-colors duration-150 ${stateClass}`}
+      className={`flex items-center w-full h-full cursor-pointer transition-all duration-150 ${borderClass} ${roundingClass} ${stateClass}`}
       onClick={(e: any) => {
         e.stopPropagation();
         onImageClick(path, e);
@@ -568,9 +610,27 @@ const ListItemComponent = ({
             </div>
           )}
 
-          {layers.length === 0 && showPlaceholder && (
-            <div className="absolute inset-0 w-full h-full flex items-center justify-center">
-              <ImageIcon size={14} className="text-text-secondary animate-pulse" />
+          {layers.length === 0 &&
+            showPlaceholder &&
+            (isCloudPlaceholder ? (
+              <div
+                className="absolute inset-0 w-full h-full flex items-center justify-center"
+                data-tooltip={t('library.items.cloudPlaceholder')}
+              >
+                <CloudOff size={14} className="text-text-secondary" />
+              </div>
+            ) : (
+              <div className="absolute inset-0 w-full h-full flex items-center justify-center">
+                <ImageIcon size={14} className="text-text-secondary animate-pulse" />
+              </div>
+            ))}
+
+          {isCloudPlaceholder && layers.length > 0 && (
+            <div
+              className="absolute top-0.5 left-0.5 z-10 rounded-full h-3.5 w-3.5 flex items-center justify-center bg-black/40 pointer-events-none"
+              data-tooltip={t('library.items.cloudPlaceholder')}
+            >
+              <CloudOff size={9} className="text-white" />
             </div>
           )}
         </div>
@@ -684,11 +744,22 @@ const RowComponent = ({
   const row = rows[index];
 
   useEffect(() => {
-    if (row && row.type === 'images') {
-      row.images.forEach((img: ImageFile) => {
-        queueThumbnailRequest(img.path);
-      });
-    }
+    if (!row || row.type !== 'images') return;
+
+    row.images.forEach((img: ImageFile) => {
+      queueThumbnailRequest(img.path);
+    });
+
+    const cloudPaths = row.images
+      .filter((img: ImageFile) => img.is_cloud_placeholder)
+      .map((img: ImageFile) => img.path);
+    if (cloudPaths.length === 0) return;
+
+    const interval = setInterval(() => {
+      cloudPaths.forEach((path: string) => queueThumbnailRequest(path));
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, [row, queueThumbnailRequest]);
 
   if (row.type === 'footer') return null;
@@ -754,50 +825,74 @@ const RowComponent = ({
         width: isListView ? '100%' : 'auto',
         display: 'flex',
         gap: gap,
+        paddingLeft: isListView ? '8px' : '0px',
+        paddingRight: isListView ? '8px' : '0px',
+        boxSizing: 'border-box',
       }}
     >
-      {row.images.map((imageFile: ImageFile) => (
-        <div
-          key={imageFile.path}
-          style={{
-            width: isListView ? '100%' : itemWidth,
-            height: itemHeight,
-          }}
-        >
-          {isListView ? (
-            <ListItem
-              isActive={activePath === imageFile.path}
-              isSelected={multiSelectedSet.has(imageFile.path)}
-              onContextMenu={onContextMenu}
-              onImageClick={onImageClick}
-              onImageDoubleClick={onImageDoubleClick}
-              onLoad={onImageLoad}
-              path={imageFile.path}
-              rating={imageRatings?.[imageFile.path] || 0}
-              tags={imageFile.tags}
-              exif={imageFile.exif}
-              aspectRatio={thumbnailAspectRatio}
-              modified={imageFile.modified}
-              columnWidths={columnWidths}
-            />
-          ) : (
-            <Thumbnail
-              isActive={activePath === imageFile.path}
-              isSelected={multiSelectedSet.has(imageFile.path)}
-              onContextMenu={onContextMenu}
-              onImageClick={onImageClick}
-              onImageDoubleClick={onImageDoubleClick}
-              onLoad={onImageLoad}
-              path={imageFile.path}
-              rating={imageRatings?.[imageFile.path] || 0}
-              tags={imageFile.tags}
-              exif={imageFile.exif}
-              isEdited={imageFile.is_edited}
-              aspectRatio={thumbnailAspectRatio}
-            />
-          )}
-        </div>
-      ))}
+      {row.images.map((imageFile: ImageFile) => {
+        let isPrevSelected = false;
+        let isNextSelected = false;
+
+        if (isListView) {
+          const prevRow = index > 0 ? rows[index - 1] : null;
+          const nextRow = index < rows.length - 1 ? rows[index + 1] : null;
+
+          if (prevRow && prevRow.type === 'images' && prevRow.images.length > 0) {
+            isPrevSelected = multiSelectedSet.has(prevRow.images[0].path);
+          }
+          if (nextRow && nextRow.type === 'images' && nextRow.images.length > 0) {
+            isNextSelected = multiSelectedSet.has(nextRow.images[0].path);
+          }
+        }
+
+        return (
+          <div
+            key={imageFile.path}
+            style={{
+              width: isListView ? '100%' : itemWidth,
+              height: itemHeight,
+            }}
+          >
+            {isListView ? (
+              <ListItem
+                isActive={activePath === imageFile.path}
+                isSelected={multiSelectedSet.has(imageFile.path)}
+                onContextMenu={onContextMenu}
+                onImageClick={onImageClick}
+                onImageDoubleClick={onImageDoubleClick}
+                onLoad={onImageLoad}
+                path={imageFile.path}
+                rating={imageRatings?.[imageFile.path] || 0}
+                tags={imageFile.tags}
+                exif={imageFile.exif}
+                aspectRatio={thumbnailAspectRatio}
+                modified={imageFile.modified}
+                columnWidths={columnWidths}
+                isCloudPlaceholder={imageFile.is_cloud_placeholder}
+                isPrevSelected={isPrevSelected} // <-- Added
+                isNextSelected={isNextSelected} // <-- Added
+              />
+            ) : (
+              <Thumbnail
+                isActive={activePath === imageFile.path}
+                isSelected={multiSelectedSet.has(imageFile.path)}
+                onContextMenu={onContextMenu}
+                onImageClick={onImageClick}
+                onImageDoubleClick={onImageDoubleClick}
+                onLoad={onImageLoad}
+                path={imageFile.path}
+                rating={imageRatings?.[imageFile.path] || 0}
+                tags={imageFile.tags}
+                exif={imageFile.exif}
+                isEdited={imageFile.is_edited}
+                aspectRatio={thumbnailAspectRatio}
+                isCloudPlaceholder={imageFile.is_cloud_placeholder}
+              />
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 };

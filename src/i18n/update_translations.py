@@ -5,69 +5,92 @@ LOCALES_DIR = Path("./locales")
 
 TRANSLATIONS = {
     "de": {
-        "done": "Fertig",
-        "exporting": "Exportieren…",
-        "savesTo": "Externe Bearbeitung — speichert in"
+        "copyPaste": {
+            "autoSyncTitle": "Anpassungen automatisch synchronisieren",
+            "autoSyncLabel": "Auto-Sync aktivieren",
+            "autoSyncDesc": "Wendet Anpassungen automatisch auf alle ausgewählten Bilder an."
+        }
     },
     "en": {
-        "done": "Done",
-        "exporting": "Exporting…",
-        "savesTo": "External edit — saves to"
+        "copyPaste": {
+            "autoSyncTitle": "Auto-sync adjustments",
+            "autoSyncLabel": "Enable auto-sync",
+            "autoSyncDesc": "Automatically apply adjustments to all selected images."
+        }
     },
     "es": {
-        "done": "Listo",
-        "exporting": "Exportando…",
-        "savesTo": "Edición externa: se guarda en"
+        "copyPaste": {
+            "autoSyncTitle": "Sincronizar ajustes automáticamente",
+            "autoSyncLabel": "Habilitar sincronización automática",
+            "autoSyncDesc": "Aplica automáticamente los ajustes a todas las imágenes seleccionadas."
+        }
     },
     "fr": {
-        "done": "Terminé",
-        "exporting": "Exportation…",
-        "savesTo": "Modification externe — s'enregistre dans"
+        "copyPaste": {
+            "autoSyncTitle": "Synchronisation automatique des réglages",
+            "autoSyncLabel": "Activer la synchronisation automatique",
+            "autoSyncDesc": "Applique automatiquement les réglages à toutes les images sélectionnées."
+        }
     },
     "it": {
-        "done": "Fatto",
-        "exporting": "Esportazione…",
-        "savesTo": "Modifica esterna — salva in"
+        "copyPaste": {
+            "autoSyncTitle": "Sincronizzazione automatica regolazioni",
+            "autoSyncLabel": "Abilita sincronizzazione automatica",
+            "autoSyncDesc": "Applica automaticamente le regolazioni a tutte le immagini selezionate."
+        }
     },
     "ja": {
-        "done": "完了",
-        "exporting": "書き出し中…",
-        "savesTo": "外部編集 — 保存先"
+        "copyPaste": {
+            "autoSyncTitle": "調整の自動同期",
+            "autoSyncLabel": "自動同期を有効にする",
+            "autoSyncDesc": "選択したすべての画像に調整を自動的に適用します。"
+        }
     },
     "ko": {
-        "done": "완료",
-        "exporting": "내보내는 중…",
-        "savesTo": "외부 편집 — 저장 위치:"
+        "copyPaste": {
+            "autoSyncTitle": "조정 자동 동기화",
+            "autoSyncLabel": "자동 동기화 활성화",
+            "autoSyncDesc": "선택한 모든 이미지에 조정을 자동으로 적용합니다."
+        }
     },
     "pl": {
-        "done": "Gotowe",
-        "exporting": "Eksportowanie…",
-        "savesTo": "Zewnętrzna edycja — zapisuje do"
+        "copyPaste": {
+            "autoSyncTitle": "Automatyczna synchronizacja dostosowań",
+            "autoSyncLabel": "Włącz auto-synchronizację",
+            "autoSyncDesc": "Automatycznie stosuje dostosowania do wszystkich wybranych obrazów."
+        }
     },
     "pt": {
-        "done": "Concluído",
-        "exporting": "Exportando…",
-        "savesTo": "Edição externa — salva em"
+        "copyPaste": {
+            "autoSyncTitle": "Sincronização automática de ajustes",
+            "autoSyncLabel": "Ativar sincronização automática",
+            "autoSyncDesc": "Aplica automaticamente os ajustes a todas as imagens selecionadas."
+        }
     },
     "ru": {
-        "done": "Готово",
-        "exporting": "Экспорт…",
-        "savesTo": "Внешнее редактирование — сохраняется в"
+        "copyPaste": {
+            "autoSyncTitle": "Автосинхронизация коррекций",
+            "autoSyncLabel": "Включить автосинхронизацию",
+            "autoSyncDesc": "Автоматически применяет коррекции ко всем выбранным изображениям."
+        }
     },
     "zh-CN": {
-        "done": "完成",
-        "exporting": "正在导出…",
-        "savesTo": "外部编辑 — 保存至"
+        "copyPaste": {
+            "autoSyncTitle": "自动同步调整",
+            "autoSyncLabel": "启用自动同步",
+            "autoSyncDesc": "自动将调整应用于所有选定的图像。"
+        }
     },
     "zh-TW": {
-        "done": "完成",
-        "exporting": "正在匯出…",
-        "savesTo": "外部編輯 — 儲存至"
+        "copyPaste": {
+            "autoSyncTitle": "自動同步調整",
+            "autoSyncLabel": "啟用自動同步",
+            "autoSyncDesc": "自動將調整套用於所有選取的影像。"
+        }
     }
 }
 
 def sort_dict_recursively(item):
-    """Recursively sorts dictionary keys alphabetically."""
     if isinstance(item, dict):
         return {k: sort_dict_recursively(v) for k, v in sorted(item.items())}
     elif isinstance(item, list):
@@ -86,18 +109,13 @@ def update_json_file(file_path: Path, trans: dict):
         print(f"Error parsing JSON in {file_path.name}. Skipping.")
         return
 
-    # Ensure the path data -> editor -> externalEdit exists
-    if "editor" not in data or not isinstance(data["editor"], dict):
-        data["editor"] = {}
-    if "externalEdit" not in data["editor"] or not isinstance(data["editor"]["externalEdit"], dict):
-        data["editor"]["externalEdit"] = {}
+    # Navigate to or create modals -> copyPaste node
+    modals_node = data.setdefault("modals", {})
+    copy_paste_node = modals_node.setdefault("copyPaste", {})
 
-    ext_node = data["editor"]["externalEdit"]
-    ext_node["done"] = trans["done"]
-    ext_node["exporting"] = trans["exporting"]
-    ext_node["savesTo"] = trans["savesTo"]
+    for key, value in trans["copyPaste"].items():
+        copy_paste_node[key] = value
 
-    # Sort keys alphabetically and write out
     sorted_data = sort_dict_recursively(data)
 
     with open(file_path, "w", encoding="utf-8") as f:

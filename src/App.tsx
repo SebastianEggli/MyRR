@@ -8,6 +8,7 @@ import clsx from 'clsx';
 
 import TitleBar from './window/TitleBar';
 import FolderTree from './components/panel/FolderTree';
+import SettingsPanel from './components/panel/SettingsPanel';
 import ExportPanel from './components/panel/right/ExportPanel';
 import Resizer from './components/ui/Resizer';
 import GlobalTooltip from './components/ui/GlobalTooltip';
@@ -41,6 +42,7 @@ import { useLibraryActions } from './hooks/useLibraryActions';
 import { useProductivityActions } from './hooks/useProductivityActions';
 
 import { useAppInitialization } from './hooks/useAppInitialization';
+import { useAndroidBackHandler } from './hooks/useAndroidBackHandler';
 import './i18n';
 
 import {
@@ -106,6 +108,7 @@ function App() {
     rightPanelWidth,
     compactEditorPanelHeightOverride,
     activeRightPanel,
+    isSettingsOpen,
     setUI,
     setRightPanel,
   } = useUIStore(
@@ -120,6 +123,7 @@ function App() {
       rightPanelWidth: state.rightPanelWidth,
       compactEditorPanelHeightOverride: state.compactEditorPanelHeightOverride,
       activeRightPanel: state.activeRightPanel,
+      isSettingsOpen: state.isSettingsOpen,
       setUI: state.setUI,
       setRightPanel: state.setRightPanel,
     })),
@@ -371,6 +375,8 @@ function App() {
     markGenerated,
   });
 
+  useAndroidBackHandler();
+
   const handleToggleFullScreen = useCallback(() => {
     const { zoom, selectedImage } = useEditorStore.getState();
     const currentlyZoomed = zoom > 1.01;
@@ -572,6 +578,7 @@ function App() {
   );
 
   const hasRoots = rootPaths && rootPaths.length > 0;
+  const hasMainContent = hasRoots || !!selectedImage;
 
   const renderFolderTree = () => {
     if (!hasRoots) return null;
@@ -640,8 +647,8 @@ function App() {
         <div
           className={clsx(
             'flex-1 flex flex-col min-h-0',
-            isLayoutReady && hasRoots && !isInstantTransition && 'transition-all duration-300 ease-in-out',
-            [hasRoots && (isFullScreen ? 'p-0 gap-0' : 'p-2 gap-2')],
+            isLayoutReady && hasMainContent && !isInstantTransition && 'transition-all duration-300 ease-in-out',
+            [hasMainContent && (isFullScreen ? 'p-0 gap-0' : 'p-2 gap-2')],
           )}
         >
           <div className="flex flex-row grow h-full min-h-0">
@@ -704,6 +711,19 @@ function App() {
                   handleResetAdjustments={handleResetAdjustments}
                   requestThumbnails={requestThumbnails}
                 />
+              )}
+              {isSettingsOpen && appSettings && hasRoots && (
+                <div className="absolute inset-0 z-50 flex bg-bg-secondary rounded-lg">
+                  <div className="w-full h-full flex flex-col p-4 lg:p-8 overflow-y-auto custom-scrollbar">
+                    <SettingsPanel
+                      appSettings={appSettings}
+                      onBack={() => setUI({ isSettingsOpen: false })}
+                      onLibraryRefresh={handleLibraryRefresh}
+                      onSettingsChange={handleSettingsChange}
+                      rootPaths={rootPaths}
+                    />
+                  </div>
+                </div>
               )}
             </div>
             {!selectedImage && isLibraryExportPanelVisible && (

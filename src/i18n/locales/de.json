@@ -352,7 +352,9 @@
       "dropzoneText": "Hier ablegen, um eine neue Bearbeitung zu erstellen",
       "editSettingsTitle": "Bearbeitungseinstellungen",
       "editsTitle": "Bearbeitungen",
+      "generativeEditTitle": "Generative Bearbeitung",
       "inpaintingTitle": "Reparieren",
+      "manualCleanupTitle": "Manuelle Bereinigung",
       "noImageSelected": "Kein Bild ausgewählt.",
       "params": {
         "feather": "Weiche Kante",
@@ -362,6 +364,12 @@
         "aiEdit": "KI-Bearbeitung {{count}}",
         "aiEdit_one": "KI-Bearbeitung {{count}}",
         "aiEdit_other": "KI-Bearbeitung {{count}}",
+        "clone": "Klonen {{count}}",
+        "clone_one": "Klonen {{count}}",
+        "clone_other": "Klonen {{count}}",
+        "heal": "Reparieren {{count}}",
+        "heal_one": "Reparieren {{count}}",
+        "heal_other": "Reparieren {{count}}",
         "invertedName": "{{name}} umgekehrt",
         "quickErase": "Schnelles Löschen {{count}}",
         "quickErase_one": "Schnelles Löschen {{count}}",
@@ -585,6 +593,7 @@
       "tooltips": {
         "addToCurrent": "{{name}} zur aktuellen Maske hinzufügen oder neu erstellen (Rechtsklick)",
         "createNew": "Neue {{name}}-Maske erstellen",
+        "selectNewSourcePoint": "{{modifier}} + Klicken, um einen neuen Quellpunkt auszuwählen",
         "showMore": "Mehr Maskenarten anzeigen"
       }
     },
@@ -825,6 +834,31 @@
         "name": "Name (A-Z)"
       }
     },
+    "culling": {
+      "addTagPlaceholder": "Tag hinzufügen...",
+      "altCullingPreviewHighRes": "Culling-Vorschau in hoher Auflösung",
+      "altThumbnailLoading": "Miniaturansicht wird geladen",
+      "aperture": "Blende",
+      "cameraSettings": "Kameraeinstellungen",
+      "clickThumbnailsHint": "Klicken Sie auf Miniaturansichten in der rechten Seitenleiste, um sie zur Vergleichsansicht hinzuzufügen.",
+      "colorLabel": "Farbmarkierung",
+      "dimensions": "Abmessungen",
+      "editImage": "Bild bearbeiten",
+      "focalLength": "Brennweite",
+      "iso": "ISO",
+      "metadata": "Metadaten",
+      "noMetadataAvailable": "Keine Metadaten verfügbar",
+      "noTagsAdded": "Keine Tags hinzugefügt",
+      "none": "Keine",
+      "rateAndLabel": "Bewerten & Markieren",
+      "rating": "Bewertung",
+      "selectImagesToCompare": "Wählen Sie Bilder zum Vergleichen aus",
+      "shutterSpeed": "Verschlusszeit",
+      "syncZoomAndPan": "Zoom und Schwenken synchronisieren",
+      "tags": "Tags",
+      "toggleFit": "1:1 / Einpassen umschalten",
+      "vc": "VK"
+    },
     "filters": {
       "edited": {
         "all": "Alle Bilder",
@@ -930,6 +964,7 @@
       "progress": "Wird importiert... ({{current}}/{{total}})"
     },
     "items": {
+      "cloudPlaceholder": "In iCloud gespeichert — nicht heruntergeladen",
       "collapseFolder": "Ordner zuklappen",
       "currentFolder": "Aktueller Ordner",
       "expandFolder": "Ordner aufklappen",
@@ -1004,10 +1039,12 @@
     "types": {
       "all": "Ganzes Bild",
       "brush": "Pinsel",
+      "clone": "Klonen",
       "color": "Farbe",
       "depth": "Tiefe",
       "flow": "Fluss",
       "foreground": "Vordergrund",
+      "heal": "Reparieren",
       "linear": "Linear",
       "luminance": "Luminanz",
       "others": "Andere",
@@ -1064,6 +1101,9 @@
       "confirm": "Bestätigen"
     },
     "copyPaste": {
+      "autoSyncDesc": "Wendet Anpassungen automatisch auf alle ausgewählten Bilder an.",
+      "autoSyncLabel": "Auto-Sync aktivieren",
+      "autoSyncTitle": "Anpassungen automatisch synchronisieren",
       "cancel": "Abbrechen",
       "descMerge": "Fügt Ihre kopierten Änderungen hinzu und lässt andere Einstellungen unberührt.",
       "descReplace": "Überschreibt alle ausgewählten Einstellungen und setzt den Rest auf Standardwerte zurück.",
@@ -1444,6 +1484,7 @@
         "cycle_zoom": "Zoom durchwechseln (Einpassen, 2x Einpassen, 100%)",
         "delete_selected": "Ausgewählte Datei(en) löschen",
         "open_image": "Ausgewähltes Bild öffnen",
+        "open_settings": "Einstellungen öffnen",
         "paste_adjustments": "Kopierte Anpassungen einfügen",
         "paste_files": "Datei(en) in aktuellen Ordner einfügen",
         "preview_next": "Nächstes Bild",
