@@ -264,7 +264,7 @@ export default function Editor({ onBackToLibrary, onContextMenu, onImageSelect, 
     [setAdjustments],
   );
 
-  const handleWbPicked = useCallback(() => { }, []);
+  const handleWbPicked = useCallback(() => {}, []);
 
   useEffect(() => {
     if (isFullScreen) {
@@ -1100,6 +1100,7 @@ export default function Editor({ onBackToLibrary, onContextMenu, onImageSelect, 
     bgPrimary: [24 / 255, 24 / 255, 24 / 255, 1.0],
     bgSecondary: [35 / 255, 35 / 255, 35 / 255, 1.0],
   });
+  const syncWgpuRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     const rootStyle = getComputedStyle(document.documentElement);
@@ -1128,8 +1129,31 @@ export default function Editor({ onBackToLibrary, onContextMenu, onImageSelect, 
   ]);
 
   useEffect(() => {
+    syncWgpuRef.current();
+  }, [
+    appSettings?.useWgpuRenderer,
+    selectedImage?.isReady,
+    hasRenderedFirstFrame,
+    isCropping,
+    uncroppedAdjustedPreviewUrl,
+    showOriginal,
+    appSettings?.theme,
+    finalPreviewUrl,
+    transformState,
+    imageRenderSize,
+  ]);
+
+  useEffect(() => {
     let isEffectActive = true;
     let isInvoking = false;
+
+    const scheduleSync = () => {
+      if (!isEffectActive || wgpuSyncRef.current !== null) return;
+      wgpuSyncRef.current = requestAnimationFrame(() => {
+        wgpuSyncRef.current = null;
+        syncWgpu();
+      });
+    };
 
     const syncWgpu = () => {
       if (!isEffectActive) return;
@@ -1138,18 +1162,14 @@ export default function Editor({ onBackToLibrary, onContextMenu, onImageSelect, 
       const container = imageContainerRef.current;
 
       if (!container) {
-        if (isEffectActive) {
-          wgpuSyncRef.current = requestAnimationFrame(syncWgpu);
-        }
+        scheduleSync();
         return;
       }
 
       const currentRect = container.getBoundingClientRect();
 
       if (currentRect.width < 10 || currentRect.height < 10) {
-        if (isEffectActive) {
-          wgpuSyncRef.current = requestAnimationFrame(syncWgpu);
-        }
+        scheduleSync();
         return;
       }
 
@@ -1162,8 +1182,15 @@ export default function Editor({ onBackToLibrary, onContextMenu, onImageSelect, 
       const clipY = (currentRect.top - OVERLAP) * dpr;
       const clipW = Math.max((currentRect.width + OVERLAP * 2) * dpr, 1);
       const clipH = Math.max((currentRect.height + OVERLAP * 2) * dpr, 1);
+      const irs = imageRenderSizeRef.current;
 
-      if (state.useWgpuRenderer === false || !state.isReady || !state.hasRenderedFirstFrame) {
+      if (
+        state.useWgpuRenderer === false ||
+        !state.isReady ||
+        !state.hasRenderedFirstFrame ||
+        irs.width === 0 ||
+        irs.height === 0
+      ) {
         const hiddenTransform = `${windowWidth},${windowHeight},-999999,-999999,1,1,${clipX},${clipY},${clipW},${clipH},${state.bgPrimary?.join(',')},${state.bgSecondary?.join(',')}`;
 
         if (lastWgpuTransformRef.current !== hiddenTransform && !isInvoking) {
@@ -1186,13 +1213,11 @@ export default function Editor({ onBackToLibrary, onContextMenu, onImageSelect, 
               pixelated: false,
             },
           })
-            .catch(() => { })
+            .catch(() => {})
             .finally(() => {
               isInvoking = false;
+              scheduleSync();
             });
-        }
-        if (isEffectActive) {
-          wgpuSyncRef.current = requestAnimationFrame(syncWgpu);
         }
         return;
       }
@@ -1204,7 +1229,6 @@ export default function Editor({ onBackToLibrary, onContextMenu, onImageSelect, 
       const cw = currentRect.width;
       const ch = currentRect.height;
 
-      const irs = imageRenderSizeRef.current;
       const offsetX = irs.width > 0 ? irs.offsetX : 0;
       const offsetY = irs.height > 0 ? irs.offsetY : 0;
       const baseW = irs.width > 0 ? irs.width : cw;
@@ -1255,21 +1279,29 @@ export default function Editor({ onBackToLibrary, onContextMenu, onImageSelect, 
           .catch((err) => console.warn('WGPU Sync Error:', err))
           .finally(() => {
             isInvoking = false;
+            scheduleSync();
           });
-      }
-
-      if (isEffectActive) {
-        wgpuSyncRef.current = requestAnimationFrame(syncWgpu);
       }
     };
 
-    wgpuSyncRef.current = requestAnimationFrame(syncWgpu);
+    syncWgpuRef.current = scheduleSync;
+    syncWgpu();
+
+    const container = imageContainerRef.current;
+    const resizeObserver = new ResizeObserver(scheduleSync);
+    if (container) {
+      resizeObserver.observe(container);
+    }
+    window.addEventListener('resize', scheduleSync);
 
     return () => {
       isEffectActive = false;
       if (wgpuSyncRef.current !== null) {
         cancelAnimationFrame(wgpuSyncRef.current);
+        wgpuSyncRef.current = null;
       }
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', scheduleSync);
     };
   }, []);
 
