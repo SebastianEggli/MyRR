@@ -134,6 +134,7 @@ impl MetadataManager {
     }
 }
 
+pub type ThumbnailGeometryEntry = (u64, Arc<DynamicImage>, f32);
 pub type TransformedImageCache = (u64, Arc<DynamicImage>, (f32, f32));
 
 pub struct AppState {
@@ -162,10 +163,11 @@ pub struct AppState {
     pub mask_cache: Mutex<HashMap<u64, GrayImage>>,
     pub patch_cache: Mutex<HashMap<String, serde_json::Value>>,
     pub geometry_cache: Mutex<HashMap<u64, DynamicImage>>,
-    pub thumbnail_geometry_cache: Mutex<HashMap<String, (u64, DynamicImage, f32)>>,
+    pub thumbnail_geometry_cache: Mutex<HashMap<String, ThumbnailGeometryEntry>>,
     pub lens_db: Mutex<Option<Arc<LensDatabase>>>,
     pub load_image_generation: Arc<AtomicUsize>,
     pub full_warped_cache: Mutex<Option<(u64, Arc<DynamicImage>)>>,
+    pub patched_warped_cache: Mutex<Option<(u64, Arc<DynamicImage>)>>,
     pub full_transformed_cache: Mutex<Option<TransformedImageCache>>,
     pub decoded_image_cache: Mutex<DecodedImageCache>,
     pub thumbnail_manager: Arc<ThumbnailManager>,

@@ -54,11 +54,9 @@ export enum Invokes {
   GenerateAiForegroundMask = 'generate_ai_foreground_mask',
   GenerateAiSkyMask = 'generate_ai_sky_mask',
   GenerateAiSubjectMask = 'generate_ai_subject_mask',
-  GenerateFullscreenPreview = 'generate_fullscreen_preview',
   GeneratePreviewForPath = 'generate_preview_for_path',
   GenerateMaskOverlay = 'generate_mask_overlay',
   GeneratePresetPreview = 'generate_preset_preview',
-  GenerateThumbnailsProgressive = 'generate_thumbnails_progressive',
   GenerateUncroppedPreview = 'generate_uncropped_preview',
   GetFolderTree = 'get_folder_tree',
   GetFolderChildren = 'get_folder_children',
@@ -71,7 +69,6 @@ export enum Invokes {
   HandleImportPresetsFromFiles = 'handle_import_presets_from_files',
   HandleImportLegacyPresetsFromFile = 'handle_import_legacy_presets_from_file',
   ImportFiles = 'import_files',
-  InvokeGenerativeReplace = 'invoke_generative_replace',
   InvokeGenerativeReplaseWithMaskDef = 'invoke_generative_replace_with_mask_def',
   IsTetheringSupported = 'is_tethering_supported',
   ListImagesInDir = 'list_images_in_dir',
@@ -151,7 +148,7 @@ export enum SortDirection {
   Descending = 'desc',
 }
 
-export type FolderSortKey = 'name' | 'modified' | 'created' | 'imageCount';
+type FolderSortKey = 'name' | 'modified' | 'created' | 'imageCount';
 
 export interface FolderTreeSort {
   key: FolderSortKey;
@@ -172,6 +169,7 @@ export enum Theme {
 export enum ThumbnailAspectRatio {
   Cover = 'cover',
   Contain = 'contain',
+  Justified = 'justified',
 }
 
 export interface WorkspaceState {
@@ -192,6 +190,8 @@ export interface AppSettings {
   aiProvider?: string;
   decorations?: any;
   editorPreviewResolution?: number;
+  smallThumbnailResolution?: number;
+  mediumThumbnailResolution?: number;
   enableZoomHifi?: boolean;
   useFullDpiRendering?: boolean;
   highResZoomMultiplier?: number;
@@ -226,8 +226,10 @@ export interface AppSettings {
   waveformHeight?: number;
   activeWaveformChannel?: string;
   useWgpuRenderer?: boolean;
+  editorNeutralGreyBg?: boolean;
   canvasInputMode?: 'mouse' | 'trackpad';
   zoomSpeedMultiplier?: number;
+  zoomPhotoToPixelClick?: boolean;
   keybinds?: { [action: string]: string[] };
   tonemapperOverrideEnabled?: boolean;
   defaultRawTonemapper?: string;
@@ -337,7 +339,6 @@ export interface SelectedImage {
   isReady: boolean;
   metadata?: any;
   original_base64?: string;
-  originalUrl: string | null;
   path: string;
   thumbnailUrl: string;
   width: number;
@@ -376,6 +377,7 @@ export interface UiVisibility {
   filmstrip: boolean;
   leftPanel: boolean;
   rightPanel: boolean;
+  quickFilter?: boolean;
 }
 
 export interface WaveformData {
@@ -397,7 +399,7 @@ export interface CullingSettings {
   filterBlurry: boolean;
 }
 
-export interface ImageAnalysisResult {
+interface ImageAnalysisResult {
   path: string;
   qualityScore: number;
   sharpnessMetric: number;
@@ -407,7 +409,7 @@ export interface ImageAnalysisResult {
   height: number;
 }
 
-export interface CullGroup {
+interface CullGroup {
   representative: ImageAnalysisResult;
   duplicates: ImageAnalysisResult[];
 }
@@ -418,7 +420,7 @@ export interface CullingSuggestions {
   failedPaths: string[];
 }
 
-export interface KeybindHandler {
+interface KeybindHandler {
   shouldFire?: () => boolean;
   execute: (event: KeyboardEvent) => void;
 }

@@ -123,11 +123,20 @@ const resolutions: OptionItem<number>[] = [
   { value: 3840, label: '3840px' },
 ];
 
-const thumbnailResolutions: OptionItem<number>[] = [
+const smallThumbnailResolutions: OptionItem<number>[] = [
+  { value: 240, label: '240px' },
+  { value: 360, label: '360px' },
+  { value: 480, label: '480px' },
   { value: 640, label: '640px' },
   { value: 720, label: '720px' },
-  { value: 960, label: '960px' },
-  { value: 1080, label: '1080px' },
+];
+
+const mediumThumbnailResolutions: OptionItem<number>[] = [
+  { value: 720, label: '720px' },
+  { value: 1024, label: '1024px' },
+  { value: 1280, label: '1280px' },
+  { value: 1440, label: '1440px' },
+  { value: 1920, label: '1920px' },
 ];
 
 const zoomMultiplierOptions: OptionItem<number>[] = [
@@ -536,7 +545,8 @@ export default function SettingsPanel({
   const osPlatform = useOsPlatform();
   const [processingSettings, setProcessingSettings] = useState({
     editorPreviewResolution: appSettings?.editorPreviewResolution || 1920,
-    thumbnailResolution: appSettings?.thumbnailResolution || 720,
+    smallThumbnailResolution: appSettings?.smallThumbnailResolution || 480,
+    mediumThumbnailResolution: appSettings?.mediumThumbnailResolution || 1280,
     rawHighlightCompression: appSettings?.rawHighlightCompression ?? 2.5,
     processingBackend: appSettings?.processingBackend || 'auto',
     linuxGpuOptimization: appSettings?.linuxGpuOptimization ?? false,
@@ -644,7 +654,8 @@ export default function SettingsPanel({
     }
     setProcessingSettings({
       editorPreviewResolution: appSettings?.editorPreviewResolution || 1920,
-      thumbnailResolution: appSettings?.thumbnailResolution || 720,
+      smallThumbnailResolution: appSettings?.smallThumbnailResolution || 480,
+      mediumThumbnailResolution: appSettings?.mediumThumbnailResolution || 1280,
       rawHighlightCompression: appSettings?.rawHighlightCompression ?? 2.5,
       processingBackend: appSettings?.processingBackend || 'auto',
       linuxGpuOptimization: appSettings?.linuxGpuOptimization ?? false,
@@ -1184,6 +1195,18 @@ export default function SettingsPanel({
                           id="folder-image-counts-toggle"
                           label={t('settings.general.showImageCounts')}
                           onChange={(checked) => onSettingsChange({ ...appSettings, enableFolderImageCounts: checked })}
+                        />
+                      </SettingItem>
+
+                      <SettingItem
+                        label={t('settings.general.neutralGreyCanvas')}
+                        description={t('settings.general.neutralGreyCanvasDesc')}
+                      >
+                        <Switch
+                          checked={appSettings?.editorNeutralGreyBg ?? false}
+                          id="neutral-grey-bg-toggle"
+                          label={t('settings.general.enableNeutralGreyCanvas')}
+                          onChange={(checked) => onSettingsChange({ ...appSettings, editorNeutralGreyBg: checked })}
                         />
                       </SettingItem>
 
@@ -1895,13 +1918,25 @@ export default function SettingsPanel({
                       </div>
 
                       <SettingItem
-                        description={t('settings.processing.thumbnailResDesc')}
-                        label={t('settings.processing.thumbnailRes')}
+                        description={t('settings.processing.smallThumbnailResDesc')}
+                        label={t('settings.processing.smallThumbnailRes')}
                       >
                         <Dropdown
-                          onChange={(value: any) => handleProcessingSettingChange('thumbnailResolution', value)}
-                          options={thumbnailResolutions}
-                          value={processingSettings.thumbnailResolution}
+                          onChange={(value: any) => handleProcessingSettingChange('smallThumbnailResolution', value)}
+                          options={smallThumbnailResolutions}
+                          value={processingSettings.smallThumbnailResolution}
+                          triggerClassName="bg-bg-primary"
+                        />
+                      </SettingItem>
+
+                      <SettingItem
+                        description={t('settings.processing.mediumThumbnailResDesc')}
+                        label={t('settings.processing.mediumThumbnailRes')}
+                      >
+                        <Dropdown
+                          onChange={(value: any) => handleProcessingSettingChange('mediumThumbnailResolution', value)}
+                          options={mediumThumbnailResolutions}
+                          value={processingSettings.mediumThumbnailResolution}
                           triggerClassName="bg-bg-primary"
                         />
                       </SettingItem>
@@ -2030,6 +2065,7 @@ export default function SettingsPanel({
                       {t('settings.processing.preprocessing.title')}
                     </Text>
                     <div className="space-y-8">
+                      {/* turn off highlights clipping setting for now - needs clean cleanup across other files.
                       <SettingItem
                         label={t('settings.processing.preprocessing.highlightRecovery')}
                         description={t('settings.processing.preprocessing.highlightRecoveryDesc')}
@@ -2047,6 +2083,7 @@ export default function SettingsPanel({
                           fillOrigin="min"
                         />
                       </SettingItem>
+                      */}
 
                       <SettingItem
                         label={t('settings.processing.preprocessing.colorNr')}
@@ -2465,6 +2502,19 @@ export default function SettingsPanel({
                             onSettingsChange({ ...appSettings, zoomSpeedMultiplier: parseFloat(e.target.value) })
                           }
                           fillOrigin="min"
+                        />
+                      </SettingItem>
+                      <SettingItem
+                        label={t('settings.controls.zoomClick')}
+                        description={t('settings.controls.zoomClickInfo')}
+                      >
+                        <Switch
+                          checked={appSettings?.zoomPhotoToPixelClick ?? false}
+                          id="zoom-photo-to-pixel-click"
+                          label={t('settings.controls.zoomClickDesc')}
+                          onChange={(checked) => {
+                            onSettingsChange({ ...appSettings, zoomPhotoToPixelClick: checked });
+                          }}
                         />
                       </SettingItem>
                     </div>
