@@ -22,6 +22,7 @@ pub fn develop_raw_image(
     highlight_compression: f32,
     linear_mode: String,
     cancel_token: Option<(Arc<AtomicUsize>, usize)>,
+    proxy_min_dim: Option<usize>,
 ) -> Result<DynamicImage> {
     let (developed_image, orientation) = develop_internal(
         file_bytes,
@@ -29,6 +30,7 @@ pub fn develop_raw_image(
         highlight_compression,
         linear_mode,
         cancel_token,
+        proxy_min_dim,
     )?;
     Ok(apply_orientation(developed_image, orientation))
 }
@@ -42,15 +44,15 @@ fn metadata_orientation(decoder: &dyn Decoder, source: &RawSource) -> Result<Ori
         .unwrap_or(Orientation::Normal))
 }
 
-pub fn extract_embedded_preview(file_bytes: &[u8]) -> Option<DynamicImage> {
-    let source = RawSource::new_from_slice(file_bytes);
-    let decoder = rawler::get_decoder(&source).ok()?;
-    let preview = decoder
-        .full_image(&source, &RawDecodeParams::default())
-        .ok()??;
-    let orientation =
-        metadata_orientation(decoder.as_ref(), &source).unwrap_or(Orientation::Normal);
-    Some(apply_orientation(preview, orientation))
+fn borrowed_raw_source(file_bytes: &[u8]) -> RawSource {
+    // SAFETY: every caller in this module keeps the source local and drops it
+    // while `file_bytes` is still borrowed.
+    unsafe { RawSource::new_from_slice_unchecked(file_bytes) }
+}
+
+pub fn with_raw_source<T>(file_bytes: &[u8], f: impl FnOnce(&RawSource) -> T) -> T {
+    let source = borrowed_raw_source(file_bytes);
+    f(&source)
 }
 
 fn is_linear_raw_format(raw_image: &RawImage) -> bool {
@@ -137,6 +139,7 @@ fn develop_internal(
     _highlight_compression: f32,
     linear_mode: String,
     cancel_token: Option<(Arc<AtomicUsize>, usize)>,
+    proxy_min_dim: Option<usize>,
 ) -> Result<(DynamicImage, Orientation)> {
     let check_cancel = || -> Result<()> {
         if let Some((tracker, generation)) = &cancel_token
@@ -149,11 +152,15 @@ fn develop_internal(
 
     check_cancel()?;
 
-    let source = RawSource::new_from_slice(file_bytes);
+    let source = borrowed_raw_source(file_bytes);
     let decoder = rawler::get_decoder(&source)?;
 
     check_cancel()?;
-    let mut raw_image: RawImage = decoder.raw_image(&source, &RawDecodeParams::default(), false)?;
+    let decode_params = RawDecodeParams {
+        proxy_min_dim,
+        ..Default::default()
+    };
+    let mut raw_image: RawImage = decoder.raw_image(&source, &decode_params, false)?;
 
     let orientation = metadata_orientation(decoder.as_ref(), &source)?;
 
@@ -323,17 +330,41 @@ pub fn read_as_shot_white_balance(file_bytes: &[u8]) -> Option<WhiteBalance> {
     WhiteBalance::from_camera_neutral(color_matrix, &neutral)
 }
 
+pub fn get_raw_dimensions(file_bytes: &[u8]) -> Option<(u32, u32, bool)> {
+    let source = borrowed_raw_source(file_bytes);
+    let decoder = rawler::get_decoder(&source).ok()?;
+    let raw_img = decoder
+        .raw_image(&source, &RawDecodeParams::default(), true)
+        .ok()?;
+    let (w, h) = raw_img
+        .crop_area
+        .map_or((raw_img.width, raw_img.height), |r| (r.d.w, r.d.h));
+    Some((w as u32, h as u32, is_linear_raw_format(&raw_img)))
+}
+
 pub fn get_fast_demosaic_scale_factor(
     file_bytes: &[u8],
     decoded_width: u32,
     decoded_height: u32,
 ) -> f32 {
-    let source = RawSource::new_from_slice(file_bytes);
+    let source = borrowed_raw_source(file_bytes);
     if let Ok(decoder) = rawler::get_decoder(&source)
         && let Ok(raw_img) = decoder.raw_image(&source, &RawDecodeParams::default(), true)
     {
-        let max_orig = (raw_img.width as f32).max(raw_img.height as f32);
         let max_comp = (decoded_width as f32).max(decoded_height as f32);
+        if is_linear_raw_format(&raw_img) {
+            let max_crop = raw_img
+                .crop_area
+                .map_or(raw_img.width.max(raw_img.height), |r| r.d.w.max(r.d.h))
+                as f32;
+            let ratio = if max_crop > 0.0 {
+                max_comp / max_crop
+            } else {
+                1.0
+            };
+            return if ratio > 0.97 { 1.0 } else { ratio };
+        }
+        let max_orig = (raw_img.width as f32).max(raw_img.height as f32);
         if max_orig > 0.0 {
             let ratio = max_comp / max_orig;
             if ratio > 0.1 && ratio < 0.35 {
