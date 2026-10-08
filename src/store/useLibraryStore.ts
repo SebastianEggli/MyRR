@@ -53,6 +53,7 @@ interface LibraryState {
   isTreeLoading: boolean;
   isViewLoading: boolean;
   libraryScrollTop: number;
+  pendingRevealPath: string | null;
   listColumnWidths: ColumnWidths;
 
   // Navigation History
@@ -93,6 +94,7 @@ export const useLibraryStore = create<LibraryState>((set) => ({
   isTreeLoading: false,
   isViewLoading: false,
   libraryScrollTop: 0,
+  pendingRevealPath: null,
   listColumnWidths: {
     thumbnail: 4,
     name: 20,

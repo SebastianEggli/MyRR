@@ -258,6 +258,7 @@ export interface AppSettings {
   taggingShortcuts?: string[];
   libraryDisplayMode?: LibraryDisplayMode;
   grouping?: GroupingMode;
+  filmstripSortByFolder?: boolean;
   requireMatchingExif?: boolean;
   groupEditedFiles?: boolean;
   groupPreferredType?: GroupPreference; // legacy

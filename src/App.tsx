@@ -51,6 +51,7 @@ import { useTauriListeners } from './hooks/useTauriListeners';
 import { useFileOperations } from './hooks/useFileOperations';
 import { useAppContextMenus } from './hooks/useAppContextMenus';
 import { useSortedLibrary } from './hooks/useSortedLibrary';
+import { getEditorImageList } from './utils/imageGrouping';
 import { useAppNavigation } from './hooks/useAppNavigation';
 import { useExternalEditSession } from './hooks/useExternalEditSession';
 import ExternalEditBar from './components/ui/ExternalEditBar';
@@ -380,7 +381,16 @@ function App() {
     return () => setImageSelectHandler(null);
   }, [handleImageSelect]);
 
-  const { displayList: sortedImageList, badges: groupBadgeInfo } = useSortedLibrary();
+  const { displayList, badges: groupBadgeInfo } = useSortedLibrary();
+  const sortedImageList = useMemo(
+    () =>
+      getEditorImageList(displayList, {
+        libraryViewMode,
+        sortByFolder: appSettings?.filmstripSortByFolder,
+        baseFolderPath: currentFolderPath,
+      }),
+    [displayList, libraryViewMode, appSettings?.filmstripSortByFolder, currentFolderPath],
+  );
 
   const handleLibraryRefresh = useCallback(async () => {
     if (currentFolderPath) {

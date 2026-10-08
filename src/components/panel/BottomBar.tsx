@@ -1,5 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
-import { Star, Copy, ClipboardPaste, Check, Settings, Filter, PanelLeft, PanelBottom, PanelRight } from 'lucide-react';
+import {
+  Star,
+  Copy,
+  ClipboardPaste,
+  Check,
+  Settings,
+  Filter,
+  PanelLeft,
+  PanelBottom,
+  PanelRight,
+  FolderTree,
+  ArrowDownAZ,
+} from 'lucide-react';
 import clsx from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useShallow } from 'zustand/react/shallow';
@@ -22,6 +34,7 @@ import { useEditorStore } from '../../store/useEditorStore';
 import { useLibraryStore } from '../../store/useLibraryStore';
 import { useLibraryActions } from '../../hooks/useLibraryActions';
 import { useUIStore } from '../../store/useUIStore';
+import { useSettingsStore } from '../../store/useSettingsStore';
 import { COLOR_LABELS } from '../../utils/adjustments';
 import { MAX_ZOOM_PERCENT, MIN_ZOOM_PERCENT, clampZoomPercent, percentFromTransform } from '../../utils/zoom';
 import { useDevicePixelRatio } from '../../hooks/useDevicePixelRatio';
@@ -209,6 +222,14 @@ export default function BottomBar({
     setUI((s) => ({
       uiVisibility: { ...s.uiVisibility, filmstrip: !s.uiVisibility.filmstrip },
     }));
+
+  const sortFilmstripByFolder = useSettingsStore((s) => s.appSettings?.filmstripSortByFolder ?? true);
+
+  const toggleFilmstripSort = () => {
+    const { appSettings, handleSettingsChange } = useSettingsStore.getState();
+    if (!appSettings) return;
+    handleSettingsChange({ ...appSettings, filmstripSortByFolder: !sortFilmstripByFolder });
+  };
 
   const { displaySize, baseRenderSize } = useEditorStore(
     useShallow((state) => ({
@@ -712,6 +733,18 @@ export default function BottomBar({
           )}
 
           <div className="flex items-center gap-1">
+            {!isLibraryView && showFilmstrip && (
+              <PanelToggleButton
+                onClick={toggleFilmstripSort}
+                Icon={sortFilmstripByFolder ? FolderTree : ArrowDownAZ}
+                tooltip={
+                  sortFilmstripByFolder
+                    ? t('ui.bottomBar.tooltips.sortFilmstripByName')
+                    : t('ui.bottomBar.tooltips.sortFilmstripByFolder')
+                }
+              />
+            )}
+
             {(showLeftPanelToggle || showRightPanelToggle || showBottomPanelToggle) && (
               <>
                 {showLeftPanelToggle && (

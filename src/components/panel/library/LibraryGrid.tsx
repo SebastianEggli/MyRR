@@ -12,12 +12,14 @@ import {
   LibraryDisplayMode,
   ThumbnailAspectRatio,
   ExifOverlay,
-  ImageFile,
 } from '../../ui/AppProperties';
 import Text from '../../ui/Text';
 import { TextColors, TextVariants, TextWeights, TEXT_COLOR_KEYS } from '../../../types/typography';
 import { useProcessStore } from '../../../store/useProcessStore';
 import { useSettingsStore } from '../../../store/useSettingsStore';
+import { useUIStore } from '../../../store/useUIStore';
+import { groupImagesByFolder } from '../../../utils/imageGrouping';
+import { centeredScrollTop, findRowOffset, resolveReveal, totalRowsHeight } from '../../../utils/libraryScroll';
 
 function ListHeader({ widths, setWidths, containerRef, sortCriteria, onSortChange }: any) {
   const { t } = useTranslation();
@@ -134,33 +136,6 @@ function ListHeader({ widths, setWidths, containerRef, sortCriteria, onSortChang
     </div>
   );
 }
-
-const groupImagesByFolder = (images: any[], baseFolderPath: string | null) => {
-  const groups: Record<string, any[]> = {};
-
-  images.forEach((img) => {
-    const physicalPath = img.path.split('?vc=')[0];
-    const separator = physicalPath.includes('/') ? '/' : '\\';
-    const lastSep = physicalPath.lastIndexOf(separator);
-    const dir = lastSep > -1 ? physicalPath.substring(0, lastSep) : physicalPath;
-
-    if (!groups[dir]) {
-      groups[dir] = [];
-    }
-    groups[dir].push(img);
-  });
-
-  const sortedKeys = Object.keys(groups).sort((a, b) => {
-    if (a === baseFolderPath) return -1;
-    if (b === baseFolderPath) return 1;
-    return a.localeCompare(b);
-  });
-
-  return sortedKeys.map((dir) => ({
-    path: dir,
-    images: groups[dir],
-  }));
-};
 
 export function buildJustifiedRows(
   images: any[],
@@ -532,11 +507,50 @@ export default function LibraryGrid(props: any) {
     [gridData],
   );
 
+  // react-window sizes its scroll area from an estimate (average of the rows rendered so far),
+  // which clamps scrolling near the end. The exact height keeps every row reachable.
+  const contentHeight = useMemo(
+    () => (gridData ? totalRowsHeight(gridData.rows.length, getItemSize) : 0),
+    [gridData, getItemSize],
+  );
+
   const prevActivePath = useRef<string | null>(null);
   const prevDisplayMode = useRef<LibraryDisplayMode | null>(null);
   const prevListElement = useRef<HTMLElement | null>(null);
+  const activeView = useUIStore((s) => s.activeView);
+  const pendingRevealPath = useLibraryStore((s) => s.pendingRevealPath);
 
   useEffect(() => {
+    if (pendingRevealPath && activeView === 'library' && listHandle?.element && gridData) {
+      const element = listHandle.element as HTMLElement;
+      if (element.clientHeight > 0) {
+        const action = resolveReveal(gridData.rows, getItemSize, pendingRevealPath, collapsedRecursiveFolders);
+
+        if (action.type === 'expand') {
+          setCollapsedRecursiveFolders((prev) => {
+            const next = new Set(prev);
+            next.delete(action.folder);
+            return next;
+          });
+          return;
+        }
+
+        setLibrary({ pendingRevealPath: null });
+
+        if (action.type === 'scroll') {
+          element.scrollTo({
+            top: centeredScrollTop(action.top, action.height, element.clientHeight),
+            behavior: 'instant',
+          });
+          isClickSelectionRef.current = false;
+          prevActivePath.current = activePath;
+          prevDisplayMode.current = libraryDisplayMode;
+          prevListElement.current = element;
+          return;
+        }
+      }
+    }
+
     const isClick = isClickSelectionRef.current;
     isClickSelectionRef.current = false;
 
@@ -562,27 +576,10 @@ export default function LibraryGrid(props: any) {
       return;
     }
 
-    let targetTop = 0;
-    let targetRowHeight = gridData.rowHeight;
-    let found = false;
+    const target = findRowOffset(gridData.rows, getItemSize, activePath);
 
-    for (let i = 0; i < gridData.rows.length; i++) {
-      const row = gridData.rows[i];
-      const currentRowHeight = getItemSize(i);
-
-      if (row.type === 'images' && row.images) {
-        const hasImage = row.images.some((img: ImageFile) => img.path === activePath);
-        if (hasImage) {
-          targetRowHeight = currentRowHeight;
-          found = true;
-          break;
-        }
-      }
-
-      targetTop += currentRowHeight;
-    }
-
-    if (found) {
+    if (target) {
+      const { top: targetTop, height: targetRowHeight } = target;
       const clientHeight = element.clientHeight;
       const scrollTop = element.scrollTop;
       const itemBottom = targetTop + targetRowHeight;
@@ -590,7 +587,7 @@ export default function LibraryGrid(props: any) {
 
       if (!isModeSame || !isElementSame) {
         element.scrollTo({
-          top: Math.max(0, targetTop - clientHeight / 2 + targetRowHeight / 2),
+          top: centeredScrollTop(targetTop, targetRowHeight, clientHeight),
           behavior: 'instant',
         });
       } else if (itemBottom > scrollTop + clientHeight) {
@@ -605,7 +602,18 @@ export default function LibraryGrid(props: any) {
         });
       }
     }
-  }, [activePath, gridData, getItemSize, multiSelectedPaths.length, listHandle, libraryDisplayMode]);
+  }, [
+    activePath,
+    activeView,
+    pendingRevealPath,
+    collapsedRecursiveFolders,
+    setLibrary,
+    gridData,
+    getItemSize,
+    multiSelectedPaths.length,
+    listHandle,
+    libraryDisplayMode,
+  ]);
 
   const memoizedRowProps = useMemo(() => {
     if (!gridData) return {};
@@ -701,7 +709,20 @@ export default function LibraryGrid(props: any) {
             className="custom-scrollbar"
             rowComponent={Row}
             rowProps={memoizedRowProps}
-          />
+          >
+            <div
+              aria-hidden
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: 1,
+                height: contentHeight,
+                visibility: 'hidden',
+                pointerEvents: 'none',
+              }}
+            />
+          </List>
         </div>
       </div>
     </div>
