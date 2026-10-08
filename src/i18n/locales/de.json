@@ -2035,7 +2035,9 @@
         "rateStars_one": "Mit 1 Stern bewerten",
         "rateStars_other": "Mit {{count}} Sternen bewerten",
         "resetZoom": "Zoom auf Einpassen zurücksetzen",
-        "selectToRate": "Bild zur Bewertung auswählen"
+        "selectToRate": "Bild zur Bewertung auswählen",
+        "sortFilmstripByFolder": "Filmstreifen nach Ordner sortieren",
+        "sortFilmstripByName": "Filmstreifen nach Name sortieren"
       },
       "zoomLabel": "Zoom",
       "zoomLabelReset": "Zoom zurücksetzen"

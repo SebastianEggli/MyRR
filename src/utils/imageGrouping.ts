@@ -1,4 +1,4 @@
-import { GroupPreference, GroupingMode, ImageFile } from '../components/ui/AppProperties';
+import { GroupPreference, GroupingMode, ImageFile, LibraryViewMode } from '../components/ui/AppProperties';
 
 export type GroupId = string;
 
@@ -100,4 +100,55 @@ export function expandGroupedPaths(images: ImageFile[], paths: string[], groupin
   }
 
   return Array.from(expandedPaths);
+}
+
+export interface FolderGroup<T extends { path: string } = ImageFile> {
+  path: string;
+  images: T[];
+}
+
+export function getFolderOfPath(path: string): string {
+  const physicalPath = path.split('?vc=')[0];
+  const separator = physicalPath.includes('/') ? '/' : '\\';
+  const lastSep = physicalPath.lastIndexOf(separator);
+  return lastSep > -1 ? physicalPath.substring(0, lastSep) : physicalPath;
+}
+
+export function groupImagesByFolder<T extends { path: string }>(
+  images: T[],
+  baseFolderPath: string | null,
+): FolderGroup<T>[] {
+  const groups: Record<string, T[]> = {};
+
+  images.forEach((img) => {
+    const dir = getFolderOfPath(img.path);
+    if (!groups[dir]) {
+      groups[dir] = [];
+    }
+    groups[dir].push(img);
+  });
+
+  const sortedKeys = Object.keys(groups).sort((a, b) => {
+    if (a === baseFolderPath) return -1;
+    if (b === baseFolderPath) return 1;
+    return a.localeCompare(b);
+  });
+
+  return sortedKeys.map((dir) => ({
+    path: dir,
+    images: groups[dir],
+  }));
+}
+
+export function orderImagesByFolder<T extends { path: string }>(images: T[], baseFolderPath: string | null): T[] {
+  return groupImagesByFolder(images, baseFolderPath).flatMap((group) => group.images);
+}
+
+export function getEditorImageList<T extends { path: string }>(
+  displayList: T[],
+  options: { libraryViewMode: LibraryViewMode; sortByFolder: boolean | undefined; baseFolderPath: string | null },
+): T[] {
+  const sortByFolder = options.sortByFolder ?? true;
+  if (options.libraryViewMode !== LibraryViewMode.Recursive || !sortByFolder) return displayList;
+  return orderImagesByFolder(displayList, options.baseFolderPath);
 }

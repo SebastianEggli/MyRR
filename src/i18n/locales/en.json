@@ -2035,7 +2035,9 @@
         "rateStars_one": "Rate 1 star",
         "rateStars_other": "Rate {{count}} stars",
         "resetZoom": "Reset Zoom to Fit Window",
-        "selectToRate": "Select an image to rate"
+        "selectToRate": "Select an image to rate",
+        "sortFilmstripByFolder": "Sort Filmstrip by Folder",
+        "sortFilmstripByName": "Sort Filmstrip by Name"
       },
       "zoomLabel": "Zoom",
       "zoomLabelReset": "Reset Zoom"
