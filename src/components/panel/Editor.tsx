@@ -38,6 +38,7 @@ import { useEditorActions, withRotation } from '../../hooks/useEditorActions';
 import { MAX_ZOOM_PERCENT, MIN_ZOOM_PERCENT, getDpr, transformFromPercent, zoomReferenceSize } from '../../utils/zoom';
 import { useDevicePixelRatio } from '../../hooks/useDevicePixelRatio';
 import { parseRgb, resolveEditorBackground } from '../../utils/editorBackground';
+import { wheelZoomFactor } from '../../utils/wheelZoom';
 
 const NO_SPLIT = { splitOrigin: [0, 0], splitNormal: [0, 0], splitOffset: [0, 0] };
 
@@ -873,11 +874,6 @@ export default function Editor({ onBackToLibrary, onContextMenu, onImageSelect, 
 
       const isPinch = e.ctrlKey;
       const isTrackpad = appSettings?.canvasInputMode === 'trackpad';
-      let zoomSpeedMult = appSettings?.zoomSpeedMultiplier ?? 1.0;
-
-      if (isTrackpad) {
-        zoomSpeedMult *= 5;
-      }
 
       const isZoomIntent = isPinch || (!isTrackpad && !e.shiftKey && !e.altKey);
 
@@ -886,11 +882,9 @@ export default function Editor({ onBackToLibrary, onContextMenu, onImageSelect, 
         const mouseX = e.clientX - rect.left;
         const mouseY = e.clientY - rect.top;
 
-        const delta = e.deltaY !== 0 ? e.deltaY : e.deltaX;
-        const zoomSensitivity = 0.002 * zoomSpeedMult;
-        const exponent = delta * zoomSensitivity;
-
-        let newScale = transformStateRef.current.scale * Math.exp(-exponent);
+        let newScale =
+          transformStateRef.current.scale *
+          wheelZoomFactor(e, appSettings?.zoomSpeedMultiplier, appSettings?.canvasInputMode);
         newScale = Math.max(minScaleRef.current, Math.min(maxScaleRef.current, newScale));
 
         const ratio = newScale / transformStateRef.current.scale;
