@@ -38,7 +38,7 @@ import { useEditorActions, withRotation } from '../../hooks/useEditorActions';
 import { MAX_ZOOM_PERCENT, MIN_ZOOM_PERCENT, getDpr, transformFromPercent, zoomReferenceSize } from '../../utils/zoom';
 import { useDevicePixelRatio } from '../../hooks/useDevicePixelRatio';
 import { parseRgb, resolveEditorBackground } from '../../utils/editorBackground';
-import { wheelZoomFactor } from '../../utils/wheelZoom';
+import { clickZoomTarget, interpretWheel, movedBeyondClick } from '../../utils/canvasControls';
 
 const NO_SPLIT = { splitOrigin: [0, 0], splitNormal: [0, 0], splitOffset: [0, 0] };
 
@@ -872,19 +872,14 @@ export default function Editor({ onBackToLibrary, onContextMenu, onImageSelect, 
         return;
       }
 
-      const isPinch = e.ctrlKey;
-      const isTrackpad = appSettings?.canvasInputMode === 'trackpad';
+      const gesture = interpretWheel(e, appSettings?.zoomSpeedMultiplier, appSettings?.canvasInputMode);
 
-      const isZoomIntent = isPinch || (!isTrackpad && !e.shiftKey && !e.altKey);
-
-      if (isZoomIntent) {
+      if (gesture.kind === 'zoom') {
         const rect = container.getBoundingClientRect();
         const mouseX = e.clientX - rect.left;
         const mouseY = e.clientY - rect.top;
 
-        let newScale =
-          transformStateRef.current.scale *
-          wheelZoomFactor(e, appSettings?.zoomSpeedMultiplier, appSettings?.canvasInputMode);
+        let newScale = transformStateRef.current.scale * gesture.factor;
         newScale = Math.max(minScaleRef.current, Math.min(maxScaleRef.current, newScale));
 
         const ratio = newScale / transformStateRef.current.scale;
@@ -899,24 +894,8 @@ export default function Editor({ onBackToLibrary, onContextMenu, onImageSelect, 
         const { positionX: curX, positionY: curY, scale } = transformStateRef.current;
         const bounds = getTransformBounds(scale);
 
-        let dx = e.deltaX;
-        let dy = e.deltaY;
-
-        if (!isTrackpad) {
-          if (e.shiftKey && e.altKey) {
-            dx = e.deltaY !== 0 ? e.deltaY : e.deltaX;
-            dy = dx;
-          } else if (e.shiftKey) {
-            dx = e.deltaY !== 0 ? e.deltaY : e.deltaX;
-            dy = 0;
-          } else if (e.altKey) {
-            dx = 0;
-            dy = e.deltaY !== 0 ? e.deltaY : e.deltaX;
-          }
-        }
-
-        let newX = curX - dx;
-        let newY = curY - dy;
+        let newX = curX - gesture.dx;
+        let newY = curY - gesture.dy;
 
         const resistance = 0.5;
 
@@ -1266,11 +1245,7 @@ export default function Editor({ onBackToLibrary, onContextMenu, onImageSelect, 
         return;
       if (isPanningDisabled || wasPanningDisabledOnDown.current) return;
 
-      if (mouseDownPos.current) {
-        const dx = Math.abs(e.clientX - mouseDownPos.current.x);
-        const dy = Math.abs(e.clientY - mouseDownPos.current.y);
-        if (dx > 5 || dy > 5) return;
-      }
+      if (mouseDownPos.current && movedBeyondClick(mouseDownPos.current, e.clientX, e.clientY)) return;
 
       const currentScale = transformStateRef.current.scale;
 
@@ -1300,15 +1275,14 @@ export default function Editor({ onBackToLibrary, onContextMenu, onImageSelect, 
         const mouseX = e.clientX - rect.left;
         const mouseY = e.clientY - rect.top;
 
-        let zoomTarget = Math.min(currentScale * 2, maxScaleRef.current);
-
-        if (appSettings?.zoomPhotoToPixelClick) {
-          const renderScale = imageRenderSizeRef.current.scale || 1;
-          const scaleForPhysical100 = transformFromPercent(1, renderScale, getDpr());
-          zoomTarget = Math.max(1.05, Math.min(scaleForPhysical100, maxScaleRef.current));
-        } else {
-          zoomTarget = savedZoomState.current ? savedZoomState.current.scale : zoomTarget;
-        }
+        const renderScale = imageRenderSizeRef.current.scale || 1;
+        const zoomTarget = clickZoomTarget(
+          currentScale,
+          maxScaleRef.current,
+          transformFromPercent(1, renderScale, getDpr()),
+          savedZoomState.current?.scale ?? null,
+          appSettings?.zoomPhotoToPixelClick,
+        );
         const ratio = zoomTarget / currentScale;
 
         const newPositionX = mouseX - (mouseX - currentPositionX) * ratio;
