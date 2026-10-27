@@ -48,6 +48,7 @@ import {
   Album as AlbumIcon,
   PencilSparkles,
   ScanLine,
+  PaintBucket,
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
@@ -75,6 +76,7 @@ import {
   INITIAL_ADJUSTMENTS,
 } from '../utils/adjustments';
 import TaggingSubMenu from '../context/TaggingSubMenu';
+import BackgroundColorSubMenu from '../context/BackgroundColorSubMenu';
 import { buildAutoAdjustModeOptions, reloadAdjustmentsForPaths, useEditorActions } from './useEditorActions';
 import { useLibraryActions } from './useLibraryActions';
 import { transferFiles } from './useFileOperations';
@@ -335,6 +337,11 @@ export function useAppContextMenus(latestProps: UseAppContextMenusProps) {
             { disabled: true, icon: Images, label: t('contextMenus.editor.mergeHdr') },
             { disabled: true, icon: Layers, label: t('contextMenus.merge.focusStack') },
           ],
+        },
+        {
+          label: t('contextMenus.editor.backgroundColor'),
+          icon: PaintBucket,
+          submenu: [{ customComponent: BackgroundColorSubMenu, customProps: {} }],
         },
         { type: OPTION_SEPARATOR },
         {

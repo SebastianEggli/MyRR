@@ -263,6 +263,7 @@ export interface AppSettings {
   activeWaveformChannel?: string;
   useWgpuRenderer?: boolean;
   editorNeutralGreyBg?: boolean;
+  editorBackgroundColor?: string | null;
   canvasInputMode?: 'mouse' | 'trackpad';
   compareMode?: CompareMode;
   whiteBalanceMode?: WhiteBalanceMode;

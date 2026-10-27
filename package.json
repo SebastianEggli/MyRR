@@ -38,6 +38,7 @@
     "lodash.throttle": "^4.1.1",
     "lucide-react": "^1.33.0",
     "react": "^19.2.8",
+    "react-colorful": "^5.8.1",
     "react-dom": "^19.2.8",
     "react-i18next": "^17.0.12",
     "react-image-crop": "^11.1.2",

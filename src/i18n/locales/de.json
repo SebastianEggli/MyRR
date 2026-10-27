@@ -223,6 +223,13 @@
       "yellow": "Gelb"
     },
     "editor": {
+      "backgroundColor": "Hintergrundfarbe",
+      "bgBlack": "Schwarz",
+      "bgDarkGrey": "Dunkelgrau",
+      "bgLightGrey": "Hellgrau",
+      "bgNeutralGrey": "Neutralgrau (18 %)",
+      "bgWhite": "Weiß",
+      "themeDefault": "Theme-Standard",
       "autoAdjust": "Autom. anpassen",
       "autoLensCorrection": "Autom. Objektivkorrektur",
       "autoStraighten": "Automatisch ausrichten",

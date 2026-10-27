@@ -37,16 +37,7 @@ import { useAiMasking } from '../../hooks/useAiMasking';
 import { useEditorActions, withRotation } from '../../hooks/useEditorActions';
 import { MAX_ZOOM_PERCENT, MIN_ZOOM_PERCENT, getDpr, transformFromPercent, zoomReferenceSize } from '../../utils/zoom';
 import { useDevicePixelRatio } from '../../hooks/useDevicePixelRatio';
-
-const parseRgb = (rgbStr: string): [number, number, number, number] => {
-  const match = rgbStr.match(/[\d.]+/g);
-  if (match && match.length >= 3) {
-    return [parseFloat(match[0]) / 255, parseFloat(match[1]) / 255, parseFloat(match[2]) / 255, 1.0];
-  }
-  return [0, 0, 0, 1.0];
-};
-
-const NEUTRAL_GREY_RGB: [number, number, number, number] = [128 / 255, 128 / 255, 128 / 255, 1.0];
+import { parseRgb, resolveEditorBackground } from '../../utils/editorBackground';
 
 const NO_SPLIT = { splitOrigin: [0, 0], splitNormal: [0, 0], splitOffset: [0, 0] };
 
@@ -1563,7 +1554,11 @@ export default function Editor({ onBackToLibrary, onContextMenu, onImageSelect, 
     const rootStyle = getComputedStyle(document.documentElement);
     const bgPrimaryStr = rootStyle.getPropertyValue('--app-bg-primary') || 'rgb(24, 24, 24)';
     const bgSecondaryStr = rootStyle.getPropertyValue('--app-bg-secondary') || 'rgb(35, 35, 35)';
-    const isNeutralGrey = appSettings?.editorNeutralGreyBg ?? false;
+    const background = resolveEditorBackground({
+      customColor: appSettings?.editorBackgroundColor,
+      neutralGrey: appSettings?.editorNeutralGreyBg,
+      themeRgb: parseRgb(bgSecondaryStr),
+    });
 
     wgpuStateRef.current = {
       useWgpuRenderer: appSettings?.useWgpuRenderer,
@@ -1575,11 +1570,12 @@ export default function Editor({ onBackToLibrary, onContextMenu, onImageSelect, 
       compareView: activeCompareView,
       splitPosition,
       bgPrimary: parseRgb(bgPrimaryStr),
-      bgSecondary: isNeutralGrey ? NEUTRAL_GREY_RGB : parseRgb(bgSecondaryStr),
+      bgSecondary: background.rgba,
     };
   }, [
     appSettings?.useWgpuRenderer,
     appSettings?.editorNeutralGreyBg,
+    appSettings?.editorBackgroundColor,
     selectedImage?.isReady,
     hasRenderedFirstFrame,
     isCropping,
@@ -1596,6 +1592,7 @@ export default function Editor({ onBackToLibrary, onContextMenu, onImageSelect, 
   }, [
     appSettings?.useWgpuRenderer,
     appSettings?.editorNeutralGreyBg,
+    appSettings?.editorBackgroundColor,
     selectedImage?.isReady,
     hasRenderedFirstFrame,
     isCropping,
@@ -2466,6 +2463,11 @@ export default function Editor({ onBackToLibrary, onContextMenu, onImageSelect, 
   }
 
   const isWgpuActive = appSettings?.useWgpuRenderer !== false && hasRenderedFirstFrame;
+  const customBackgroundCss = resolveEditorBackground({
+    customColor: appSettings?.editorBackgroundColor,
+    neutralGrey: appSettings?.editorNeutralGreyBg,
+    themeRgb: [0, 0, 0, 1],
+  }).css;
   const isSplitActive = activeCompareView === 'vertical' || activeCompareView === 'horizontal';
   const contentTransform = `translate(${transformStateRef.current.positionX}px, ${transformStateRef.current.positionY}px) scale(${transformStateRef.current.scale})`;
   const originalLayer = originalPreview?.url && (
@@ -2551,8 +2553,9 @@ export default function Editor({ onBackToLibrary, onContextMenu, onImageSelect, 
           'flex-1 flex relative overflow-hidden isolate',
           isFullScreen ? 'rounded-none' : 'rounded-lg',
           appSettings?.useWgpuRenderer !== false && !isFullScreen && 'ring-[9999px] ring-bg-secondary',
-          !isWgpuActive && (appSettings?.editorNeutralGreyBg ? 'bg-[#808080]' : 'bg-bg-secondary'),
+          !isWgpuActive && !customBackgroundCss && 'bg-bg-secondary',
         )}
+        style={!isWgpuActive && customBackgroundCss ? { backgroundColor: customBackgroundCss } : undefined}
       >
         {isSideBySide && (
           <div
