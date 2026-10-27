@@ -67,18 +67,8 @@ fn emit_thumbnail_cache_setup_error(app_handle: &AppHandle, path: &str, reason: 
     );
 }
 
-fn compute_thumbnail_cache_hash(
-    path_str: &str,
-    adjustments_bytes: &[u8],
-    settings: &AppSettings,
-) -> Option<String> {
+fn compute_thumbnail_cache_hash(path_str: &str, adjustments_bytes: &[u8]) -> Option<String> {
     let (source_path, _) = parse_virtual_path(path_str);
-    let is_raw = is_raw_file(&source_path);
-    let render_key = format!(
-        "{:?}{:?}",
-        resolve_render_options(settings, is_raw),
-        settings.always_decode_raw_thumbnails
-    );
 
     let img_mod_time = fs::metadata(&source_path)
         .ok()?
@@ -92,7 +82,6 @@ fn compute_thumbnail_cache_hash(
     hasher.update(path_str.as_bytes());
     hasher.update(&img_mod_time.to_le_bytes());
     hasher.update(adjustments_bytes);
-    hasher.update(render_key.as_bytes());
     Some(hasher.finalize().to_hex().to_string())
 }
 
@@ -1467,21 +1456,6 @@ pub fn write_file_atomic(path: &Path, contents: &[u8]) -> std::io::Result<()> {
     }
 }
 
-fn reserve_thumbnail_decode(
-    state: &AppState,
-    source_path: &Path,
-    is_raw: bool,
-    preloaded_image: Option<&DynamicImage>,
-) -> Option<crate::memory_budget::MemoryReservation> {
-    if preloaded_image.is_some() || rayon::current_thread_index().is_some() {
-        return None;
-    }
-    let pixels = crate::memory_budget::image_pixel_count(source_path, is_raw)?;
-    state
-        .memory_budget
-        .reserve(pixels * if is_raw { 10 } else { 20 }, None)
-}
-
 pub fn generate_thumbnail_data(
     path_str: &str,
     gpu_context: Option<&GpuContext>,
@@ -1531,9 +1505,6 @@ fn generate_thumbnail_data_with_metadata(
 
     let null_adjustments = serde_json::Value::Null;
     let adjustments = metadata.map_or(&null_adjustments, |m| &m.adjustments);
-    let cached_patched = preloaded_image.and_then(|img| {
-        crate::cached_patched_image(&app_handle.state::<AppState>(), img, adjustments)
-    });
 
     let always_decode_raw = settings.always_decode_raw_thumbnails.unwrap_or(false);
 
@@ -1593,11 +1564,7 @@ fn generate_thumbnail_data_with_metadata(
         } else {
             let mut raw_scale_factor = 1.0f32;
 
-            let _decode_reservation =
-                reserve_thumbnail_decode(&state, &source_path, is_raw, preloaded_image);
-            let composite_image: Cow<DynamicImage> = if let Some(patched) = &cached_patched {
-                Cow::Borrowed(patched)
-            } else if let Some(img) = preloaded_image {
+            let composite_image: Cow<DynamicImage> = if let Some(img) = preloaded_image {
                 image_loader::prepare_base_image_cow(img, &source_path_str, adjustments)?
             } else {
                 let mmap_guard;
@@ -1647,7 +1614,17 @@ fn generate_thumbnail_data_with_metadata(
                 Cow::Owned(img)
             };
 
-            let full_max_dim = composite_image.width().max(composite_image.height());
+            let warped_image = apply_geometry_warp(composite_image, &meta.adjustments);
+
+            let relit_image = crate::relight::apply_relight(warped_image, &meta.adjustments);
+            let fogged_image = crate::fog::apply_fog(relit_image, &meta.adjustments);
+            let blurred_image = crate::lens_blur::apply_lens_blur(fogged_image, &meta.adjustments);
+
+            let orientation_steps =
+                meta.adjustments["orientationSteps"].as_u64().unwrap_or(0) as u8;
+            let coarse_rotated_image = apply_coarse_rotation(blurred_image, orientation_steps);
+
+            let (full_w, full_h) = coarse_rotated_image.dimensions();
 
             let mut processing_dim = target_res;
             if let Some(c) = &crop_data
@@ -1656,55 +1633,27 @@ fn generate_thumbnail_data_with_metadata(
             {
                 let crop_max_dim_loaded = c.width.max(c.height) * raw_scale_factor as f64;
                 if crop_max_dim_loaded > 0.0 {
-                    processing_dim = ((target_res as f64 * full_max_dim as f64
-                        / crop_max_dim_loaded)
+                    let full_max_dim = full_w.max(full_h) as f64;
+                    processing_dim = ((target_res as f64 * full_max_dim / crop_max_dim_loaded)
                         .round() as u32)
-                        .min(full_max_dim);
+                        .min(full_w.max(full_h));
                 }
             }
 
-            let has_geometry = !crate::image_processing::is_geometry_identity(
-                &crate::image_processing::get_geometry_params_from_json(&meta.adjustments),
-            );
-            let working_dim = if has_geometry {
-                processing_dim.saturating_mul(2).min(full_max_dim)
-            } else {
-                processing_dim
-            };
-
-            let working_image = if full_max_dim > working_dim {
-                Cow::Owned(crate::image_processing::downscale_f32_image(
-                    &composite_image,
-                    working_dim,
-                    working_dim,
-                ))
-            } else {
-                Cow::Borrowed(&*composite_image)
-            };
-
-            let warped_image = apply_geometry_warp(working_image, &meta.adjustments);
-            let warped_image = if warped_image.width().max(warped_image.height()) > processing_dim {
-                Cow::Owned(crate::image_processing::downscale_f32_image(
-                    &warped_image,
+            let (base, gpu_scale) = if full_w > processing_dim || full_h > processing_dim {
+                let base = crate::image_processing::downscale_f32_image(
+                    &coarse_rotated_image,
                     processing_dim,
                     processing_dim,
-                ))
+                );
+                let scale = if full_w > 0 {
+                    base.width() as f32 / full_w as f32
+                } else {
+                    1.0
+                };
+                (base, scale)
             } else {
-                warped_image
-            };
-
-            let relit_image = crate::relight::apply_relight(warped_image, &meta.adjustments);
-            let fogged_image = crate::fog::apply_fog(relit_image, &meta.adjustments);
-            let blurred_image = crate::lens_blur::apply_lens_blur(fogged_image, &meta.adjustments);
-
-            let orientation_steps =
-                meta.adjustments["orientationSteps"].as_u64().unwrap_or(0) as u8;
-            let base = apply_coarse_rotation(blurred_image, orientation_steps).into_owned();
-
-            let gpu_scale = if full_max_dim > 0 {
-                base.width().max(base.height()) as f32 / full_max_dim as f32
-            } else {
-                1.0
+                (coarse_rotated_image.into_owned(), 1.0)
             };
 
             let total_scale = gpu_scale * raw_scale_factor;
@@ -1821,15 +1770,7 @@ fn generate_thumbnail_data_with_metadata(
         }
     }
 
-    let _decode_reservation = reserve_thumbnail_decode(
-        &app_handle.state::<AppState>(),
-        &source_path,
-        is_raw,
-        preloaded_image,
-    );
-    let mut final_image: Cow<DynamicImage> = if let Some(patched) = &cached_patched {
-        Cow::Borrowed(patched)
-    } else if let Some(img) = preloaded_image {
+    let mut final_image: Cow<DynamicImage> = if let Some(img) = preloaded_image {
         image_loader::prepare_base_image_cow(img, &source_path_str, adjustments)?
     } else {
         Cow::Owned(match read_file_mapped(&source_path) {
@@ -1880,15 +1821,10 @@ fn generate_thumbnail_data_with_metadata(
 }
 
 fn encode_thumbnail(image: &DynamicImage, target_width: u32) -> Result<Vec<u8>> {
-    let downscaled =
-        crate::image_processing::downscale_f32_image_if_needed(image, target_width, target_width);
-    let thumbnail = downscaled.as_ref().unwrap_or(image);
+    let thumbnail = crate::image_processing::downscale_f32_image(image, target_width, target_width);
     let mut buf = Cursor::new(Vec::new());
     let mut encoder = JpegEncoder::new_with_quality(&mut buf, 75);
-    match thumbnail.as_rgb8() {
-        Some(rgb) => encoder.encode_image(rgb)?,
-        None => encoder.encode_image(&thumbnail.to_rgb8())?,
-    }
+    encoder.encode_image(&thumbnail.to_rgb8())?;
     Ok(buf.into_inner())
 }
 
@@ -1966,7 +1902,7 @@ fn generate_single_thumbnail_and_cache_with(
         return remote.map(|(small, medium)| (small, medium, rating, is_edited));
     }
 
-    let cache_hash = compute_thumbnail_cache_hash(path_str, &adjustments_bytes, settings)?;
+    let cache_hash = compute_thumbnail_cache_hash(path_str, &adjustments_bytes)?;
 
     let small_path = thumb_cache_dir.join(format!("{}_small.jpg", cache_hash));
     let medium_path = thumb_cache_dir.join(format!("{}_medium.jpg", cache_hash));
@@ -3972,7 +3908,7 @@ pub fn get_thumb_cache_dir(app_handle: &AppHandle) -> Result<PathBuf, String> {
     Ok(thumb_cache_dir)
 }
 
-pub fn get_cache_key_hash(path_str: &str, settings: &AppSettings) -> Option<String> {
+pub fn get_cache_key_hash(path_str: &str) -> Option<String> {
     let (_, sidecar_path) = parse_virtual_path(path_str);
 
     let adjustments_bytes = if let Ok(content) = fs::read_to_string(&sidecar_path) {
@@ -3985,7 +3921,7 @@ pub fn get_cache_key_hash(path_str: &str, settings: &AppSettings) -> Option<Stri
         Vec::new()
     };
 
-    compute_thumbnail_cache_hash(path_str, &adjustments_bytes, settings)
+    compute_thumbnail_cache_hash(path_str, &adjustments_bytes)
 }
 
 pub fn get_cached_or_generate_thumbnail_image(
@@ -3998,7 +3934,7 @@ pub fn get_cached_or_generate_thumbnail_image(
     let target_width_small = settings.small_thumbnail_resolution.unwrap_or(480);
     let target_width_medium = settings.medium_thumbnail_resolution.unwrap_or(1280);
 
-    if let Some(cache_hash) = get_cache_key_hash(path_str, &settings) {
+    if let Some(cache_hash) = get_cache_key_hash(path_str) {
         let cache_path = thumb_cache_dir.join(format!("{}_medium.jpg", cache_hash));
 
         if cache_path.exists() {
