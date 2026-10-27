@@ -51,6 +51,7 @@ import {
   ScanLine,
   PaintBucket,
   MonitorUp,
+  AppWindow,
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
@@ -69,6 +70,7 @@ import {
   AlbumItem,
   Album,
   AlbumGroup,
+  EditInApp,
 } from '../components/ui/AppProperties';
 import {
   AutoAdjustMode,
@@ -79,7 +81,12 @@ import {
 } from '../utils/adjustments';
 import TaggingSubMenu from '../context/TaggingSubMenu';
 import BackgroundColorSubMenu from '../context/BackgroundColorSubMenu';
-import { buildAutoAdjustModeOptions, reloadAdjustmentsForPaths, useEditorActions } from './useEditorActions';
+import {
+  buildAutoAdjustModeOptions,
+  debouncedSave,
+  reloadAdjustmentsForPaths,
+  useEditorActions,
+} from './useEditorActions';
 import { useLibraryActions } from './useLibraryActions';
 import { transferFiles } from './useFileOperations';
 import { globalImageCache } from '../utils/ImageLRUCache';
@@ -228,6 +235,62 @@ export function useAppContextMenus(latestProps: UseAppContextMenusProps) {
     [albumIcons, t],
   );
 
+  const handleEditInApp = useCallback(
+    async (path: string, app: EditInApp) => {
+      const { selectedImage, adjustments } = useEditorStore.getState();
+      const sessionId = crypto.randomUUID();
+      let running = true;
+      let cancelled = false;
+      debouncedSave.flush();
+      const toastId = toast.info(t('contextMenus.toasts.editInWaiting', { app: app.name }), {
+        autoClose: false,
+        closeOnClick: false,
+        onClose: () => {
+          if (!running) return;
+          cancelled = true;
+          invoke(Invokes.CancelEditInApp, { sessionId });
+        },
+      });
+      try {
+        const newPath = await invoke<string | null>(Invokes.EditInApp, {
+          path,
+          app,
+          sessionId,
+          currentEditAdjustments: selectedImage?.path === path ? adjustments : null,
+        });
+        running = false;
+        toast.dismiss(toastId);
+        await props.refreshImageList();
+        if (newPath) {
+          props.handleImageSelect(newPath);
+        } else if (!cancelled) {
+          toast.info(t('contextMenus.toasts.editInNoOutput', { app: app.name }));
+        }
+      } catch (err) {
+        running = false;
+        toast.dismiss(toastId);
+        await props.refreshImageList();
+        toast.error(t('contextMenus.toasts.editInFailed', { app: app.name, err }));
+      }
+    },
+    [props, t],
+  );
+
+  const buildEditInOptions = useCallback(
+    (path: string): Option[] => {
+      const apps = useSettingsStore.getState().appSettings?.editInApps ?? [];
+      if (apps.length === 0) return [];
+      return [
+        {
+          label: t('contextMenus.editor.editIn'),
+          icon: AppWindow,
+          submenu: apps.map((app) => ({ label: app.name, onClick: () => handleEditInApp(path, app) })),
+        },
+      ];
+    },
+    [handleEditInApp, t],
+  );
+
   const handleEditorContextMenu = useCallback(
     (event: any) => {
       event.preventDefault();
@@ -259,6 +322,7 @@ export function useAppContextMenus(latestProps: UseAppContextMenusProps) {
           icon: FileInput,
           onClick: () => setPanel(Panel.Export),
         },
+        ...buildEditInOptions(selectedImage.path),
         ...(osPlatform !== 'android'
           ? [
               {
@@ -437,6 +501,7 @@ export function useAppContextMenus(latestProps: UseAppContextMenusProps) {
       buildFlagMenu,
       handleSetColorLabel,
       handleTagsChanged,
+      buildEditInOptions,
       showContextMenu,
       t,
     ],
@@ -655,9 +720,10 @@ export function useAppContextMenus(latestProps: UseAppContextMenusProps) {
                 onClick: () => props.handleImageSelect(finalSelection[0]),
               },
               { icon: FileInput, label: exportLabel, onClick: onExportClick },
-              { type: OPTION_SEPARATOR },
             ]
-          : [{ icon: FileInput, label: exportLabel, onClick: onExportClick }, { type: OPTION_SEPARATOR }]),
+          : [{ icon: FileInput, label: exportLabel, onClick: onExportClick }]),
+        ...(isSingleSelection ? buildEditInOptions(finalSelection[0]) : []),
+        { type: OPTION_SEPARATOR },
         {
           icon: Copy,
           label: t('contextMenus.editor.copyAdjustments'),
@@ -976,6 +1042,7 @@ export function useAppContextMenus(latestProps: UseAppContextMenusProps) {
       handleSetColorLabel,
       handleTagsChanged,
       handleResetAdjustments,
+      buildEditInOptions,
       showContextMenu,
       props,
       t,
