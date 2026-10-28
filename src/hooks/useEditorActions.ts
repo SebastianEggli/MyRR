@@ -148,6 +148,7 @@ export const applyCrop = () => {
 
 export const cancelCrop = () => {
   const { cropSessionSnapshot, selectedImage, adjustments, setEditor } = useEditorStore.getState();
+  applyCrop();
   if (cropSessionSnapshot && cropSessionSnapshot.path === (selectedImage?.path ?? null)) {
     const { geometry } = cropSessionSnapshot;
     const hasChanged = CROP_GEOMETRY_KEYS.some(
@@ -164,7 +165,6 @@ export const cancelCrop = () => {
       });
     }
   }
-  applyCrop();
 };
 
 export function useEditorActions() {
