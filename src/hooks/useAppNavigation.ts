@@ -226,6 +226,7 @@ export function useAppNavigation({ clearThumbnailQueue, refs }: AppNavigationPro
         isRelightPickerActive: false,
         activeRelightLightId: null,
         activeCenterMarker: null,
+        mixerPickerProperty: null,
         previewOverride: null,
       });
 
