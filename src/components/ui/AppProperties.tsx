@@ -291,6 +291,7 @@ export interface AppSettings {
   zoomSpeedMultiplier?: number;
   zoomPhotoToPixelClick?: boolean;
   keybinds?: { [action: string]: string[] };
+  speedEditAdjustments?: string[];
   enableBaselineExposure?: boolean;
   baselineExposure?: number;
   compensateHighlightPreservation?: boolean;
