@@ -1782,7 +1782,7 @@
           "fine": "Shift for fine"
         },
         "keys": {
-          "hold": "Hold",
+          "hold": "Tap / hold",
           "previousImage": "Prev. image",
           "nextImage": "Next image",
           "reset": "Reset",
