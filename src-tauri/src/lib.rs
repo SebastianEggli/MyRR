@@ -35,6 +35,7 @@ mod baseline_exposure;
 mod bm3d;
 mod cache_utils;
 mod camera_tethering;
+mod clone_heal;
 mod culling;
 mod display_profile;
 mod edit_in;
@@ -240,11 +241,11 @@ pub fn generate_transformed_preview(
     Ok((preview, scale_for_gpu, unscaled_crop_offset))
 }
 
-fn get_or_compute_stage(
-    cache: &Mutex<Option<(u64, Arc<DynamicImage>)>>,
+fn get_or_compute_stage<T>(
+    cache: &Mutex<Option<(u64, Arc<T>)>>,
     key: u64,
-    compute: impl FnOnce() -> Result<Arc<DynamicImage>, String>,
-) -> Result<Arc<DynamicImage>, String> {
+    compute: impl FnOnce() -> Result<Arc<T>, String>,
+) -> Result<Arc<T>, String> {
     let mut cache_lock = cache.lock().unwrap_or_else(|e| e.into_inner());
 
     if let Some((hash, img)) = cache_lock.as_ref()
@@ -2770,6 +2771,7 @@ pub fn run() {
             full_warped_build_lock: Mutex::new(()),
             wgpu_presented_generation: AtomicUsize::new(usize::MAX),
             patched_cache: Mutex::new(None),
+            cleanup_source_cache: Mutex::new(None),
             warped_cache: Mutex::new(None),
             working_cache: Mutex::new(None),
             effects_cache: Mutex::new(None),
