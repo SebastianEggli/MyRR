@@ -72,6 +72,7 @@ mod relight;
 mod storage;
 mod tagging;
 mod tagging_utils;
+mod touch_up;
 mod viewer_window;
 mod white_balance;
 mod window_customizer;
