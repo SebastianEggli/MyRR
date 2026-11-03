@@ -32,6 +32,7 @@ const getCurrentZoomPercent = (editor: {
 };
 
 const SPEED_EDIT_IMAGE_DIRECTIONS: Record<string, number> = { KeyQ: -1, KeyE: 1 };
+const NON_TEXT_INPUT_TYPES = new Set(['checkbox', 'radio', 'range', 'button', 'submit', 'reset', 'color', 'file']);
 
 const getParentFolder = (path: string) => {
   const physicalPath = path.split('?vc=')[0];
@@ -755,8 +756,10 @@ export const useKeyboardShortcuts = ({
         return;
       }
 
+      const focused = document.activeElement;
       const isInputFocused =
-        document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA';
+        focused?.tagName === 'TEXTAREA' ||
+        (focused instanceof HTMLInputElement && !NON_TEXT_INPUT_TYPES.has(focused.type));
       if (isInputFocused) return;
 
       for (const builtin of builtinShortcuts) {
