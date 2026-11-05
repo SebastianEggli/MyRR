@@ -57,6 +57,7 @@ import { transferFiles, useFileOperations } from './hooks/useFileOperations';
 import { useAppContextMenus } from './hooks/useAppContextMenus';
 import { useSortedLibrary } from './hooks/useSortedLibrary';
 import { getEditorImageList } from './utils/imageGrouping';
+import { useImagePreloader } from './hooks/useImagePreloader';
 import { useAppNavigation } from './hooks/useAppNavigation';
 import { useExternalEditSession } from './hooks/useExternalEditSession';
 import ExternalEditBar from './components/ui/ExternalEditBar';
@@ -400,6 +401,7 @@ function App() {
       }),
     [displayList, libraryViewMode, appSettings?.filmstripSortByFolder, currentFolderPath],
   );
+  useImagePreloader(sortedImageList);
 
   const handleLibraryRefresh = useCallback(async () => {
     if (currentFolderPath) {
