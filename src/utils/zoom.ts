@@ -1,3 +1,4 @@
+import { getDevicePixelRatio } from './displayScale';
 // Zoom percentages are physical: 1.0 means one image pixel per device pixel.
 // The editor draws the (cropped, oriented) image fitted to its container at
 // `renderScale` CSS px per image px, then applies a transform scale on top.
@@ -11,7 +12,8 @@ export interface Size {
   height: number;
 }
 
-export const getDpr = (): number => (typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1);
+// Physical pixels per CSS pixel, corrected for the interface scale setting.
+export const getDpr = (): number => (typeof window !== 'undefined' ? getDevicePixelRatio() : 1);
 
 export const clampZoomPercent = (percent: number): number =>
   Math.max(MIN_ZOOM_PERCENT, Math.min(MAX_ZOOM_PERCENT, percent));

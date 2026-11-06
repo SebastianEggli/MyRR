@@ -41,6 +41,7 @@ import { useDevicePixelRatio } from '../../hooks/useDevicePixelRatio';
 import { parseRgb, resolveEditorBackground } from '../../utils/editorBackground';
 import { clickZoomTarget, interpretWheel, movedBeyondClick } from '../../utils/canvasControls';
 import { getVisibleImageRegion } from '../../utils/previewResolution';
+import { getDevicePixelRatio } from '../../utils/displayScale';
 
 const NO_SPLIT = { splitOrigin: [0, 0], splitNormal: [0, 0], splitOffset: [0, 0] };
 
@@ -1443,7 +1444,7 @@ export default function Editor({ onBackToLibrary, onContextMenu, onImageSelect, 
     const region = getVisibleImageRegion(view, renderSize, padding);
     if (!region) return null;
 
-    const pixelRatio = useSettingsStore.getState().appSettings?.useFullDpiRendering ? window.devicePixelRatio || 1 : 1;
+    const pixelRatio = useSettingsStore.getState().appSettings?.useFullDpiRendering ? getDevicePixelRatio() : 1;
     const density = Math.max(1, view.scale) * pixelRatio;
     const [x, y, w, h] = region;
     const width = Math.max(1, Math.ceil(w * renderSize.width * density));
@@ -1688,7 +1689,7 @@ export default function Editor({ onBackToLibrary, onContextMenu, onImageSelect, 
       }
 
       const currentRect = container.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
+      const dpr = getDevicePixelRatio();
       const windowWidth = Math.max(window.innerWidth * dpr, 1);
       const windowHeight = Math.max(window.innerHeight * dpr, 1);
 
