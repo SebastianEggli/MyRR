@@ -1029,6 +1029,10 @@
       "removeGps": "GPS-Daten entfernen",
       "saveWithMetadata": "Mit Metadaten speichern"
     },
+    "openWith": {
+      "enable": "Exportierte Bilder in einem anderen Programm öffnen",
+      "noApps": "Kein Photoshop oder GIMP gefunden. Fügen Sie unter Einstellungen › Bearbeiten in ein Programm hinzu."
+    },
     "pad": {
       "aspectRatio": "Seitenverhältnis",
       "backgroundColor": "Hintergrundfarbe",
@@ -1055,6 +1059,7 @@
       "fileSettings": "Dateieinstellungen",
       "imageSizing": "Bildgröße",
       "metadata": "Metadaten",
+      "openWith": "Nach dem Export öffnen",
       "watermark": "Wasserzeichen"
     },
     "status": {

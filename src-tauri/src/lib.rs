@@ -2927,6 +2927,7 @@ pub fn run() {
             export_processing::estimate_export_sizes,
             edit_in::edit_in_app,
             edit_in::cancel_edit_in_app,
+            edit_in::list_external_editors,
             image_processing::calculate_auto_adjustments,
             image_processing::sample_white_balance,
             auto_straighten::calculate_auto_straighten,

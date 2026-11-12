@@ -354,6 +354,10 @@ pub struct ExportPreset {
     pub tiff_bit_depth: Option<u8>,
     #[serde(default)]
     pub preserve_timestamps: Option<bool>,
+    #[serde(default)]
+    pub open_after_export: Option<bool>,
+    #[serde(default)]
+    pub open_after_export_app: Option<String>,
 }
 
 pub fn default_export_presets() -> Vec<ExportPreset> {
@@ -395,6 +399,8 @@ pub fn default_export_presets() -> Vec<ExportPreset> {
             subfolder: Some("".to_string()),
             tiff_bit_depth: Some(16),
             preserve_timestamps: Some(false),
+            open_after_export: None,
+            open_after_export_app: None,
         },
         ExportPreset {
             id: "default-fast".to_string(),
@@ -433,6 +439,8 @@ pub fn default_export_presets() -> Vec<ExportPreset> {
             subfolder: Some("".to_string()),
             tiff_bit_depth: Some(16),
             preserve_timestamps: Some(false),
+            open_after_export: None,
+            open_after_export_app: None,
         },
     ]
 }

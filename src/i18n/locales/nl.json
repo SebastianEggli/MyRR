@@ -1022,6 +1022,10 @@
       "removeGps": "GPS-gegevens verwijderen",
       "saveWithMetadata": "Opslaan met metadata"
     },
+    "openWith": {
+      "enable": "Geëxporteerde afbeeldingen openen in een ander programma",
+      "noApps": "Geen Photoshop of GIMP gevonden. Voeg een programma toe onder Instellingen › Bewerken in."
+    },
     "pad": {
       "aspectRatio": "Beeldverhouding",
       "backgroundColor": "Achtergrondkleur",
@@ -1048,6 +1052,7 @@
       "fileSettings": "Bestandsinstellingen",
       "imageSizing": "Afbeeldingsgrootte",
       "metadata": "Metadata",
+      "openWith": "Openen na exporteren",
       "watermark": "Watermerk"
     },
     "status": {
