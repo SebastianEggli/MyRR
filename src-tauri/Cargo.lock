@@ -41,6 +41,7 @@ dependencies = [
  "lsdetect",
  "memmap2",
  "mimalloc",
+ "moxcms",
  "mozjpeg-rs",
  "nalgebra",
  "ndarray",
@@ -90,6 +91,8 @@ dependencies = [
  "wgpu",
  "windows 0.62.2",
  "windows-native-keyring-store",
+ "x11-dl",
+ "zbus",
  "zbus-secret-service-keyring-store",
 ]
 

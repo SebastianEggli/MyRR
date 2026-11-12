@@ -56,6 +56,7 @@ import { useCloudUsage } from '../../hooks/useCloudUsage';
 import { open } from '@tauri-apps/plugin-shell';
 import ImmichSettings from '../immich/ImmichSettings';
 import DataManagementSettings from './settings/DataManagementSettings';
+import DisplayColorSettings from './settings/DisplayColorSettings';
 
 interface ConfirmModalState {
   confirmText: string;
@@ -1914,6 +1915,15 @@ export default function SettingsPanel({
                           }}
                         />
                       </SettingItem>
+
+                      {osPlatform === 'linux' && (
+                        <SettingItem
+                          label={t('settings.processing.displayColor.title')}
+                          description={t('settings.processing.displayColor.description')}
+                        >
+                          <DisplayColorSettings appSettings={appSettings} onSettingsChange={onSettingsChange} />
+                        </SettingItem>
+                      )}
 
                       <SettingItem
                         label={t('settings.processing.wgpu')}

@@ -50,6 +50,7 @@ export function useImageProcessing(
   const activeView = useUIStore((state) => state.activeView);
   const activePanel = useUIStore((state) => state.activePanel);
   const appSettings = useSettingsStore((state) => state.appSettings);
+  const displayProfileGeneration = useSettingsStore((state) => state.displayProfileGeneration);
   const multiSelectedPaths = useLibraryStore((state) => state.multiSelectedPaths);
 
   const uncroppedJobIdRef = useRef(0);
@@ -130,8 +131,15 @@ export function useImageProcessing(
       if (view === 'off' || !image?.isReady || ui.activeView !== 'editor' || ui.activePanel === Panel.Crop) return;
 
       const originalAdjustments = getOriginalAdjustments(currentAdjustments);
-      const { useWgpuRenderer } = useSettingsStore.getState().appSettings ?? {};
-      const key = JSON.stringify([image.path, targetRes, useWgpuRenderer, originalAdjustments]);
+      const settingsState = useSettingsStore.getState();
+      const { useWgpuRenderer } = settingsState.appSettings ?? {};
+      const key = JSON.stringify([
+        image.path,
+        targetRes,
+        useWgpuRenderer,
+        settingsState.displayProfileGeneration,
+        originalAdjustments,
+      ]);
       if (key === originalRequestKeyRef.current) return;
       originalRequestKeyRef.current = key;
 
@@ -351,7 +359,14 @@ export function useImageProcessing(
     if (activeView === 'editor' && activePanel === Panel.Crop && selectedImage?.isReady) {
       generateUncroppedPreview(adjustments);
     }
-  }, [activeView, adjustments, activePanel, selectedImage?.isReady, generateUncroppedPreview]);
+  }, [
+    activeView,
+    adjustments,
+    activePanel,
+    selectedImage?.isReady,
+    generateUncroppedPreview,
+    displayProfileGeneration,
+  ]);
 
   const calculateTargetRes = useCallback(() => {
     const baseTargetRes = appSettings?.editorPreviewResolution || 1920;
@@ -443,6 +458,7 @@ export function useImageProcessing(
     selectedImage?.isReady,
     renderOriginal,
     currentResRef,
+    displayProfileGeneration,
   ]);
 
   useEffect(() => {
@@ -536,6 +552,7 @@ export function useImageProcessing(
     appSettings?.copyPasteSettings?.includedAdjustments,
     appSettings?.copyPasteSettings?.autoSync,
     isWaveformVisible,
+    displayProfileGeneration,
   ]);
 
   return {

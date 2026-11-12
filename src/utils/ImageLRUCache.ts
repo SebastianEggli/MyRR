@@ -75,6 +75,14 @@ class ImageLRUCache {
     }
   }
 
+  deleteWhere(predicate: (key: string) => boolean): void {
+    for (const key of [...this.cache.keys()]) {
+      if (predicate(key)) {
+        this.delete(key);
+      }
+    }
+  }
+
   clear(): void {
     for (const entry of this.cache.values()) {
       this.cleanupEntry(entry);

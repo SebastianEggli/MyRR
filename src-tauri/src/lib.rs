@@ -36,6 +36,7 @@ mod bm3d;
 mod cache_utils;
 mod camera_tethering;
 mod culling;
+mod display_profile;
 mod effect_maps;
 mod exif_processing;
 mod export_processing;
@@ -867,7 +868,10 @@ fn process_preview_job(
             _ => return Err("Expected Rgba8 image from GPU for encoding".to_string()),
         };
 
-        let raw_bytes: &[u8] = final_rgba_image.as_raw();
+        let display_converted = display_profile::convert_rgba8(final_rgba_image.as_raw());
+        let raw_bytes: &[u8] = display_converted
+            .as_deref()
+            .unwrap_or_else(|| final_rgba_image.as_raw());
         let rgba8_pixels: &[RGBA8] = raw_bytes.as_rgba();
 
         let img_ref = ImgRef::new(
@@ -1205,7 +1209,10 @@ async fn generate_uncropped_preview(
             "generate_uncropped_preview",
         ) {
             let (width, height) = processed_image.dimensions();
-            let rgb_pixels = processed_image.to_rgb8().into_vec();
+            let rgb_pixels = processed_image
+                .as_rgba8()
+                .and_then(|img| display_profile::convert_rgba8_to_rgb8(img.as_raw()))
+                .unwrap_or_else(|| processed_image.to_rgb8().into_vec());
 
             if let Ok(bytes) = Encoder::new(Preset::BaselineFastest)
                 .quality(80)
@@ -2283,6 +2290,7 @@ pub fn run() {
 
             start_preview_worker(app_handle.clone());
             start_analytics_worker(app_handle.clone());
+            display_profile::start_watcher(app_handle.clone());
             file_management::start_thumbnail_workers(app_handle.clone());
             file_management::start_metadata_workers(app_handle.clone());
             ai_jobs::start_worker(app_handle.clone());
@@ -2536,6 +2544,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             apply_adjustments,
             subscribe_analytics,
+            display_profile::get_display_profile_info,
+            display_profile::refresh_display_profile,
             generate_preview_for_path,
             generate_preset_preview,
             generate_uncropped_preview,
