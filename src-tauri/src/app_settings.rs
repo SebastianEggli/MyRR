@@ -1000,7 +1000,7 @@ pub fn set_ui_scale(scale: f64, app_handle: AppHandle) {
 }
 
 #[tauri::command]
-pub fn save_settings(mut settings: AppSettings, app_handle: AppHandle) -> Result<(), String> {
+pub fn save_settings(settings: AppSettings, app_handle: AppHandle) -> Result<(), String> {
     let previous_gpu_acceleration = load_settings(app_handle.clone())
         .map(|previous| previous.ai_gpu_acceleration)
         .ok();
