@@ -75,20 +75,17 @@ pub fn read_from_prefix<T>(
     read(file_bytes, true)
 }
 
-pub fn extract_embedded_preview(file_bytes: &[u8]) -> Option<DynamicImage> {
-    read_from_prefix(file_bytes, |bytes, whole_file| {
-        let source = RawSource::new_from_slice(bytes);
-        let decoder = rawler::get_decoder(&source).ok()?;
-        let orientation = match metadata_orientation(decoder.as_ref(), &source) {
-            Ok(orientation) => orientation,
-            Err(_) if whole_file => Orientation::Normal,
-            Err(_) => return None,
-        };
-        let preview = decoder
-            .full_image(&source, &RawDecodeParams::default())
-            .ok()??;
-        Some(apply_orientation(preview, orientation))
-    })
+fn borrowed_raw_source(file_bytes: &[u8]) -> RawSource {
+    // SAFETY: every caller in this module keeps the source local and drops it
+    // while `file_bytes` is still borrowed.
+    unsafe { RawSource::new_from_slice_unchecked(file_bytes) }
+}
+
+/// Runs `f` on a rawler source that reads `file_bytes` without copying them,
+/// so a memory-mapped file is only paged in where the decoder reads.
+pub fn with_raw_source<T>(file_bytes: &[u8], f: impl FnOnce(&RawSource) -> T) -> T {
+    let source = borrowed_raw_source(file_bytes);
+    f(&source)
 }
 
 fn is_linear_raw_format(raw_image: &RawImage) -> bool {
@@ -296,6 +293,7 @@ impl CameraToSrgb {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn develop_raw_image(
     file_bytes: &[u8],
     fast_demosaic: bool,
@@ -304,6 +302,7 @@ pub fn develop_raw_image(
     denoise: f32,
     sharpen: f32,
     cancel_token: Option<(Arc<AtomicUsize>, usize)>,
+    proxy_min_dim: Option<usize>,
 ) -> Result<DynamicImage> {
     let check_cancel = || -> Result<()> {
         if let Some((tracker, generation)) = &cancel_token
@@ -316,11 +315,17 @@ pub fn develop_raw_image(
 
     check_cancel()?;
 
-    let source = RawSource::new_from_slice(file_bytes);
+    let source = borrowed_raw_source(file_bytes);
     let decoder = rawler::get_decoder(&source)?;
 
     check_cancel()?;
-    let mut raw_image: RawImage = decoder.raw_image(&source, &RawDecodeParams::default(), false)?;
+    // A linear DNG can carry reduced-resolution LinearRaw proxies; with
+    // `proxy_min_dim` rawler decodes the smallest one that is large enough.
+    let decode_params = RawDecodeParams {
+        proxy_min_dim,
+        ..Default::default()
+    };
+    let mut raw_image: RawImage = decoder.raw_image(&source, &decode_params, false)?;
 
     let orientation = metadata_orientation(decoder.as_ref(), &source)?;
 
@@ -669,8 +674,21 @@ fn mono_pixels_to_rgb(
         .ok_or_else(|| anyhow!("Developed image size does not match its dimensions"))
 }
 
+/// Cropped raw size and whether the raw is already demosaiced (linear DNG).
+pub fn get_raw_dimensions(file_bytes: &[u8]) -> Option<(u32, u32, bool)> {
+    let source = borrowed_raw_source(file_bytes);
+    let decoder = rawler::get_decoder(&source).ok()?;
+    let raw_img = decoder
+        .raw_image(&source, &RawDecodeParams::default(), true)
+        .ok()?;
+    let (w, h) = raw_img
+        .crop_area
+        .map_or((raw_img.width, raw_img.height), |r| (r.d.w, r.d.h));
+    Some((w as u32, h as u32, is_linear_raw_format(&raw_img)))
+}
+
 pub fn raw_dimensions(file_bytes: &[u8]) -> Option<(usize, usize)> {
-    let source = RawSource::new_from_slice(file_bytes);
+    let source = borrowed_raw_source(file_bytes);
     let decoder = rawler::get_decoder(&source).ok()?;
     let raw_img = decoder
         .raw_image(&source, &RawDecodeParams::default(), true)
@@ -683,9 +701,26 @@ pub fn get_fast_demosaic_scale_factor(
     decoded_width: u32,
     decoded_height: u32,
 ) -> f32 {
-    if let Some((raw_width, raw_height)) = raw_dimensions(file_bytes) {
-        let max_orig = (raw_width as f32).max(raw_height as f32);
+    let source = borrowed_raw_source(file_bytes);
+    if let Ok(decoder) = rawler::get_decoder(&source)
+        && let Ok(raw_img) = decoder.raw_image(&source, &RawDecodeParams::default(), true)
+    {
         let max_comp = (decoded_width as f32).max(decoded_height as f32);
+        // A linear DNG may have been decoded from a smaller proxy: the scale is
+        // the decoded size against the cropped full size.
+        if is_linear_raw_format(&raw_img) {
+            let max_crop = raw_img
+                .crop_area
+                .map_or(raw_img.width.max(raw_img.height), |r| r.d.w.max(r.d.h))
+                as f32;
+            let ratio = if max_crop > 0.0 {
+                max_comp / max_crop
+            } else {
+                1.0
+            };
+            return if ratio > 0.97 { 1.0 } else { ratio };
+        }
+        let max_orig = (raw_img.width as f32).max(raw_img.height as f32);
         if max_orig > 0.0 {
             let ratio = max_comp / max_orig;
             if ratio > 0.1 && ratio < 0.29 {

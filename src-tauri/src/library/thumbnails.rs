@@ -7,7 +7,6 @@ use crate::library::file_ops::{is_cloud_placeholder, read_file_mapped};
 use crate::library::listing::enqueue_metadata;
 use crate::library::sidecars::{parse_virtual_path, run_batch_workers};
 use crate::masks::generation::MaskDefinition;
-use crate::metadata::exif_processing;
 use crate::metadata::sidecar::{ImageMetadata, is_image_edited};
 use crate::render::adjustment_utils::effective_baseline_exposure;
 use crate::render::geometry::{
@@ -18,7 +17,6 @@ use crate::render::gpu::output::process_and_get_dynamic_image;
 use crate::render::gpu::processor::RenderRequest;
 use crate::render::image_processing::{apply_cpu_default_raw_processing, apply_exposure};
 use crate::render::options::{resolve_render_options, resolve_tonemapper_override};
-use crate::render::preview::cached_patched_image;
 use crate::render::source::{Frame, RenderSource, SourceTransform};
 use crate::render::uniforms::get_all_adjustments_from_json;
 use anyhow::Result;
@@ -72,18 +70,10 @@ pub fn emit_thumbnail_cache_setup_error(app_handle: &AppHandle, path: &str, reas
     );
 }
 
-fn compute_thumbnail_cache_hash(
-    path_str: &str,
-    adjustments_bytes: &[u8],
-    settings: &AppSettings,
-) -> Option<String> {
+// The key leaves out render settings, so changing them doesn't regenerate the
+// whole library's thumbnails.
+fn compute_thumbnail_cache_hash(path_str: &str, adjustments_bytes: &[u8]) -> Option<String> {
     let (source_path, _) = parse_virtual_path(path_str);
-    let is_raw = is_raw_file(&source_path);
-    let render_key = format!(
-        "{:?}{:?}",
-        resolve_render_options(settings, is_raw),
-        settings.always_decode_raw_thumbnails
-    );
 
     let img_mod_time = fs::metadata(&source_path)
         .ok()?
@@ -97,7 +87,6 @@ fn compute_thumbnail_cache_hash(
     hasher.update(path_str.as_bytes());
     hasher.update(&img_mod_time.to_le_bytes());
     hasher.update(adjustments_bytes);
-    hasher.update(render_key.as_bytes());
     Some(hasher.finalize().to_hex().to_string())
 }
 
@@ -105,89 +94,63 @@ const THUMBNAIL_SOURCE_CACHE_ENTRIES: usize = 8;
 
 const THUMBNAIL_SOURCE_CACHE_BYTES: usize = 256 << 20;
 
-fn find_embedded_jpeg<'a>(
-    exif: &'a exif::Exif,
-    file_bytes: &'a [u8],
-    ifd: exif::In,
-) -> Option<&'a [u8]> {
-    let offset = exif
-        .get_field(exif::Tag::JPEGInterchangeFormat, ifd)?
-        .value
-        .get_uint(0)? as usize;
-    let len = exif
-        .get_field(exif::Tag::JPEGInterchangeFormatLength, ifd)?
-        .value
-        .get_uint(0)? as usize;
-    let tiff = if exif_processing::is_tiff(file_bytes) {
-        file_bytes
-    } else {
-        exif.buf()
-    };
-    tiff.get(offset..offset + len)
-}
-
-fn apply_exif_orientation(img: DynamicImage, orientation: u32) -> DynamicImage {
-    match orientation {
-        2 => img.fliph(),
-        3 => img.rotate180(),
-        4 => img.flipv(),
-        5 => img.rotate90().fliph(),
-        6 => img.rotate90(),
-        7 => img.rotate270().fliph(),
-        8 => img.rotate270(),
-        _ => img,
-    }
-}
-
-fn reserve_thumbnail_decode(
-    state: &AppState,
+/// Unedited raws (or only default adjustments, no real crop, no lens blur) can
+/// show the camera's embedded JPEG instead of a decode.
+fn can_use_embedded_preview(
+    adjustments: &serde_json::Value,
     source_path: &Path,
+    settings: &AppSettings,
     file_bytes: &[u8],
-    is_raw: bool,
-) -> Option<crate::app::memory_budget::MemoryReservation> {
-    if rayon::current_thread_index().is_some() {
+) -> bool {
+    // Custom develop defaults (per-camera presets) only show in a rendered thumbnail.
+    if crate::adjustments::develop_defaults::is_customized(source_path) {
+        return false;
+    }
+    if adjustments.is_null() {
+        return true;
+    }
+    let tm = resolve_tonemapper_override(settings, true);
+    if is_image_edited(adjustments, source_path, true, tm)
+        || adjustments["lensBlurEnabled"].as_bool().unwrap_or(false)
+    {
+        return false;
+    }
+    let Ok(crop) = serde_json::from_value::<Crop>(adjustments["crop"].clone()) else {
+        return true;
+    };
+    let Some((w, h, _)) = crate::decode::raw_processing::get_raw_dimensions(file_bytes) else {
+        return false;
+    };
+    let near = |a: f64, b: u32| (a - b as f64).abs() <= b as f64 * 0.01 + 1.0;
+    (near(crop.width, w) && near(crop.height, h)) || (near(crop.width, h) && near(crop.height, w))
+}
+
+fn has_ai_patches(adjustments: &serde_json::Value) -> bool {
+    adjustments["aiPatches"]
+        .as_array()
+        .is_some_and(|patches| !patches.is_empty())
+}
+
+/// For a linear DNG, the smallest proxy size that still covers the thumbnail
+/// (or its crop) at `target_res`.
+fn thumbnail_proxy_min_dim(
+    file_bytes: &[u8],
+    target_res: u32,
+    crop: Option<&Crop>,
+) -> Option<usize> {
+    let (full_w, full_h, is_linear) =
+        crate::decode::raw_processing::get_raw_dimensions(file_bytes)?;
+    if !is_linear {
         return None;
     }
-    let pixels = if is_raw {
-        crate::app::memory_budget::raw_pixel_count(file_bytes)?
-    } else {
-        crate::app::memory_budget::image_pixel_count(source_path, false)?
+    let full_max_dim = full_w.max(full_h) as f64;
+    let needed = match crop {
+        Some(c) if c.width > 0.0 && c.height > 0.0 => {
+            target_res as f64 * full_max_dim / c.width.max(c.height)
+        }
+        _ => target_res as f64,
     };
-    state
-        .memory_budget
-        .reserve(pixels * if is_raw { 10 } else { 20 }, None)
-}
-
-fn exif_embedded_preview(exif: &exif::Exif, file_bytes: &[u8]) -> Option<DynamicImage> {
-    let (jpeg_bytes, ifd) = find_embedded_jpeg(exif, file_bytes, exif::In::PRIMARY)
-        .map(|b| (b, exif::In::PRIMARY))
-        .or_else(|| {
-            find_embedded_jpeg(exif, file_bytes, exif::In::THUMBNAIL)
-                .map(|b| (b, exif::In::THUMBNAIL))
-        })?;
-
-    let img = image::load_from_memory_with_format(jpeg_bytes, image::ImageFormat::Jpeg).ok()?;
-
-    let orientation = exif
-        .get_field(exif::Tag::Orientation, ifd)
-        .and_then(|f| f.value.get_uint(0))
-        .unwrap_or(1);
-
-    Some(apply_exif_orientation(img, orientation))
-}
-
-fn try_load_embedded_raw_preview(source_path: &Path, target_res: u32) -> Option<DynamicImage> {
-    let mmap = read_file_mapped(source_path).ok()?;
-    let min_size = (target_res as f32 * 0.95) as u32;
-    let large_enough = |preview: &DynamicImage| preview.width().max(preview.height()) >= min_size;
-
-    match exif_processing::read_exif(&mmap) {
-        Some(exif) => exif_embedded_preview(&exif, &mmap)
-            .filter(large_enough)
-            .or_else(|| image_loader::tiff_embedded_preview(&mmap).filter(large_enough)),
-        None => image_loader::safe_embedded_preview_fallback(&mmap, &source_path.to_string_lossy())
-            .filter(large_enough),
-    }
+    Some(needed.min(full_max_dim).ceil() as usize)
 }
 
 pub fn generate_thumbnail_data(
@@ -261,16 +224,24 @@ fn generate_thumbnail_data_with_metadata(
 
     let null_adjustments = serde_json::Value::Null;
     let adjustments = metadata.map_or(&null_adjustments, |m| &m.adjustments);
-    let cached_patched = preloaded_image
-        .and_then(|img| cached_patched_image(&app_handle.state::<AppState>(), img, adjustments));
-
     let always_decode_raw = settings.always_decode_raw_thumbnails.unwrap_or(false);
 
-    if is_raw && adjustments.is_null() && preloaded_image.is_none() && !always_decode_raw {
-        let target_res = settings.medium_thumbnail_resolution.unwrap_or(1280);
-        if let Some(preview) = try_load_embedded_raw_preview(&source_path, target_res) {
-            return Ok(preview);
-        }
+    // The smallest embedded JPEG that covers the medium thumbnail, if it is at
+    // least about the small thumbnail size.
+    if is_raw
+        && preloaded_image.is_none()
+        && !always_decode_raw
+        && let Ok(mmap) = read_file_mapped(&source_path)
+        && can_use_embedded_preview(adjustments, &source_path, settings, &mmap)
+        && let Some(preview) = image_loader::safe_embedded_preview(
+            &mmap,
+            &source_path_str,
+            Some(settings.medium_thumbnail_resolution.unwrap_or(1280)),
+        )
+        && preview.width().max(preview.height())
+            >= (settings.small_thumbnail_resolution.unwrap_or(480) as f32 * 0.95) as u32
+    {
+        return Ok(preview);
     }
 
     if let (Some(context), Some(meta)) = (gpu_context, metadata)
@@ -326,15 +297,9 @@ fn generate_thumbnail_data_with_metadata(
         let base = if let Some(base) = cached_base {
             base
         } else {
-            let mut raw_scale_factor = 1.0f32;
+            let mut raw_scale_factor: f32;
 
-            let _decode_reservation;
-            let composite_image: Cow<DynamicImage> = if let Some(patched) = &cached_patched {
-                if let Some(img) = preloaded_image {
-                    raw_scale_factor = crate::ai::upscale::scale_between(img, patched);
-                }
-                Cow::Borrowed(patched)
-            } else if let Some(img) = preloaded_image {
+            let composite_image: Cow<DynamicImage> = if let Some(img) = preloaded_image {
                 let prepared =
                     image_loader::prepare_base_image_cow(img, &source_path_str, adjustments)?;
                 raw_scale_factor = crate::ai::upscale::scale_between(img, &prepared);
@@ -364,16 +329,20 @@ fn generate_thumbnail_data_with_metadata(
                     }
                 };
 
-                _decode_reservation =
-                    reserve_thumbnail_decode(&state, &source_path, file_slice, is_raw);
                 crate::decode::as_shot::as_shot_from_bytes(&source_path_str, file_slice);
-                let (img, upscale) = image_loader::load_and_composite(
+                let proxy_min_dim = if is_raw && !has_ai_patches(adjustments) {
+                    thumbnail_proxy_min_dim(file_slice, target_res, crop_data.as_ref())
+                } else {
+                    None
+                };
+                let (img, upscale) = image_loader::load_and_composite_with_proxy(
                     file_slice,
                     &source_path_str,
                     adjustments,
                     true,
                     settings,
                     None,
+                    proxy_min_dim,
                 )?;
 
                 raw_scale_factor = upscale;
@@ -405,21 +374,16 @@ fn generate_thumbnail_data_with_metadata(
                 }
             }
 
-            let has_geometry =
-                !is_geometry_identity(&get_geometry_params_from_json(path_str, &meta.adjustments));
             let processing_dim = processing_dim.min(texture_limit);
-            let working_dim = if has_geometry {
-                processing_dim.saturating_mul(2).min(full_max_dim)
-            } else {
-                processing_dim
-            }
-            .min(texture_limit);
 
-            let working_image = if full_max_dim > working_dim {
+            // Geometry and effects run on the full-size image and the result is
+            // downscaled to `processing_dim` at the end; only an image larger
+            // than the GPU allows is reduced first.
+            let working_image = if full_max_dim > texture_limit {
                 crate::render::image_processing::downscale_f32_image(
                     &composite_image,
-                    working_dim,
-                    working_dim,
+                    texture_limit,
+                    texture_limit,
                 )
             } else {
                 composite_image.into_owned()
@@ -528,10 +492,7 @@ fn generate_thumbnail_data_with_metadata(
         return processed_image.map_err(|e| anyhow::anyhow!(e));
     }
 
-    let _decode_reservation;
-    let mut final_image: Cow<DynamicImage> = if let Some(patched) = &cached_patched {
-        Cow::Borrowed(patched)
-    } else if let Some(img) = preloaded_image {
+    let mut final_image: Cow<DynamicImage> = if let Some(img) = preloaded_image {
         image_loader::prepare_base_image_cow(img, &source_path_str, adjustments)?
     } else {
         let mmap_guard;
@@ -547,12 +508,6 @@ fn generate_thumbnail_data_with_metadata(
                 &vec_guard
             }
         };
-        _decode_reservation = reserve_thumbnail_decode(
-            &app_handle.state::<AppState>(),
-            &source_path,
-            file_slice,
-            is_raw,
-        );
         if adjustments.is_null() {
             crate::decode::as_shot::as_shot_from_bytes(&source_path_str, file_slice);
         }
@@ -593,18 +548,11 @@ fn generate_thumbnail_data_with_metadata(
 }
 
 fn encode_thumbnail(image: &DynamicImage, target_width: u32) -> Result<Vec<u8>> {
-    let downscaled = crate::render::image_processing::downscale_f32_image_if_needed(
-        image,
-        target_width,
-        target_width,
-    );
-    let thumbnail = downscaled.as_ref().unwrap_or(image);
+    let thumbnail =
+        crate::render::image_processing::downscale_f32_image(image, target_width, target_width);
     let mut buf = Cursor::new(Vec::new());
     let mut encoder = JpegEncoder::new_with_quality(&mut buf, 75);
-    match thumbnail.as_rgb8() {
-        Some(rgb) => encoder.encode_image(rgb)?,
-        None => encoder.encode_image(&thumbnail.to_rgb8())?,
-    }
+    encoder.encode_image(&thumbnail.to_rgb8())?;
     Ok(buf.into_inner())
 }
 
@@ -617,7 +565,7 @@ pub fn generate_single_thumbnail_and_cache(
     force_regenerate: bool,
     app_handle: &AppHandle,
     settings: &AppSettings,
-    before_generate: Option<&dyn Fn()>,
+    before_generate: Option<&dyn Fn(bool)>,
 ) -> Option<(String, String, u8, bool)> {
     let (source_path, sidecar_path) = parse_virtual_path(path_str);
     let sidecar_is_placeholder = is_cloud_placeholder(&sidecar_path);
@@ -659,7 +607,7 @@ pub fn generate_single_thumbnail_and_cache(
         return remote.map(|(small, medium)| (small, medium, rating, is_edited));
     }
 
-    let cache_hash = compute_thumbnail_cache_hash(path_str, &adjustments_bytes, settings)?;
+    let cache_hash = compute_thumbnail_cache_hash(path_str, &adjustments_bytes)?;
 
     let small_path = thumb_cache_dir.join(format!("{}_small.jpg", cache_hash));
     let medium_path = thumb_cache_dir.join(format!("{}_medium.jpg", cache_hash));
@@ -675,7 +623,7 @@ pub fn generate_single_thumbnail_and_cache(
     }
 
     if let Some(before_generate) = before_generate {
-        before_generate();
+        before_generate(is_edited);
     }
 
     if is_cloud_placeholder(&source_path) {
@@ -718,11 +666,43 @@ pub fn generate_single_thumbnail_and_cache(
     None
 }
 
-fn prefetch_source_file(path_str: &str) {
+const RAW_HEADER_PREFETCH_BYTES: u64 = 8 * 1024 * 1024;
+
+/// Reads the source ahead into the OS cache on rotational disks. For a raw
+/// whose thumbnail comes from data near the start (embedded preview, or a
+/// linear DNG proxy), only the first 8 MB are read.
+fn prefetch_source_file(path_str: &str, is_edited: bool, always_decode_raw: bool) {
+    use std::io::Read;
     let (source_path, _) = parse_virtual_path(path_str);
-    if let Ok(mut file) = std::fs::File::open(&source_path) {
-        let _ = std::io::copy(&mut file, &mut std::io::sink());
+    let Ok(mut file) = std::fs::File::open(&source_path) else {
+        return;
+    };
+    let source_path_str = source_path.to_string_lossy().into_owned();
+    if is_raw_file(&source_path_str) {
+        let mut head = Vec::new();
+        if (&mut file)
+            .take(RAW_HEADER_PREFETCH_BYTES)
+            .read_to_end(&mut head)
+            .is_err()
+        {
+            return;
+        }
+        if !is_edited && !always_decode_raw {
+            return;
+        }
+        let is_dng = source_path_str.to_lowercase().ends_with(".dng");
+        let is_linear_dng = is_dng
+            && std::panic::catch_unwind(|| {
+                crate::decode::raw_processing::get_raw_dimensions(&head)
+            })
+            .ok()
+            .flatten()
+            .is_some_and(|(_, _, is_linear)| is_linear);
+        if is_linear_dng && !always_decode_raw {
+            return;
+        }
     }
+    let _ = std::io::copy(&mut file, &mut std::io::sink());
 }
 
 pub fn start_thumbnail_workers(app_handle: tauri::AppHandle) {
@@ -760,10 +740,13 @@ pub fn start_thumbnail_workers(app_handle: tauri::AppHandle) {
                 let current_settings = load_settings(app_clone.clone()).unwrap_or_default();
 
                 if let Ok(cache_dir) = resolve_thumbnail_cache_dir(&app_clone) {
-                    let prefetch = || {
+                    let always_decode_raw = current_settings
+                        .always_decode_raw_thumbnails
+                        .unwrap_or(false);
+                    let prefetch = |is_edited: bool| {
                         if manager_clone.rotational_disk.load(Ordering::Relaxed) {
                             let _io_permit = manager_clone.io_gate.lock().unwrap();
-                            prefetch_source_file(&path_to_process);
+                            prefetch_source_file(&path_to_process, is_edited, always_decode_raw);
                         }
                     };
 
@@ -951,7 +934,7 @@ pub fn clear_thumbnail_cache(app_handle: AppHandle) -> Result<(), String> {
     Ok(())
 }
 
-pub fn get_cache_key_hash(path_str: &str, settings: &AppSettings) -> Option<String> {
+pub fn get_cache_key_hash(path_str: &str) -> Option<String> {
     let (_, sidecar_path) = parse_virtual_path(path_str);
 
     let mut metadata = fs::read_to_string(&sidecar_path)
@@ -962,7 +945,7 @@ pub fn get_cache_key_hash(path_str: &str, settings: &AppSettings) -> Option<Stri
         adjustments_bytes = metadata_adjustments_bytes(&metadata);
     }
 
-    compute_thumbnail_cache_hash(path_str, &adjustments_bytes, settings)
+    compute_thumbnail_cache_hash(path_str, &adjustments_bytes)
 }
 
 pub fn get_cached_or_generate_thumbnail_image(
@@ -976,7 +959,7 @@ pub fn get_cached_or_generate_thumbnail_image(
     let target_width_small = settings.small_thumbnail_resolution.unwrap_or(480);
     let target_width_medium = settings.medium_thumbnail_resolution.unwrap_or(1280);
 
-    if let Some(cache_hash) = get_cache_key_hash(path_str, &settings) {
+    if let Some(cache_hash) = get_cache_key_hash(path_str) {
         let cache_path = thumb_cache_dir.join(format!("{}_medium.jpg", cache_hash));
 
         if cache_path.exists() {
