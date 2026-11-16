@@ -61,6 +61,7 @@ import { open } from '@tauri-apps/plugin-shell';
 import ImmichSettings from '../immich/ImmichSettings';
 import DataManagementSettings from './settings/DataManagementSettings';
 import DefaultAdjustmentsSettings from './settings/DefaultAdjustmentsSettings';
+import DisplayColorSettings from './settings/DisplayColorSettings';
 import EditInAppsSettings from './settings/EditInAppsSettings';
 import { applyUiScale, clampUiScale, UI_SCALE_PRESETS } from '../../utils/displayScale';
 import type { ParseKeys } from 'i18next';
@@ -1963,6 +1964,15 @@ export default function SettingsPanel({
                           }}
                         />
                       </SettingItem>
+
+                      {osPlatform === 'linux' && (
+                        <SettingItem
+                          label={t('settings.processing.displayColor.title')}
+                          description={t('settings.processing.displayColor.description')}
+                        >
+                          <DisplayColorSettings appSettings={appSettings} onSettingsChange={onSettingsChange} />
+                        </SettingItem>
+                      )}
 
                       <SettingItem
                         label={t('settings.processing.wgpu')}

@@ -144,6 +144,8 @@ export interface AppSettings {
   useWgpuRenderer?: boolean;
   editorNeutralGreyBg?: boolean;
   editorBackgroundColor?: string | null;
+  displayColorManagement?: DisplayColorManagementMode;
+  displayProfilePath?: string | null;
   canvasInputMode?: 'mouse' | 'trackpad';
   compareMode?: CompareMode;
   whiteBalanceMode?: WhiteBalanceMode;
@@ -224,4 +226,16 @@ export interface ImmichSettings {
   cacheLimitGb: number;
   exportAlbum: string;
   exportWithOriginal: boolean;
+}
+
+export type DisplayColorManagementMode = 'auto' | 'custom' | 'off';
+
+export interface DisplayProfileInfo {
+  mode: DisplayColorManagementMode;
+  source: 'x11' | 'colord' | 'file' | 'none';
+  description: string | null;
+  active: boolean;
+  blockedByWgpu: boolean;
+  error: string | null;
+  generation: number;
 }

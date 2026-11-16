@@ -400,7 +400,12 @@ pub async fn generate_uncropped_preview(
             "generate_uncropped_preview",
         ) {
             let (width, height) = processed_image.dimensions();
-            let rgb_pixels = processed_image.to_rgb8().into_vec();
+            let rgb_pixels = processed_image
+                .as_rgba8()
+                .and_then(|img| {
+                    crate::platform::display_profile::convert_rgba8_to_rgb8(img.as_raw())
+                })
+                .unwrap_or_else(|| processed_image.to_rgb8().into_vec());
 
             if let Ok(bytes) = Encoder::new(Preset::BaselineFastest)
                 .quality(80)

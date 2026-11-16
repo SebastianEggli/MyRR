@@ -301,7 +301,11 @@ fn process_preview_job(
             _ => return Err("Expected Rgba8 image from GPU for encoding".to_string()),
         };
 
-        let raw_bytes: &[u8] = final_rgba_image.as_raw();
+        let display_converted =
+            crate::platform::display_profile::convert_rgba8(final_rgba_image.as_raw());
+        let raw_bytes: &[u8] = display_converted
+            .as_deref()
+            .unwrap_or_else(|| final_rgba_image.as_raw());
         let rgba8_pixels: &[RGBA8] = raw_bytes.as_rgba();
 
         let img_ref = ImgRef::new(

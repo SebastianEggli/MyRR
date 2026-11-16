@@ -5,12 +5,14 @@ import { toast } from 'react-toastify';
 import { Status } from '../types/export';
 import { Invokes } from '../types/invokes';
 import { Progress } from '../types/library';
+import { DisplayProfileInfo } from '../types/settings';
 import { ImageDefaults, WaveformData } from '../types/editor';
 import { Adjustments, MaskContainer } from '../utils/adjustments';
 import { AiJobsStatus, JobKind, JobStatus, useProcessStore } from '../store/useProcessStore';
 import { useEditorStore } from '../store/useEditorStore';
 import { useUIStore } from '../store/useUIStore';
 import { useLibraryStore } from '../store/useLibraryStore';
+import { useSettingsStore } from '../store/useSettingsStore';
 import { adjustmentsFromMetadata, fetchImageDefaults } from '../utils/developDefaults';
 import { globalImageCache } from '../utils/ImageLRUCache';
 
@@ -204,6 +206,9 @@ export function useTauriListeners({
     };
 
     const listeners = [
+      listen<DisplayProfileInfo>('display-profile-changed', (event) => {
+        if (isEffectActive) useSettingsStore.getState().setDisplayProfileGeneration(event.payload.generation);
+      }),
       listen('preview-update-uncropped', (event: any) => {
         if (isEffectActive) useEditorStore.getState().setEditor({ uncroppedAdjustedPreviewUrl: event.payload });
       }),
@@ -675,6 +680,15 @@ export function useTauriListeners({
     invoke(Invokes.SubscribeAnalytics, { channel: analyticsChannel }).catch((err) =>
       console.error('Failed to subscribe to analytics:', err),
     );
+
+    // The backend resolves the display profile at startup; pick up the result in case its
+    // change event fired before the listener above was attached.
+    Promise.all(listeners)
+      .then(() => invoke<DisplayProfileInfo>(Invokes.GetDisplayProfileInfo))
+      .then((info) => {
+        if (isEffectActive) useSettingsStore.getState().setDisplayProfileGeneration(info.generation);
+      })
+      .catch((err) => console.error('Failed to get display profile info:', err));
 
     invoke<string[]>(Invokes.GetPendingAiPaths)
       .then((paths) => {

@@ -376,6 +376,7 @@ pub fn run() {
             start_preview_worker(app_handle.clone());
             start_analytics_worker(app_handle.clone());
             decode::image_preload::start_preload_worker(app_handle.clone());
+            platform::display_profile::start_watcher(app_handle.clone());
             library::thumbnails::start_thumbnail_workers(app_handle.clone());
             library::listing::start_metadata_workers(app_handle.clone());
             ai::jobs::start_worker(app_handle.clone());
@@ -625,6 +626,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             render::commands::apply_adjustments,
             render::commands::subscribe_analytics,
+            platform::display_profile::get_display_profile_info,
+            platform::display_profile::refresh_display_profile,
             render::commands::generate_preview_for_path,
             library::presets::generate_preset_preview,
             render::commands::generate_uncropped_preview,

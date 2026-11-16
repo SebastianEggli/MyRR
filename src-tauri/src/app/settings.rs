@@ -681,6 +681,10 @@ pub struct AppSettings {
     #[serde(default)]
     pub use_wgpu_renderer: Option<bool>,
     #[serde(default)]
+    pub display_color_management: Option<String>,
+    #[serde(default)]
+    pub display_profile_path: Option<String>,
+    #[serde(default)]
     pub editor_neutral_grey_bg: Option<bool>,
     #[serde(default)]
     pub editor_background_color: Option<String>,
@@ -908,6 +912,8 @@ impl Default for AppSettings {
             use_wgpu_renderer: Some(false),
             #[cfg(not(any(target_os = "linux", target_os = "android")))]
             use_wgpu_renderer: Some(true),
+            display_color_management: Some("auto".to_string()),
+            display_profile_path: None,
             editor_neutral_grey_bg: Some(false),
             editor_background_color: None,
             canvas_input_mode: Some("mouse".to_string()),
