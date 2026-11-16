@@ -2707,7 +2707,7 @@ export default function Editor({ onBackToLibrary, onContextMenu, onImageSelect, 
         ref={viewportRef}
         className={clsx(
           'flex-1 flex relative overflow-hidden isolate',
-          isFullScreen ? 'rounded-none' : 'rounded-lg',
+          'rounded-none',
           appSettings?.useWgpuRenderer !== false && !isFullScreen && 'ring-[9999px] ring-bg-secondary',
           !isWgpuActive && (appSettings?.editorNeutralGreyBg ? 'bg-[#808080]' : 'bg-bg-secondary'),
         )}
