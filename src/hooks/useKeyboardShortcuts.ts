@@ -11,7 +11,27 @@ import { getReopenedPanelWidth, isPanelVisible, useUIStore } from '../store/useU
 import { useProcessStore } from '../store/useProcessStore';
 import { applyCrop, cancelCrop, useEditorActions } from './useEditorActions';
 import { useLibraryActions } from './useLibraryActions';
-import { getDevicePixelRatio } from '../utils/displayScale';
+import {
+  clampZoomPercent,
+  fitPercent as getFitPercent,
+  getDpr,
+  percentFromTransform,
+  stepZoomIn,
+  stepZoomOut,
+} from '../utils/zoom';
+
+// Current physical zoom (1.0 = 1:1) derived from the editor store
+const getCurrentZoomPercent = (editor: {
+  baseRenderSize?: { renderScale: number; width: number };
+  displaySize?: { width: number };
+}): number => {
+  const { baseRenderSize, displaySize } = editor;
+  if (!baseRenderSize || !displaySize || baseRenderSize.renderScale <= 0 || baseRenderSize.width <= 0) {
+    return 1.0;
+  }
+  if (displaySize.width <= 0) return 1.0;
+  return percentFromTransform(baseRenderSize.renderScale, displaySize.width / baseRenderSize.width, getDpr());
+};
 
 const SPEED_EDIT_IMAGE_DIRECTIONS: Record<string, number> = { KeyQ: -1, KeyE: 1 };
 const NON_TEXT_INPUT_TYPES = new Set(['checkbox', 'radio', 'range', 'button', 'submit', 'reset', 'color', 'file']);
@@ -209,46 +229,25 @@ export const useKeyboardShortcuts = ({
         shouldFire: (s: any) => s.ui.activeView === 'editor' && !!s.editor.selectedImage,
         execute: (e: any, s: any) => {
           e.preventDefault();
-          const dpr = getDevicePixelRatio();
-          const currentPercent =
-            s.editor.originalSize?.width > 0 && s.editor.displaySize?.width > 0
-              ? (s.editor.displaySize.width * dpr) / s.editor.originalSize.width
-              : 1.0;
-          handleZoomChange(Math.min(currentPercent + 0.1, 2.0));
+          const currentPercent = getCurrentZoomPercent(s.editor);
+          handleZoomChange(stepZoomIn(currentPercent));
         },
       },
       zoom_out_step: {
         shouldFire: (s: any) => s.ui.activeView === 'editor' && !!s.editor.selectedImage,
         execute: (e: any, s: any) => {
           e.preventDefault();
-          const dpr = getDevicePixelRatio();
-          const currentPercent =
-            s.editor.originalSize?.width > 0 && s.editor.displaySize?.width > 0
-              ? (s.editor.displaySize.width * dpr) / s.editor.originalSize.width
-              : 1.0;
-          handleZoomChange(Math.max(currentPercent - 0.1, 0.1));
+          const currentPercent = getCurrentZoomPercent(s.editor);
+          handleZoomChange(stepZoomOut(currentPercent));
         },
       },
       cycle_zoom: {
         shouldFire: (s: any) => s.ui.activeView === 'editor' && !!s.editor.selectedImage,
         execute: (e: any, s: any) => {
           e.preventDefault();
-          const dpr = getDevicePixelRatio();
-          const { originalSize, displaySize, baseRenderSize } = s.editor;
-          const currentPercent =
-            originalSize?.width > 0 && displaySize?.width > 0
-              ? Math.round(((displaySize.width * dpr) / originalSize.width) * 100)
-              : 100;
-          let fitPercent = 100;
-
-          if (originalSize?.width > 0 && baseRenderSize?.width > 0) {
-            const originalAspect = originalSize.width / originalSize.height;
-            const baseAspect = baseRenderSize.width / baseRenderSize.height;
-            fitPercent =
-              originalAspect > baseAspect
-                ? Math.round(((baseRenderSize.width * dpr) / originalSize.width) * 100)
-                : Math.round(((baseRenderSize.height * dpr) / originalSize.height) * 100);
-          }
+          const currentPercent = Math.round(getCurrentZoomPercent(s.editor) * 100);
+          const renderScale = s.editor.baseRenderSize?.renderScale;
+          const fitPercent = renderScale > 0 ? Math.round(getFitPercent(renderScale, getDpr()) * 100) : 100;
 
           const doubleFitPercent = fitPercent * 2;
           if (Math.abs(currentPercent - fitPercent) < 5) {
@@ -264,24 +263,16 @@ export const useKeyboardShortcuts = ({
         shouldFire: (s: any) => s.ui.activeView === 'editor' && !!s.editor.selectedImage,
         execute: (e: any, s: any) => {
           e.preventDefault();
-          const dpr = getDevicePixelRatio();
-          const currentPercent =
-            s.editor.originalSize?.width > 0 && s.editor.displaySize?.width > 0
-              ? (s.editor.displaySize.width * dpr) / s.editor.originalSize.width
-              : 1.0;
-          handleZoomChange(Math.min(currentPercent * 1.2, 2.0));
+          const currentPercent = getCurrentZoomPercent(s.editor);
+          handleZoomChange(clampZoomPercent(currentPercent * 1.2));
         },
       },
       zoom_out: {
         shouldFire: (s: any) => s.ui.activeView === 'editor' && !!s.editor.selectedImage,
         execute: (e: any, s: any) => {
           e.preventDefault();
-          const dpr = getDevicePixelRatio();
-          const currentPercent =
-            s.editor.originalSize?.width > 0 && s.editor.displaySize?.width > 0
-              ? (s.editor.displaySize.width * dpr) / s.editor.originalSize.width
-              : 1.0;
-          handleZoomChange(Math.max(currentPercent / 1.2, 0.1));
+          const currentPercent = getCurrentZoomPercent(s.editor);
+          handleZoomChange(clampZoomPercent(currentPercent / 1.2));
         },
       },
       zoom_fit: {

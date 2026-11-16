@@ -43,6 +43,8 @@ import { useEditorActions, withRotation } from '../../hooks/useEditorActions';
 import { clickZoomTarget, interpretWheel, movedBeyondClick } from '../../utils/canvasControls';
 import { getVisibleImageRegion } from '../../utils/previewResolution';
 import { getDevicePixelRatio } from '../../utils/displayScale';
+import { MAX_ZOOM_PERCENT, MIN_ZOOM_PERCENT, getDpr, transformFromPercent, zoomReferenceSize } from '../../utils/zoom';
+import { useDevicePixelRatio } from '../../hooks/useDevicePixelRatio';
 import { parseRgb, resolveEditorBackground } from '../../utils/editorBackground';
 
 const NO_SPLIT = { splitOrigin: [0, 0], splitNormal: [0, 0], splitOffset: [0, 0] };
@@ -188,6 +190,7 @@ export default function Editor({ onBackToLibrary, onContextMenu, onImageSelect, 
   const originalPreview = useEditorStore((s) => s.originalPreview);
   const isSliderDragging = useEditorStore((s) => s.isSliderDragging);
   const targetZoom = useEditorStore((s) => s.zoom);
+  const dpr = useDevicePixelRatio();
   const originalSize = useEditorStore((s) => s.originalSize);
   const isRotationActive = useEditorStore((s) => s.isRotationActive);
   const overlayMode = useEditorStore((s) => s.overlayMode);
@@ -381,7 +384,7 @@ export default function Editor({ onBackToLibrary, onContextMenu, onImageSelect, 
   }, []);
 
   const handleDisplaySizeChange = useCallback(
-    (size: RenderSize) => {
+    (size: RenderSize & { renderScale: number }) => {
       setEditor({ displaySize: { width: size.width, height: size.height } });
       if (size.scale) {
         const baseWidth = size.width / size.scale;
@@ -393,6 +396,7 @@ export default function Editor({ onBackToLibrary, onContextMenu, onImageSelect, 
           offsetY: size.offsetY || 0,
           containerWidth: size.containerWidth || 0,
           containerHeight: size.containerHeight || 0,
+          renderScale: size.renderScale,
         };
         setEditor({ baseRenderSize: newSize });
       }
@@ -471,17 +475,11 @@ export default function Editor({ onBackToLibrary, onContextMenu, onImageSelect, 
     if (!selectedImage?.width || !selectedImage?.height) {
       return null;
     }
-    if (adjustments.crop) {
-      return { width: adjustments.crop.width, height: adjustments.crop.height } as ImageDimensions;
-    }
-    if (selectedImage) {
-      const orientationSteps = adjustments.orientationSteps || 0;
-      const isSwapped = orientationSteps === 1 || orientationSteps === 3;
-      const width = isSwapped ? selectedImage.height : selectedImage.width;
-      const height = isSwapped ? selectedImage.width : selectedImage.height;
-      return { width, height } as ImageDimensions;
-    }
-    return null;
+    return zoomReferenceSize(
+      { width: selectedImage.width, height: selectedImage.height },
+      adjustments.orientationSteps || 0,
+      adjustments.crop,
+    );
   }, [selectedImage, adjustments.crop, adjustments.orientationSteps]);
 
   const imageRenderSize = useImageRenderSize(imageContainerRef, croppedDimensions);
@@ -493,17 +491,15 @@ export default function Editor({ onBackToLibrary, onContextMenu, onImageSelect, 
       return { minScale: 0.1, maxScale: 20 };
     }
 
-    const dpr = getDevicePixelRatio();
-    const scaleFor100Percent = 1 / imageRenderSize.scale;
+    const minScale = transformFromPercent(MIN_ZOOM_PERCENT, imageRenderSize.scale, dpr);
+    const maxScale = transformFromPercent(MAX_ZOOM_PERCENT, imageRenderSize.scale, dpr);
 
-    const minScale = (0.1 / dpr) * scaleFor100Percent;
-    const maxScale = (2.0 / dpr) * scaleFor100Percent;
-
+    // Never force the fitted view (scale 1) out of range, e.g. for tiny images
     return {
-      minScale: Math.max(0.1, minScale),
-      maxScale: Math.max(20, maxScale),
+      minScale: Math.min(1, minScale),
+      maxScale: Math.max(1, maxScale),
     };
-  }, [selectedImage, imageRenderSize.scale, originalSize]);
+  }, [selectedImage, imageRenderSize.scale, originalSize, dpr]);
 
   const minScaleRef = useRef(transformConfig.minScale);
   const maxScaleRef = useRef(transformConfig.maxScale);
@@ -1388,12 +1384,11 @@ export default function Editor({ onBackToLibrary, onContextMenu, onImageSelect, 
         const mouseX = e.clientX - rect.left;
         const mouseY = e.clientY - rect.top;
 
-        const dpr = getDevicePixelRatio();
-        const scaleForCss100 = imageRenderSizeRef.current.scale ? 1 / imageRenderSizeRef.current.scale : 1;
+        const renderScale = imageRenderSizeRef.current.scale || 1;
         const zoomTarget = clickZoomTarget(
           currentScale,
           maxScaleRef.current,
-          scaleForCss100 / dpr,
+          transformFromPercent(1, renderScale, getDpr()),
           savedZoomState.current?.scale ?? null,
           appSettings?.zoomPhotoToPixelClick,
         );
@@ -1492,6 +1487,7 @@ export default function Editor({ onBackToLibrary, onContextMenu, onImageSelect, 
           width: imageRenderSize.width * transformScale,
           height: imageRenderSize.height * transformScale,
           scale: transformScale,
+          renderScale: imageRenderSize.scale,
           offsetX: imageRenderSize.offsetX,
           offsetY: imageRenderSize.offsetY,
           containerWidth: imageContainerRef.current?.clientWidth || 0,

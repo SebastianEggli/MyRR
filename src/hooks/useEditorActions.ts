@@ -30,7 +30,7 @@ import { Invokes } from '../types/invokes';
 import { Option, Panel } from '../types/ui';
 import { SelectedImage } from '../types/editor';
 import { globalImageCache } from '../utils/ImageLRUCache';
-import { getDevicePixelRatio } from '../utils/displayScale';
+import { getDpr, transformFromPercent } from '../utils/zoom';
 
 export { debouncedSetHistory };
 
@@ -488,51 +488,10 @@ export function useEditorActions() {
   );
 
   const handleZoomChange = useCallback((zoomValue: number, fitToWindow: boolean = false) => {
-    const { originalSize, baseRenderSize, adjustments } = useEditorStore.getState();
-    const dpr = getDevicePixelRatio();
-    let targetZoomPercent: number;
-
-    const orientationSteps = adjustments.orientationSteps || 0;
-    const isSwapped = orientationSteps === 1 || orientationSteps === 3;
-    const effectiveOriginalWidth = isSwapped ? originalSize.height : originalSize.width;
-    const effectiveOriginalHeight = isSwapped ? originalSize.width : originalSize.height;
-
-    if (fitToWindow) {
-      if (
-        effectiveOriginalWidth > 0 &&
-        effectiveOriginalHeight > 0 &&
-        baseRenderSize.width > 0 &&
-        baseRenderSize.height > 0
-      ) {
-        const originalAspect = effectiveOriginalWidth / effectiveOriginalHeight;
-        const baseAspect = baseRenderSize.width / baseRenderSize.height;
-        targetZoomPercent =
-          originalAspect > baseAspect
-            ? baseRenderSize.width / effectiveOriginalWidth
-            : baseRenderSize.height / effectiveOriginalHeight;
-      } else {
-        targetZoomPercent = 1.0;
-      }
-    } else {
-      targetZoomPercent = zoomValue / dpr;
-    }
-
-    targetZoomPercent = Math.max(0.1 / dpr, Math.min(2.0, targetZoomPercent));
-
+    const { renderScale } = useEditorStore.getState().baseRenderSize;
     let transformZoom = 1.0;
-    if (
-      effectiveOriginalWidth > 0 &&
-      effectiveOriginalHeight > 0 &&
-      baseRenderSize.width > 0 &&
-      baseRenderSize.height > 0
-    ) {
-      const originalAspect = effectiveOriginalWidth / effectiveOriginalHeight;
-      const baseAspect = baseRenderSize.width / baseRenderSize.height;
-      if (originalAspect > baseAspect) {
-        transformZoom = (targetZoomPercent * effectiveOriginalWidth) / baseRenderSize.width;
-      } else {
-        transformZoom = (targetZoomPercent * effectiveOriginalHeight) / baseRenderSize.height;
-      }
+    if (!fitToWindow && renderScale > 0) {
+      transformZoom = transformFromPercent(zoomValue, renderScale, getDpr());
     }
     useEditorStore.getState().setEditor({ zoom: transformZoom });
   }, []);

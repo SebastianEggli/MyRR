@@ -55,13 +55,14 @@ import { DEFAULT_SPEED_EDIT_ADJUSTMENTS, SPEED_EDIT_ADJUSTMENTS } from '../../ut
 import Text from '../ui/Text';
 import { TextColors, TextVariants, TextWeights } from '../../types/typography';
 import { useOsPlatform } from '../../hooks/useOsPlatform';
+import { useDevicePixelRatio } from '../../hooks/useDevicePixelRatio';
 import { useCloudUsage } from '../../hooks/useCloudUsage';
 import { open } from '@tauri-apps/plugin-shell';
 import ImmichSettings from '../immich/ImmichSettings';
 import DataManagementSettings from './settings/DataManagementSettings';
 import DefaultAdjustmentsSettings from './settings/DefaultAdjustmentsSettings';
 import EditInAppsSettings from './settings/EditInAppsSettings';
-import { applyUiScale, clampUiScale, getDevicePixelRatio, UI_SCALE_PRESETS } from '../../utils/displayScale';
+import { applyUiScale, clampUiScale, UI_SCALE_PRESETS } from '../../utils/displayScale';
 import type { ParseKeys } from 'i18next';
 
 interface ConfirmModalState {
@@ -700,7 +701,7 @@ export default function SettingsPanel({
   });
   const [restartRequired, setRestartRequired] = useState(false);
   const [activeCategory, setActiveCategory] = useState('general');
-  const [dpr, setDpr] = useState(() => getDevicePixelRatio());
+  const dpr = useDevicePixelRatio();
 
   const settingCategories = useMemo(
     () => [
@@ -779,22 +780,6 @@ export default function SettingsPanel({
       return { value: scale, label: presetNames[scale] ? `${percent} · ${presetNames[scale]}` : percent };
     });
   }, [t]);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const updateDpr = () => setDpr(getDevicePixelRatio());
-
-    const mediaQuery = window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
-    mediaQuery.addEventListener('change', updateDpr);
-
-    window.addEventListener('resize', updateDpr);
-
-    return () => {
-      mediaQuery.removeEventListener('change', updateDpr);
-      window.removeEventListener('resize', updateDpr);
-    };
-  }, []);
 
   const customAiTags = Array.from(new Set<string>(appSettings?.customAiTags || []));
   const taggingShortcuts = Array.from(new Set<string>(appSettings?.taggingShortcuts || []));
