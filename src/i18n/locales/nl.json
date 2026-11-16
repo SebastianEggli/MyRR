@@ -150,6 +150,8 @@
       "aiDenoise": "AI-ruisonderdrukking",
       "classicDenoise": "Klassieke ruisonderdrukking",
       "aiDenoiseDetail": "Detail",
+      "aiUpscale": "RapidRes 2x",
+      "aiUpscaleDetail": "Detail",
       "blueYellow": "Blauw/Geel",
       "centre": "Centrum",
       "chromaticAberration": "Chromatische aberratie",
@@ -165,6 +167,7 @@
       "negativeGreen": "Groen",
       "negativeRed": "Rood",
       "noiseReduction": "Ruisonderdrukking",
+      "superResolution": "RapidRes",
       "presence": "Presentie",
       "redCyan": "Rood/Cyaan",
       "sharpening": "Verscherping",
@@ -295,6 +298,12 @@
       "autoAdjust": "Autom. aanpassen",
       "autoLensCorrection": "Autom. lenscorrectie",
       "autoStraighten": "Automatisch rechtzetten",
+      "backgroundColor": "Achtergrondkleur",
+      "bgBlack": "Zwart",
+      "bgDarkGrey": "Donkergrijs",
+      "bgLightGrey": "Lichtgrijs",
+      "bgNeutralGrey": "Neutraal grijs (18%)",
+      "bgWhite": "Wit",
       "cancel": "Annuleren",
       "closeViewer": "Tweede venster sluiten",
       "colorLabel": "Kleurlabel",
@@ -324,9 +333,14 @@
       "removeBlackWhite": "Zwart-wit verwijderen",
       "removeDenoise": "Ruisonderdrukking verwijderen",
       "removeNegativeConversion": "Negatiefconversie verwijderen",
+      "removeSuperResolution": "RapidRes verwijderen",
       "resetAdjustments": "Aanpassingen herstellen",
+      "resetToDefaults": "Herstellen naar standaard",
+      "resetToNeutral": "Herstellen naar neutraal",
       "stitchPanorama": "Panorama samenvoegen",
+      "superResolution": "RapidRes (2x)",
       "tagging": "Tags toevoegen",
+      "themeDefault": "Standaard van thema",
       "undo": "Ongedaan maken",
       "unflagged": "Niet gemarkeerd"
     },
@@ -387,6 +401,8 @@
       "deleteSelected": "Alleen geselecteerde verwijderen",
       "denoise_one": "Ruis verwijderen",
       "denoise_other": "Ruis verwijderen",
+      "superResolution_one": "RapidRes (2x)",
+      "superResolution_other": "RapidRes (2x)",
       "duplicateImage": "Afbeelding dupliceren",
       "enable": "Inschakelen",
       "exportImage_one": "Afbeelding exporteren",
@@ -510,6 +526,7 @@
       "createNewTitle": "Nieuwe generatieve bewerking maken",
       "createNewTooltip": "Nieuwe {{name}} bewerking maken",
       "denoising": "AI-ruisonderdrukking wordt uitgevoerd...",
+      "upscaling": "RapidRes wordt uitgevoerd...",
       "dropzoneText": "Hier neerzetten om een nieuwe bewerking te maken",
       "editSettingsTitle": "Bewerkingsinstellingen",
       "editsTitle": "Bewerkingen",
@@ -714,11 +731,13 @@
       "cancel": "Annuleren",
       "drawingActive": "Tekenen actief",
       "hint": "Teken langs randen in uw foto die verticaal of horizontaal moeten zijn.",
+      "horizontalLine": "Horizontale hulplijn {{index}}",
       "linesStatus": "Actieve hulplijnen",
       "toast": {
         "angleRejected": "Lijnhoek is te ver van horizontaal of verticaal",
         "maxLines": "Maximaal 2 verticale en 2 horizontale lijnen toegestaan"
-      }
+      },
+      "verticalLine": "Verticale hulplijn {{index}}"
     },
     "layout": {
       "split": "Splitsen"
@@ -833,6 +852,7 @@
         "focalLength": "Brandpuntsafstand",
         "iso": "ISO",
         "lens": "Lens",
+        "model": "Model",
         "shutterSpeed": "Sluitertijd",
         "title": "Cameradetails"
       },
@@ -877,6 +897,8 @@
     },
     "presets": {
       "amount": "Hoeveelheid",
+      "defaultForAllCameras": "Standaard voor alle camera's",
+      "defaultForCamera": "Standaard voor {{camera}}",
       "dialog": {
         "allPresetFiles": "Alle voorinstellingsbestanden",
         "exportAllTitle": "Alle voorinstellingen exporteren",
@@ -897,7 +919,11 @@
         "newPreset": "Nieuwe voorinstelling",
         "overwrite": "Overschrijven",
         "renameFolder": "Map hernoemen",
-        "sortAll": "Alles alfabetisch sorteren"
+        "setDefaultAllCameras": "Instellen als standaard voor alle camera's",
+        "setDefaultForCamera": "Instellen als standaard voor {{camera}}",
+        "sortAll": "Alles alfabetisch sorteren",
+        "unsetDefaultAllCameras": "Niet meer als standaard gebruiken voor alle camera's",
+        "unsetDefaultForCamera": "Niet meer als standaard gebruiken voor {{camera}}"
       },
       "status": {
         "empty": "Nog geen voorinstellingen opgeslagen. Maak uw eigen, importeer uit een bestand of verken community-voorinstellingen.",
@@ -932,12 +958,16 @@
         "adjust": "Aanpassen",
         "crop": "Bijsnijden",
         "export": "Exporteren",
+        "filmstrip": "Filmstrip",
         "info": "Info",
         "inpaint": "Inpainting",
         "masks": "Maskers",
         "presets": "Voorinstellingen",
         "tethering": "Kabelopname"
       }
+    },
+    "toasts": {
+      "embeddedPreview": "RapidRAW kon dit RAW-bestand niet decoderen, dus je ziet en bewerkt de ingesloten JPEG-preview van de camera. Verwacht een lagere kwaliteit en minder bewerkingsruimte dan bij een echte RAW."
     },
     "toolbar": {
       "history": "Geschiedenis",
@@ -1104,6 +1134,10 @@
       "title": "Bewerkingen nog niet in Immich"
     },
     "export": {
+      "newAlbum": "Nieuw album…",
+      "newAlbumName": "Albumnaam",
+      "createAlbum": "Aanmaken",
+      "newAlbumFailed": "Kan het album niet aanmaken: {{error}}",
       "album": "Album",
       "destination": "Immich",
       "noAlbum": "Geen album",
@@ -1112,16 +1146,19 @@
       "withOriginalDesc": "Voor afbeeldingen uit een lokale map: het origineel wordt met zijn bewerkingen geüpload en de export wordt erbovenop gestapeld. Afbeeldingen uit Immich worden altijd op hun origineel gestapeld."
     },
     "section": {
+      "albums": "Albums",
       "empty": "Geen albums op de server.",
       "error": "Immich is niet bereikbaar.",
       "loading": "Albums laden…",
       "refresh": "Albums vernieuwen",
       "timeline": "Tijdlijn",
-      "title": "Immich"
+      "title": "Immich",
+      "unassigned": "Zonder album",
+      "unassignedHint": "Sleep afbeeldingen hierheen om ze te uploaden zonder ze aan een album toe te voegen."
     },
     "settings": {
       "apiKey": "API-sleutel",
-      "apiKeyDesc": "Maak er een aan in Immich onder Accountinstellingen → API-sleutels met deze rechten: album.read, albumAsset.create, albumAsset.delete, asset.read, asset.view, asset.download, asset.upload, asset.update, asset.delete, stack.read, stack.create en user.read.",
+      "apiKeyDesc": "Maak er een aan in Immich onder Accountinstellingen → API-sleutels met deze rechten: album.read, album.create, albumAsset.create, albumAsset.delete, asset.read, asset.view, asset.download, asset.upload, asset.update, asset.delete, stack.read, stack.create en user.read.",
       "connected": "Verbonden als {{user}} (Immich {{version}})",
       "description": "Blader door de foto's van je Immich-server in de bibliotheek en bewerk ze direct. Originelen worden gedownload als je ze opent, en je bewerkingen worden in Immich opgeslagen, zodat ze op elke computer hetzelfde zijn.",
       "keyInFile": "Opgeslagen in een bestand dat alleen jij kunt lezen: er is geen sleutelopslag beschikbaar. Zet in KDE de Secret Service-interface aan in de instellingen van KDE Wallet en sla opnieuw op.",
@@ -1139,12 +1176,17 @@
       "pending": "Bewerkingen die op Immich wachten: {{number}}"
     },
     "toasts": {
+      "editsStayLocal": "{{fileName}} is van iemand anders, dus Immich accepteert er geen bewerkingen voor. Je bewerkingen blijven op deze computer.",
       "backOnline": "Immich is weer bereikbaar en alle bewerkingen zijn daar opgeslagen.",
       "downloadFailed": "Downloaden van Immich mislukt: {{error}}",
       "editsConflict": "{{fileName}} is ook op een andere computer bewerkt. Je bewerkingen blijven en de andere versie wordt bewaard als virtuele kopie.",
       "offline": "Immich is niet bereikbaar. Je bewerkingen blijven hier en worden verstuurd zodra het weer bereikbaar is.",
+      "transferFailed": "Niet toegevoegd aan Immich: {{number}} ({{error}})",
+      "transferred": "Toegevoegd aan Immich: {{number}}",
+      "transferring": "Toevoegen aan Immich… {{current}}/{{total}}",
       "trashFailed": "Verplaatsen naar de prullenbak van Immich mislukt: {{error}}",
-      "uploaded": "Geüpload naar Immich: {{number}}"
+      "uploaded": "Geüpload naar Immich: {{number}}",
+      "uploadKeptCopy": "{{fileName}} staat al in Immich met andere bewerkingen. Die blijven, en jouw bewerkingen worden als virtuele kopie bewaard."
     }
   },
   "library": {
@@ -1153,6 +1195,7 @@
       "failed": "Mislukt ({{failedCount}})",
       "kinds": {
         "denoise": "AI-ruisonderdrukking",
+        "upscale": "RapidRes-vergroting",
         "depthMap": "Diepte analyseren",
         "depthMask": "Dieptemasker maken",
         "faceMask": "Gezichtsmasker maken",
@@ -1449,10 +1492,7 @@
       "originalRatio": "Originele verhouding"
     },
     "thumbnailSize": {
-      "large": "Groot",
-      "list": "Lijst",
-      "medium": "Middel",
-      "small": "Klein"
+      "list": "Lijst"
     },
     "tooltips": {
       "communityPresets": "Community-voorinstellingen",
@@ -1545,6 +1585,7 @@
       "descReplace": "Overschrijft alle geselecteerde instellingen en herstelt de overige naar standaardwaarden.",
       "groups": {
         "aiDenoise": "AI-ruisonderdrukking",
+        "aiUpscale": "RapidRes",
         "blackWhite": "Zwart-wit",
         "chromaticAberration": "Chromatische aberratie",
         "clarityDehaze": "Contrast en nevelreductie",
@@ -1703,7 +1744,6 @@
       "selectManufacturer": "Fabrikant selecteren",
       "title": "Lenscorrectie",
       "vignetting": "Vignettering",
-      "waitingAutoDetect": "Wachten op automatische detectie...",
       "zoomInTooltip": "Inzoomen",
       "zoomOutTooltip": "Uitzoomen"
     },
@@ -1836,6 +1876,7 @@
       "limit": "Limiet",
       "modals": {
         "aiDenoiseMessage": "Weet je zeker dat je de AI-ruisonderdrukkingscache wilt wissen?\n\nAfbeeldingen met AI-ruisonderdrukking ingeschakeld moeten opnieuw worden verwerkt, wat per afbeelding enkele minuten kan duren.",
+        "aiUpscaleMessage": "Weet je zeker dat je de RapidRes-cache wilt wissen?\n\nAfbeeldingen met RapidRes ingeschakeld moeten opnieuw worden vergroot.",
         "aiMapsMessage": "Weet je zeker dat je de diepte- en normal maps wilt wissen?\n\nAfbeeldingen met lensvervaging, mist of herbelichting maken hun maps opnieuw aan wanneer ze weer worden geopend.",
         "aiMessage": "Weet u zeker dat u alle door AI gegenereerde tags van alle afbeeldingen in alle actieve hoofdmappen wilt verwijderen?\n\nDit heeft geen invloed op door gebruikers toegevoegde tags. Deze actie kan niet ongedaan worden gemaakt.",
         "allMessage": "Weet u zeker dat u alle door AI gegenereerde en door gebruikers toegevoegde tags van alle afbeeldingen in alle actieve hoofdmappen wilt verwijderen?\n\nDeze actie kan niet ongedaan worden gemaakt.",
@@ -1863,6 +1904,7 @@
       "show": "Tonen",
       "statuses": {
         "aiDenoiseSuccess": "AI-ruisonderdrukkingscache succesvol gewist.",
+        "aiUpscaleSuccess": "RapidRes-cache succesvol gewist.",
         "aiSuccess": "{{count}} bestanden bijgewerkt. AI-tags verwijderd.",
         "aiSuccess_one": "{{count}} bestand bijgewerkt. AI-tags verwijderd.",
         "aiSuccess_other": "{{count}} bestanden bijgewerkt. AI-tags verwijderd.",
@@ -1879,6 +1921,8 @@
       "storage": {
         "aiDenoise": "AI-ruisonderdrukking",
         "aiDenoiseDesc": "Gecachete ruisonderdrukkingsresultaten.",
+        "aiUpscale": "RapidRes",
+        "aiUpscaleDesc": "Gecachete 2x-vergrotingen van RapidRes.",
         "aiMaps": "Diepte- & normal maps",
         "aiMapsDesc": "Gebruikt door lensvervaging, mist en herbelichting.",
         "immich": "Immich",
@@ -2104,6 +2148,31 @@
         "metal": "Metal",
         "vulkan": "Vulkan"
       },
+      "defaultAdjustments": {
+        "addCamera": "Camera toevoegen…",
+        "applyToNonRaw": "Ook toepassen op JPEG, TIFF, PNG en andere niet-RAW-bestanden",
+        "applyToNonRawDesc": "Indien uit gebruiken alleen RAW-bestanden deze standaardwaarden. JPEG's uit de camera zijn meestal al bewerkt en lensgecorrigeerd, dus nogmaals toepassen kan te veel worden.",
+        "autoLensCorrection": "Automatische lenscorrectie",
+        "autoLensCorrectionDesc": "Corrigeert vertekening, chromatische aberratie en vignettering met het lensprofiel dat uit de metadata van elke afbeelding is herkend.",
+        "cameraDefaults": "Standaardwaarden per camera",
+        "cameraDefaultsDesc": "Geef afbeeldingen van bepaalde camera's een eigen voorinstelling. Camera's die hier niet staan, gebruiken de standaardvoorinstelling hierboven, en lenscorrectie geldt voor alle camera's.",
+        "cameraPresetMissing": "De gekozen voorinstelling is verwijderd, daarom gebruiken afbeeldingen van deze camera weer de voorinstelling voor alle camera's.",
+        "description": "Bepaal waarmee onbewerkte afbeeldingen beginnen en waarnaar \"Aanpassingen herstellen\" terugkeert; bewerkte afbeeldingen behouden hun instellingen. Met standaardwaarden worden RAW-miniaturen berekend in plaats van de ingesloten camerapreview te gebruiken en laden ze eerst trager.",
+        "lensCorrection": "Lenscorrectie",
+        "noCamerasFound": "Geen andere camera's gevonden. Open een map met afbeeldingen van een camera, of klik met rechts op een voorinstelling terwijl je een van de afbeeldingen bewerkt.",
+        "noPreset": "Geen (neutraal)",
+        "preset": "Standaardvoorinstelling",
+        "presetDesc": "Geldt voor elke onbewerkte afbeelding. Maskers, uitsneden en transformaties worden overgeslagen, omdat ze alleen passen bij de afbeelding waarop ze zijn gemaakt.",
+        "presetMissing": "De gekozen voorinstelling is verwijderd, daarom gebruiken onbewerkte afbeeldingen weer neutrale waarden.",
+        "removeCamera": "Camera verwijderen",
+        "sameAsAllCameras": "Zelfde als alle camera's",
+        "scope": "Van toepassing op",
+        "sliderReset": "Schuifregelaar herstellen",
+        "sliderResetDefaults": "Standaardaanpassingen",
+        "sliderResetDesc": "Waar een schuifregelaar naar teruggaat als je hem herstelt, bijvoorbeeld door te dubbelklikken of in snelbewerken. Maskerregelaars gaan altijd terug naar hun neutrale waarde.",
+        "sliderResetNeutral": "Neutrale waarde",
+        "title": "Standaardaanpassingen"
+      },
       "displayColor": {
         "chooseFile": "Profiel kiezen…",
         "description": "Zet de bewerkingsweergave om van sRGB naar het kleurprofiel van je monitor, zodat die overeenkomt met apps met kleurbeheer. Exports worden niet beïnvloed.",
@@ -2120,7 +2189,8 @@
           "notFound": "Geen monitorprofiel gevonden – sRGB aangenomen",
           "off": "Geen omzetting – de bewerkingsweergave neemt een sRGB-monitor aan",
           "srgb": "{{name}} komt overeen met sRGB – geen omzetting nodig",
-          "unnamed": "Naamloos profiel"
+          "unnamed": "Naamloos profiel",
+          "wgpu": "Niet toegepast zolang directe WGPU-rendering is ingeschakeld"
         },
         "title": "Kleurbeheer van het scherm"
       },
@@ -2169,7 +2239,7 @@
         "baselineExposure": "Basisbelichting",
         "baselineExposureAmount": "Basiswaarde",
         "baselineExposureAmountDesc": "Belichting die aan RAW-bestanden wordt toegevoegd. darktable gebruikt +0,7 EV.",
-        "baselineExposureDesc": "Maakt alle RAW-bestanden een vaste hoeveelheid lichter, zoals de scene-referred standaard van darktable, plus de DNG-tag BaselineExposure als die aanwezig is. Afbeeldingen die vóór deze optie zijn bewerkt, veranderen niet.",
+        "baselineExposureDesc": "Maakt RAW-bestanden een vaste hoeveelheid lichter, of in plaats daarvan met de waarde van de DNG-tag BaselineExposure indien aanwezig.",
         "colorNr": "Basis kleurruisonderdrukking",
         "colorNrDesc": "Past een cross-bilateraal filter vroeg in de pijplijn toe om chroominantieruis te verwijderen. Hogere waarde = Sterkere ruisonderdrukking.",
         "defaultNonRawTonemapper": "Standaard niet-RAW-toonmapping",
@@ -2182,7 +2252,7 @@
         "enablePreprocessingNonRaws": "Inschakelen voor niet-RAW-bestanden",
         "enableTonemapperOverride": "Toonmappingoverride inschakelen",
         "highlightPreservation": "Compensatie voor bescherming van hoge lichten",
-        "highlightPreservationDesc": "Herstelt de belichting die de camera inhield in modi die de hoge lichten beschermen, uitgelezen uit het RAW-bestand (Fujifilm DR200/DR400, Canon Prioriteit hoge lichten en Auto Lighting Optimizer, Nikon Actieve D-Lighting, Olympus gradatie, Pentax DR-uitbreiding). Afbeeldingen die vóór deze optie zijn bewerkt, veranderen niet.",
+        "highlightPreservationDesc": "Herstelt de belichting die cameramodi voor bescherming van hoge lichten verlagen, zoals Fujifilm DR200/DR400 of Nikon Actieve D-Lighting.",
         "highlightRecovery": "RAW-hooglichtenherstel",
         "highlightRecoveryDesc": "Bepaalt hoeveel detail wordt hersteld van uitgeknipte hooglichten in RAW-bestanden. Hogere waarden herstellen meer detail maar kunnen paarse artefacten introduceren.",
         "linearOptions": {
@@ -2217,15 +2287,14 @@
       "smallThumbnailRes": "Rasterminiatuurresolutie",
       "smallThumbnailResDesc": "Resolutie van miniaturen weergegeven in het bibliotheekoverzicht.",
       "staticDesc": "De editor rendert de afbeelding op een vaste resolutie. Deze modus is het snelst en meest consistent, waardoor het ideaal is voor minder krachtige hardware waar vloeiende prestaties prioriteit hebben boven pixelperfecte zoom.",
-      "staticPreviewRes": "Statische voorbeeldresolutie",
-      "staticPreviewResDesc": "Stelt de resolutie in voor statische voorbeelden zoals bijsnijdmodus, lenscorrectie en perspectief-tools. Heeft geen invloed op het hoofdeditorvoorbeeld.",
       "threads": "Threads",
       "thumbnailRes": "Miniatuurresolutie",
       "thumbnailResDesc": "Bepaalt de resolutie van gegenereerde bibliotheekminiaturen. Hogere waarden produceren scherpere afbeeldingen tijdens het laden.",
       "title": "Verwerkingsmotor",
       "wgpu": "WGPU directe rendering",
       "wgpuDescAndroid": "Omzeilt browsercodering voor direct responsieve live voorbeelden. (Uitgeschakeld op Android: native WGPU-surface creatie wordt momenteel niet ondersteund naast de mobiele webweergave.)",
-      "wgpuDescLinux": "Omzeilt browsercodering voor direct responsieve live voorbeelden. (Uitgeschakeld op Linux: Tauri gebruikt GTK voor webweergaven, wat conflicteert met WGPU op hetzelfde X11-surface en flikkering veroorzaakt.)",
+      "wgpuDescLinuxExperimental": "Experimenteel op Linux en mogelijk instabiel.",
+      "wgpuDescLinuxX11": "Niet beschikbaar op X11.",
       "wgpuDescRecommended": "Omzeilt browsercodering voor direct responsieve live voorbeelden. Sterk aanbevolen voor prestaties.",
       "wgpuLabel": "Directe WGPU-rendering inschakelen",
       "workerThreads": "Miniatuurwerkerthreads",
@@ -2267,6 +2336,7 @@
         "mediapipe": "Voor de snelle gezichtslandmark- en segmentatiemodellen achter de AI-gezichtsmaskers.",
         "negpy": "Voor de inspiratie achter de negatief-omzetlogica.",
         "nind": "Voor het leveren van AI-modellen die de AI-ruisonderdrukkingmogelijkheden in RapidRAW aandrijven.",
+        "span": "Voor het basis-AI-model achter RapidRes, de 2x AI-vergroting van RapidRAW, door RapidRAW verfijnd op de eigen RAW-verwerking (door Philip Hofmann, CC BY 4.0).",
         "rawler": "Voor de uitstekende Rust-crate die de basis vormt voor RAW-bestandsverwerking in dit project.",
         "sam2": "Voor het leveren van het basismodel dat wordt gebruikt voor de AI-onderwerpdetectiemogelijkheden.",
         "spektrafilm": "Voor de spectraalgebaseerde filmemulatie-LUT's door Andrea Volpato, gebruikt voor de ingebouwde filmemulaties van RapidRAW. Gelicenseerd onder CC BY-SA 4.0.",
@@ -2342,13 +2412,11 @@
     "bottomBar": {
       "imagesSelected": "{{current}} van {{total}} afbeeldingen geselecteerd",
       "tooltips": {
-        "collapseFilmstrip": "Filmstrip inklappen",
         "collapseLeft": "Linkerpaneel inklappen",
         "collapseRight": "Rechterpaneel inklappen",
         "copyPasteSettings": "Instellingen kopiëren & plakken",
         "copySettings": "Instellingen kopiëren",
         "customZoom": "Klik om aangepast zoompercentage in te voeren",
-        "expandFilmstrip": "Filmstrip uitklappen",
         "expandLeft": "Linkerpaneel uitklappen",
         "expandRight": "Rechterpaneel uitklappen",
         "export": "Exporteren",
@@ -2357,7 +2425,9 @@
         "rateStars_one": "1 ster beoordelen",
         "rateStars_other": "{{count}} sterren beoordelen",
         "resetZoom": "Zoom herstellen om venster te passen",
-        "selectToRate": "Selecteer een afbeelding om te beoordelen"
+        "selectToRate": "Selecteer een afbeelding om te beoordelen",
+        "sortFilmstripByFolder": "Filmstrip sorteren op map",
+        "sortFilmstripByName": "Filmstrip sorteren op naam"
       },
       "zoomLabel": "Zoom",
       "zoomLabelReset": "Zoom herstellen"

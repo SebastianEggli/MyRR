@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect, useRef, useCallback, memo, useMemo } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef, useCallback, memo, useMemo, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import ReactCrop from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
@@ -19,21 +19,24 @@ import {
   RelightLight,
   createRelightLight,
 } from '../../../utils/adjustments';
-import { Mask, SubMask, SubMaskMode, ToolType } from '../right/Masks';
-import { AppSettings, BrushSettings, Invokes, Panel, SelectedImage, TransformState } from '../../ui/AppProperties';
+import { Mask, SubMask, SubMaskMode, ToolType } from '../../../types/masks';
+import { AppSettings } from '../../../types/settings';
+import { BrushSettings, SelectedImage, TransformState, type OverlayMode } from '../../../types/editor';
+import { Invokes } from '../../../types/invokes';
+import { Panel } from '../../../types/ui';
 import { RenderSize } from '../../../hooks/useImageRenderSize';
 import { useDelayedLoading } from '../../../hooks/useDelayedLoading';
 import { useTranslation } from 'react-i18next';
-import { useEditorStore } from '../../../store/useEditorStore';
+import { useEditorStore, WgpuPhase } from '../../../store/useEditorStore';
 import { MIXER_SAMPLE_SCREEN_SIZE, useHslMixerPicker } from '../../../hooks/useHslMixerPicker';
 import { isPanelVisible, useUIStore } from '../../../store/useUIStore';
-import type { OverlayMode } from '../right/CropPanel';
 import CompositionOverlays from './overlays/CompositionOverlays';
+import CropRotateArea from './overlays/CropRotateArea';
 import RelightLightShape, { RelightBasis } from './overlays/RelightLightShape';
 import CenterMarkerShape, { CENTER_MARKERS } from './overlays/CenterMarkerShape';
 import CloneSourceOverlay from './overlays/CloneSourceOverlay';
 import { countPatchesOfType, createSubMask, getStrokeCenter } from '../../../utils/maskUtils';
-import { calculateStraightenAngle, resolveAspectRatio } from '../../../utils/cropUtils';
+import { calculateStraightenAngle, getCropViewLayout, resolveAspectRatio } from '../../../utils/cropUtils';
 import { toast } from 'react-toastify';
 import {
   getWhiteBalanceMode,
@@ -42,6 +45,8 @@ import {
   withKelvinWhiteBalance,
   withRelativeWhiteBalance,
 } from '../../../utils/whiteBalance';
+
+const WGPU_HANDOFF_FADE_MS = 180;
 
 interface CursorPreview {
   visible: boolean;
@@ -102,7 +107,7 @@ interface ImageCanvasProps {
   isMaxZoom?: boolean;
   liveRotation?: number | null;
   transformScale: number;
-  hasRenderedFirstFrame: boolean;
+  wgpuPhase: WgpuPhase;
   overlayRoot: HTMLElement | null;
   subscribeViewTransform(listener: (state: TransformState) => void): () => void;
 }
@@ -1437,7 +1442,7 @@ const ImageCanvas = memo(
     isMaxZoom,
     liveRotation,
     transformScale,
-    hasRenderedFirstFrame,
+    wgpuPhase,
     overlayRoot,
     subscribeViewTransform,
   }: ImageCanvasProps) => {
@@ -1504,7 +1509,19 @@ const ImageCanvas = memo(
     const [isAltPressed, setIsAltPressed] = useState(false);
     const retainedPatchRef = useRef<typeof interactivePatch>(null);
 
-    const isWgpuActive = appSettings?.useWgpuRenderer !== false && selectedImage?.isReady && hasRenderedFirstFrame;
+    const isWgpuActive = appSettings?.useWgpuRenderer !== false && wgpuPhase === 'live';
+
+    const [prevIsWgpuActive, setPrevIsWgpuActive] = useState(isWgpuActive);
+    const [isWgpuHandoffFading, setIsWgpuHandoffFading] = useState(false);
+    if (prevIsWgpuActive !== isWgpuActive) {
+      setPrevIsWgpuActive(isWgpuActive);
+      setIsWgpuHandoffFading(isWgpuActive && !!displayState.base);
+    }
+    useEffect(() => {
+      if (!isWgpuHandoffFading) return;
+      const timer = setTimeout(() => setIsWgpuHandoffFading(false), WGPU_HANDOFF_FADE_MS + 50);
+      return () => clearTimeout(timer);
+    }, [isWgpuHandoffFading]);
     const { t } = useTranslation();
 
     const directPatchStateRef = useRef({
@@ -1670,6 +1687,7 @@ const ImageCanvas = memo(
         prevImageIdentityRef.current = selectedImage.thumbnailUrl;
         setDisplayState({ base: newSrc, fade: null });
         setIsFadingIn(false);
+        setIsWgpuHandoffFading(false);
         return;
       }
 
@@ -1681,10 +1699,9 @@ const ImageCanvas = memo(
           setDisplayState((prev) => ({ base: prev.base, fade: newSrc }));
           setIsFadingIn(false);
 
-          let frame1: number;
           let frame2: number;
 
-          frame1 = requestAnimationFrame(() => {
+          const frame1 = requestAnimationFrame(() => {
             frame2 = requestAnimationFrame(() => {
               setIsFadingIn(true);
             });
@@ -1857,9 +1874,11 @@ const ImageCanvas = memo(
       ],
     );
 
+    const strokeFeather = !isMasking && activeSubMask?.type === Mask.Brush ? 0 : (brushSettings?.feather ?? 0) / 100;
+
     const brushCursorPreview = useMemo(() => {
       const radius = Math.max(0.1, brushStageSize / 2);
-      const feather = Math.max(0, Math.min(1, (brushSettings?.feather ?? 0) / 100));
+      const feather = Math.max(0, Math.min(1, strokeFeather));
       const subMaskOpacity = Math.max(0, Math.min(1, (activeSubMask?.opacity ?? 100) / 100));
       const containerOpacity =
         activeContainer && 'opacity' in activeContainer && typeof activeContainer.opacity === 'number'
@@ -1905,7 +1924,7 @@ const ImageCanvas = memo(
       activeSubMask?.opacity,
       activeSubMask?.parameters?.flow,
       activeSubMask?.type,
-      brushSettings?.feather,
+      strokeFeather,
       brushStageSize,
       baseTool,
       isAltPressed,
@@ -2053,12 +2072,13 @@ const ImageCanvas = memo(
         return null;
       }
 
-      const scale = Math.min(viewportWidth / uncroppedEffectiveWidth, viewportHeight / uncroppedEffectiveHeight);
-
-      const renderWidth = uncroppedEffectiveWidth * scale;
-      const renderHeight = uncroppedEffectiveHeight * scale;
-
-      return { width: renderWidth, height: renderHeight };
+      const { width, height } = getCropViewLayout(
+        viewportWidth,
+        viewportHeight,
+        uncroppedEffectiveWidth,
+        uncroppedEffectiveHeight,
+      );
+      return { width, height };
     }, [selectedImage?.width, selectedImage?.height, imageRenderSize, adjustments.orientationSteps]);
 
     const cropRect = useMemo<RectBounds | null>(() => {
@@ -2380,7 +2400,7 @@ const ImageCanvas = memo(
 
       const handlePointerDown = (e: PointerEvent) => {
         const target = e.target as HTMLElement;
-        if (target.closest('.konvajs-content') || target.closest('[data-relight-lights]')) return;
+        if (target.closest('.konvajs-content, [data-relight-lights], [data-dropdown-menu]')) return;
         setEditor({ isRelightPickerActive: false });
       };
 
@@ -2702,7 +2722,7 @@ const ImageCanvas = memo(
 
             const imageSpaceLine: DrawnLine = {
               brushSize: brushImageSpaceSize,
-              feather: brushSettings?.feather ? brushSettings?.feather / 100 : 0,
+              feather: strokeFeather,
               flow: activeLineFlow,
               points: interpolateLine(startImageSpace, endImageSpace),
               tool: effectiveTool,
@@ -2797,6 +2817,7 @@ const ImageCanvas = memo(
         isAiSubjectActive,
         isParametricActive,
         brushSettings,
+        strokeFeather,
         onSelectMask,
         onSelectAiSubMask,
         isMasking,
@@ -2998,7 +3019,7 @@ const ImageCanvas = memo(
               ...stroke.lines,
               {
                 brushSize: brushImageSpaceSize,
-                feather: brushSettings?.feather ? brushSettings?.feather / 100 : 0,
+                feather: strokeFeather,
                 points: updatedLine.points.map((p: Coord) => ({ x: p.x / scale + cropX, y: p.y / scale + cropY })),
                 tool: updatedLine.tool,
               },
@@ -3012,7 +3033,7 @@ const ImageCanvas = memo(
 
             const imageSpaceLine: DrawnLine = {
               brushSize: brushImageSpaceSize,
-              feather: brushSettings?.feather ? brushSettings?.feather / 100 : 0,
+              feather: strokeFeather,
               flow: activeLineFlow,
               points: updatedLine.points.map((p: Coord) => ({
                 x: p.x / scale + cropX,
@@ -3043,7 +3064,7 @@ const ImageCanvas = memo(
 
             const imageSpaceLine: DrawnLine = {
               brushSize: brushImageSpaceSize,
-              feather: brushSettings?.feather ? brushSettings?.feather / 100 : 0,
+              feather: strokeFeather,
               flow: activeLineFlow,
               points: updatedLine.points.map((p: Coord) => ({
                 x: p.x / scale + cropX,
@@ -3103,6 +3124,7 @@ const ImageCanvas = memo(
         cropY,
         effectiveImageDimensions,
         brushSettings,
+        strokeFeather,
         isMasking,
         localInitialDrawParams,
         brushImageSpaceSize,
@@ -3286,7 +3308,7 @@ const ImageCanvas = memo(
       if (isBrushActive) {
         const imageSpaceLine: DrawnLine = {
           brushSize: brushImageSpaceSize,
-          feather: brushSettings?.feather ? brushSettings?.feather / 100 : 0,
+          feather: strokeFeather,
           flow: activeLineFlow,
           points: line.points.map((p: Coord) => ({
             x: p.x / scale + cropX,
@@ -3352,6 +3374,7 @@ const ImageCanvas = memo(
       cropX,
       cropY,
       brushSettings,
+      strokeFeather,
       imageRenderSize.scale,
       isAiEditing,
       isBrushActive,
@@ -3503,10 +3526,24 @@ const ImageCanvas = memo(
       }
     }, [baseIsReady, interactivePatch]);
 
-    const cropImageTransforms = useMemo(() => {
-      const rotation = liveRotation !== null && liveRotation !== undefined ? liveRotation : adjustments.rotation || 0;
-      return `rotate(${rotation}deg)`;
-    }, [adjustments.rotation, liveRotation]);
+    const effectiveRotation = liveRotation ?? adjustments.rotation ?? 0;
+
+    const cropImageTransforms = useMemo(() => `rotate(${effectiveRotation}deg)`, [effectiveRotation]);
+
+    const handleRotateHandleChange = useCallback(
+      (rotation: number) => setEditor({ isRotationActive: true, liveRotation: rotation }),
+      [setEditor],
+    );
+
+    const handleRotateHandleEnd = useCallback(
+      (rotation: number | null) => {
+        setEditor({ isRotationActive: false, liveRotation: null });
+        if (rotation !== null) {
+          setAdjustments((prev: Adjustments) => ({ ...prev, rotation }));
+        }
+      },
+      [setAdjustments, setEditor],
+    );
 
     const getCropDimensions = () => {
       if (!crop || !uncroppedImageRenderSize?.width || !uncroppedImageRenderSize?.height) {
@@ -3602,6 +3639,24 @@ const ImageCanvas = memo(
             ? 0
             : 1;
 
+    const imageBoxStyle: CSSProperties =
+      imageRenderSize.width > 0 && imageRenderSize.height > 0
+        ? {
+            position: 'absolute',
+            left: `${imageRenderSize.offsetX}px`,
+            top: `${imageRenderSize.offsetY}px`,
+            width: `${imageRenderSize.width}px`,
+            height: `${imageRenderSize.height}px`,
+            overflow: 'visible',
+          }
+        : {
+            position: 'absolute',
+            inset: '0px',
+            width: '100%',
+            height: '100%',
+            overflow: 'visible',
+          };
+
     return (
       <div className="relative" style={{ width: '100%', height: '100%', cursor: effectiveCursor }}>
         <div
@@ -3620,35 +3675,19 @@ const ImageCanvas = memo(
             }}
           >
             <div className="absolute inset-0 w-full h-full">
-              <svg
-                className="pointer-events-none"
-                style={
-                  imageRenderSize.width > 0 && imageRenderSize.height > 0
-                    ? {
-                        position: 'absolute',
-                        left: `${imageRenderSize.offsetX}px`,
-                        top: `${imageRenderSize.offsetY}px`,
-                        width: `${imageRenderSize.width}px`,
-                        height: `${imageRenderSize.height}px`,
-                        overflow: 'visible',
-                      }
-                    : {
-                        position: 'absolute',
-                        inset: '0px',
-                        width: '100%',
-                        height: '100%',
-                        overflow: 'visible',
-                      }
-                }
-              >
-                {displayState.base && !isWgpuActive && (
+              <svg className="pointer-events-none" style={imageBoxStyle}>
+                {displayState.base && (!isWgpuActive || isWgpuHandoffFading) && (
                   <image
                     href={displayState.base}
                     x="0"
                     y="0"
                     width="100%"
                     height="100%"
-                    style={{ imageRendering: isMaxZoom ? 'pixelated' : 'auto' }}
+                    style={{
+                      imageRendering: isMaxZoom ? 'pixelated' : 'auto',
+                      opacity: isWgpuActive ? 0 : 1,
+                      transition: isWgpuActive ? `opacity ${WGPU_HANDOFF_FADE_MS}ms ease-out` : 'none',
+                    }}
                   />
                 )}
 
@@ -3681,21 +3720,20 @@ const ImageCanvas = memo(
               </svg>
 
               {displayedMaskOverlay && (
-                <img
-                  alt="Mask Overlay"
-                  className="absolute pointer-events-none"
-                  src={displayedMaskOverlay.url}
-                  style={{
-                    height: `${displayedMaskOverlay.region[3] * imageRenderSize.height}px`,
-                    left: `${imageRenderSize.offsetX + displayedMaskOverlay.region[0] * imageRenderSize.width}px`,
-                    opacity: maskOpacity,
-                    top: `${imageRenderSize.offsetY + displayedMaskOverlay.region[1] * imageRenderSize.height}px`,
-                    transition: 'opacity 300ms ease-in-out',
-                    width: `${displayedMaskOverlay.region[2] * imageRenderSize.width}px`,
-                    imageRendering: isMaxZoom ? 'pixelated' : 'auto',
-                    zIndex: 3,
-                  }}
-                />
+                <svg
+                  className="pointer-events-none"
+                  style={{ ...imageBoxStyle, opacity: maskOpacity, transition: 'opacity 300ms ease-in-out', zIndex: 3 }}
+                >
+                  <image
+                    href={displayedMaskOverlay.url}
+                    x={`${displayedMaskOverlay.region[0] * 100}%`}
+                    y={`${displayedMaskOverlay.region[1] * 100}%`}
+                    width={`${displayedMaskOverlay.region[2] * 100}%`}
+                    height={`${displayedMaskOverlay.region[3] * 100}%`}
+                    preserveAspectRatio="none"
+                    style={{ imageRendering: isMaxZoom ? 'pixelated' : 'auto' }}
+                  />
+                </svg>
               )}
             </div>
           </div>
@@ -4063,55 +4101,65 @@ const ImageCanvas = memo(
                   className="absolute inset-0 transition-opacity duration-200"
                   style={{ opacity: isCropViewVisible ? 1 : 0, pointerEvents: 'none' }}
                 >
-                  <div
-                    ref={cropWrapperRef}
-                    className="absolute"
-                    style={{ pointerEvents: isCropViewVisible ? 'auto' : 'none' }}
-                    onPointerDownCapture={(e) => {
-                      if (e.button !== 0) {
-                        e.stopPropagation();
-                      }
-                    }}
-                    onMouseDownCapture={(e) => {
-                      if (e.button !== 0) {
-                        e.stopPropagation();
-                      }
-                    }}
+                  <CropRotateArea
+                    enabled={isCropViewVisible && !isStraightenActive && !isGuidedPerspectiveActive}
+                    rotation={effectiveRotation}
+                    onRotate={handleRotateHandleChange}
+                    onRotateEnd={handleRotateHandleEnd}
                   >
-                    <ReactCrop
-                      aspect={
-                        resolveAspectRatio(adjustments.aspectRatio, selectedImage, adjustments.orientationSteps || 0) ??
-                        undefined
-                      }
-                      crop={crop ?? undefined}
-                      onChange={setCrop}
-                      onComplete={handleCropComplete}
-                      ruleOfThirds={false}
-                      style={{ display: 'block' }}
-                      renderSelectionAddon={() => {
-                        const { width, height } = getCropDimensions();
-                        if (width <= 0 || height <= 0) {
-                          return null;
+                    <div
+                      ref={cropWrapperRef}
+                      className="absolute"
+                      style={{ pointerEvents: isCropViewVisible ? 'auto' : 'none' }}
+                      onPointerDownCapture={(e) => {
+                        if (e.button !== 0) {
+                          e.stopPropagation();
                         }
-                        const showDenseGrid = isRotationActive && !isStraightenActive && !isGuidedPerspectiveActive;
-                        const currentOverlayMode =
-                          isRotationActive || isStraightenActive || isGuidedPerspectiveActive
-                            ? 'none'
-                            : overlayMode || 'none';
-                        return (
-                          <CompositionOverlays
-                            width={width}
-                            height={height}
-                            mode={currentOverlayMode}
-                            rotation={overlayRotation || 0}
-                            denseVisible={showDenseGrid}
-                          />
-                        );
+                      }}
+                      onMouseDownCapture={(e) => {
+                        if (e.button !== 0) {
+                          e.stopPropagation();
+                        }
                       }}
                     >
-                      <div ref={cropSizerRef} />
-                    </ReactCrop>
-                  </div>
+                      <ReactCrop
+                        aspect={
+                          resolveAspectRatio(
+                            adjustments.aspectRatio,
+                            selectedImage,
+                            adjustments.orientationSteps || 0,
+                          ) ?? undefined
+                        }
+                        crop={crop ?? undefined}
+                        onChange={setCrop}
+                        onComplete={handleCropComplete}
+                        ruleOfThirds={false}
+                        style={{ display: 'block' }}
+                        renderSelectionAddon={() => {
+                          const { width, height } = getCropDimensions();
+                          if (width <= 0 || height <= 0) {
+                            return null;
+                          }
+                          const showDenseGrid = isRotationActive && !isStraightenActive && !isGuidedPerspectiveActive;
+                          const currentOverlayMode =
+                            isRotationActive || isStraightenActive || isGuidedPerspectiveActive
+                              ? 'none'
+                              : overlayMode || 'none';
+                          return (
+                            <CompositionOverlays
+                              width={width}
+                              height={height}
+                              mode={currentOverlayMode}
+                              rotation={overlayRotation || 0}
+                              denseVisible={showDenseGrid}
+                            />
+                          );
+                        }}
+                      >
+                        <div ref={cropSizerRef} />
+                      </ReactCrop>
+                    </div>
+                  </CropRotateArea>
 
                   {(isStraightenActive ||
                     isGuidedPerspectiveActive ||

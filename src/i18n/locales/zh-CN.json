@@ -150,6 +150,8 @@
       "aiDenoise": "AI 降噪",
       "classicDenoise": "经典降噪",
       "aiDenoiseDetail": "细节",
+      "aiUpscale": "RapidRes 2x",
+      "aiUpscaleDetail": "细节",
       "blueYellow": "蓝/黄",
       "centre": "居中",
       "chromaticAberration": "色差",
@@ -165,6 +167,7 @@
       "negativeGreen": "绿色",
       "negativeRed": "红色",
       "noiseReduction": "降噪",
+      "superResolution": "RapidRes",
       "presence": "质感",
       "redCyan": "红/青",
       "sharpening": "锐化",
@@ -295,6 +298,12 @@
       "autoAdjust": "自动调整",
       "autoLensCorrection": "自动镜头校正",
       "autoStraighten": "自动拉直",
+      "backgroundColor": "背景颜色",
+      "bgBlack": "黑色",
+      "bgDarkGrey": "深灰色",
+      "bgLightGrey": "浅灰色",
+      "bgNeutralGrey": "中性灰 (18%)",
+      "bgWhite": "白色",
       "cancel": "取消",
       "closeViewer": "关闭第二窗口",
       "colorLabel": "颜色标签",
@@ -324,9 +333,14 @@
       "removeBlackWhite": "移除黑白",
       "removeDenoise": "移除降噪",
       "removeNegativeConversion": "移除负片转换",
+      "removeSuperResolution": "移除 RapidRes",
       "resetAdjustments": "重置调整",
+      "resetToDefaults": "重置为默认值",
+      "resetToNeutral": "重置为中性值",
       "stitchPanorama": "拼接全景图",
+      "superResolution": "RapidRes (2x)",
       "tagging": "标签",
+      "themeDefault": "主题默认",
       "undo": "撤销",
       "unflagged": "无标记"
     },
@@ -387,6 +401,8 @@
       "deleteSelected": "仅删除选中项",
       "denoise_one": "降噪",
       "denoise_other": "降噪",
+      "superResolution_one": "RapidRes (2x)",
+      "superResolution_other": "RapidRes (2x)",
       "duplicateImage": "复制图像",
       "enable": "启用",
       "exportImage_one": "导出图像",
@@ -510,6 +526,7 @@
       "createNewTitle": "创建新的生成式编辑",
       "createNewTooltip": "创建新的 {{name}} 编辑",
       "denoising": "正在进行 AI 降噪...",
+      "upscaling": "正在运行 RapidRes...",
       "dropzoneText": "拖放到此处以创建新编辑",
       "editSettingsTitle": "编辑设置",
       "editsTitle": "编辑",
@@ -711,11 +728,13 @@
       "cancel": "取消",
       "drawingActive": "绘图中",
       "hint": "沿着照片中应该是垂直或水平的边缘绘制。",
+      "horizontalLine": "水平引导线 {{index}}",
       "linesStatus": "活跃引导线",
       "toast": {
         "angleRejected": "线条角度偏离水平或垂直太远",
         "maxLines": "最多允许 2 条垂直线和 2 条水平线"
-      }
+      },
+      "verticalLine": "垂直引导线 {{index}}"
     },
     "layout": {
       "split": "拆分"
@@ -830,6 +849,7 @@
         "focalLength": "焦距",
         "iso": "ISO",
         "lens": "镜头",
+        "model": "型号",
         "shutterSpeed": "快门速度",
         "title": "相机详情"
       },
@@ -874,6 +894,8 @@
     },
     "presets": {
       "amount": "数量",
+      "defaultForAllCameras": "所有相机的默认值",
+      "defaultForCamera": "{{camera}} 的默认值",
       "dialog": {
         "allPresetFiles": "所有预设文件",
         "exportAllTitle": "导出所有预设",
@@ -894,7 +916,11 @@
         "newPreset": "新建预设",
         "overwrite": "覆盖",
         "renameFolder": "重命名文件夹",
-        "sortAll": "全部按字母排序"
+        "setDefaultAllCameras": "设为所有相机的默认值",
+        "setDefaultForCamera": "设为 {{camera}} 的默认值",
+        "sortAll": "全部按字母排序",
+        "unsetDefaultAllCameras": "不再作为所有相机的默认值",
+        "unsetDefaultForCamera": "不再作为 {{camera}} 的默认值"
       },
       "status": {
         "empty": "尚未保存预设。创建您自己的预设、从文件导入或探索社区预设。",
@@ -929,12 +955,16 @@
         "adjust": "调整",
         "crop": "裁剪",
         "export": "导出",
+        "filmstrip": "胶片条",
         "info": "信息",
         "inpaint": "修复",
         "masks": "蒙版",
         "presets": "预设",
         "tethering": "联机拍摄"
       }
+    },
+    "toasts": {
+      "embeddedPreview": "RapidRAW 无法解码此 RAW 文件，因此您看到和编辑的是相机内嵌的 JPEG 预览。画质会低于真正的 RAW，可调整的空间也更小。"
     },
     "toolbar": {
       "history": "历史记录",
@@ -1101,6 +1131,10 @@
       "title": "编辑尚未同步到 Immich"
     },
     "export": {
+      "newAlbum": "新建相册…",
+      "newAlbumName": "相册名称",
+      "createAlbum": "创建",
+      "newAlbumFailed": "无法创建相册：{{error}}",
       "album": "相册",
       "destination": "Immich",
       "noAlbum": "不加入相册",
@@ -1109,16 +1143,19 @@
       "withOriginalDesc": "对于本地文件夹中的图像：原始文件会连同编辑内容一起上传，导出的图像会堆叠在其上方。来自 Immich 的图像始终堆叠在其原始文件上。"
     },
     "section": {
+      "albums": "相册",
       "empty": "服务器上没有相册。",
       "error": "无法连接到 Immich。",
       "loading": "正在加载相册…",
       "refresh": "刷新相册",
       "timeline": "时间线",
-      "title": "Immich"
+      "title": "Immich",
+      "unassigned": "不在任何相册中",
+      "unassignedHint": "将图像拖到这里即可上传，但不加入任何相册。"
     },
     "settings": {
       "apiKey": "API 密钥",
-      "apiKeyDesc": "在 Immich 的“帐户设置 → API 密钥”中创建，并授予以下权限：album.read, albumAsset.create, albumAsset.delete, asset.read, asset.view, asset.download, asset.upload, asset.update, asset.delete, stack.read, stack.create、user.read。",
+      "apiKeyDesc": "在 Immich 的“帐户设置 → API 密钥”中创建，并授予以下权限：album.read, album.create, albumAsset.create, albumAsset.delete, asset.read, asset.view, asset.download, asset.upload, asset.update, asset.delete, stack.read, stack.create、user.read。",
       "connected": "已以 {{user}} 身份连接 (Immich {{version}})",
       "description": "在图库中浏览 Immich 服务器上的照片并直接编辑。原始文件会在打开时下载，编辑内容会保存到 Immich，因此在每台电脑上看起来都一样。",
       "keyInFile": "已保存在仅你可读取的文件中：没有可用的凭据存储。在 KDE 中，请在 KDE 钱包设置里启用 Secret Service 接口，然后重新保存。",
@@ -1136,12 +1173,17 @@
       "pending": "等待同步到 Immich 的编辑：{{number}}"
     },
     "toasts": {
+      "editsStayLocal": "{{fileName}} 属于其他人，因此 Immich 不接受对它的编辑。你的编辑会保留在这台电脑上。",
       "backOnline": "Immich 已重新连接，所有编辑内容都已保存。",
       "downloadFailed": "无法从 Immich 下载：{{error}}",
       "editsConflict": "{{fileName}} 也在另一台电脑上被编辑过。你的编辑内容会保留，另一个版本已保存为虚拟副本。",
       "offline": "无法连接到 Immich。你的编辑内容会保留在这里，并在恢复连接后发送。",
+      "transferFailed": "未能添加到 Immich：{{number}}（{{error}}）",
+      "transferred": "已添加到 Immich：{{number}}",
+      "transferring": "正在添加到 Immich… {{current}}/{{total}}",
       "trashFailed": "无法移至 Immich 回收站：{{error}}",
-      "uploaded": "已上传到 Immich：{{number}}"
+      "uploaded": "已上传到 Immich：{{number}}",
+      "uploadKeptCopy": "{{fileName}} 已在 Immich 中，且有其他编辑。那些编辑会保留，你的编辑将作为虚拟副本保存。"
     }
   },
   "library": {
@@ -1150,6 +1192,7 @@
       "failed": "失败（{{failedCount}}）",
       "kinds": {
         "denoise": "正在 AI 降噪",
+        "upscale": "正在 RapidRes 放大",
         "depthMap": "正在分析深度",
         "depthMask": "正在生成深度蒙版",
         "faceMask": "正在生成面部蒙版",
@@ -1443,10 +1486,7 @@
       "originalRatio": "原始比例"
     },
     "thumbnailSize": {
-      "large": "大",
-      "list": "列表",
-      "medium": "中",
-      "small": "小"
+      "list": "列表"
     },
     "tooltips": {
       "communityPresets": "社区预设",
@@ -1539,6 +1579,7 @@
       "descReplace": "覆盖所有选中的设置，其余重置为默认值。",
       "groups": {
         "aiDenoise": "AI 降噪",
+        "aiUpscale": "RapidRes",
         "blackWhite": "黑白",
         "chromaticAberration": "色差",
         "clarityDehaze": "清晰度与去雾",
@@ -1697,7 +1738,6 @@
       "selectManufacturer": "选择制造商",
       "title": "镜头校正",
       "vignetting": "暗角",
-      "waitingAutoDetect": "等待自动检测...",
       "zoomInTooltip": "放大",
       "zoomOutTooltip": "缩小"
     },
@@ -1830,6 +1870,7 @@
       "limit": "上限",
       "modals": {
         "aiDenoiseMessage": "确定要清除 AI 降噪缓存吗？\n\n启用了 AI 降噪的图像需要重新降噪，每张图像可能需要几分钟。",
+        "aiUpscaleMessage": "确定要清除 RapidRes 缓存吗？\n\n启用了 RapidRes 的图像需要重新放大。",
         "aiMapsMessage": "确定要清除深度与法线贴图吗？\n\n使用镜头模糊、雾效或重新打光的图像会在下次打开时重新生成贴图。",
         "aiMessage": "您确定要从所有活动根文件夹中的所有图像中移除所有 AI 生成的标签吗？\n\n这不会影响用户添加的标签。此操作无法撤销。",
         "allMessage": "您确定要从所有活动根文件夹中的所有图像中移除所有 AI 生成和用户添加的标签吗？\n\n此操作无法撤销。",
@@ -1857,6 +1898,7 @@
       "show": "显示",
       "statuses": {
         "aiDenoiseSuccess": "AI 降噪缓存已成功清除。",
+        "aiUpscaleSuccess": "RapidRes 缓存已成功清除。",
         "aiSuccess": "{{count}} 个文件已更新。AI 标签已移除。",
         "aiSuccess_one": "{{count}} 个文件已更新。AI 标签已移除。",
         "aiSuccess_other": "{{count}} 个文件已更新。AI 标签已移除。",
@@ -1873,6 +1915,8 @@
       "storage": {
         "aiDenoise": "AI 降噪",
         "aiDenoiseDesc": "缓存的降噪结果。",
+        "aiUpscale": "RapidRes",
+        "aiUpscaleDesc": "缓存的 RapidRes 2 倍放大结果。",
         "aiMaps": "深度与法线贴图",
         "aiMapsDesc": "用于镜头模糊、雾效和重新打光。",
         "immich": "Immich",
@@ -2102,6 +2146,31 @@
         "metal": "Metal",
         "vulkan": "Vulkan"
       },
+      "defaultAdjustments": {
+        "addCamera": "添加相机…",
+        "applyToNonRaw": "同时应用于 JPEG、TIFF、PNG 等非 RAW 文件",
+        "applyToNonRawDesc": "关闭时仅 RAW 文件使用这些默认值。相机直出的 JPEG 通常已处理并校正，再次应用可能会过度。",
+        "autoLensCorrection": "自动镜头校正",
+        "autoLensCorrectionDesc": "根据从每张图像元数据中识别出的镜头配置文件，校正畸变、色差和暗角。",
+        "cameraDefaults": "按相机设置默认值",
+        "cameraDefaultsDesc": "为特定相机的图像设置单独的预设。未列出的相机使用上面的默认预设，镜头校正适用于所有相机。",
+        "cameraPresetMissing": "所选预设已被删除，因此该相机的图像重新使用所有相机的预设。",
+        "description": "设置未编辑图像的初始值以及“重置调整”恢复到的值；已编辑的图像保留各自的设置。设置默认值后，RAW 缩略图将重新渲染而不使用相机内嵌预览，因此首次加载较慢。",
+        "lensCorrection": "镜头校正",
+        "noCamerasFound": "未找到其他相机。请打开包含该相机图像的文件夹，或在编辑其图像时右键单击预设。",
+        "noPreset": "无（中性）",
+        "preset": "默认预设",
+        "presetDesc": "应用于所有未编辑的图像。蒙版、裁剪和变换只适合创建它们的图像，因此会被跳过。",
+        "presetMissing": "所选预设已被删除，因此未编辑的图像重新使用中性值。",
+        "removeCamera": "移除相机",
+        "sameAsAllCameras": "与所有相机相同",
+        "scope": "应用于",
+        "sliderReset": "滑块重置",
+        "sliderResetDefaults": "默认调整",
+        "sliderResetDesc": "通过双击或快速编辑等方式重置滑块时恢复到的值。蒙版滑块始终重置为中性值。",
+        "sliderResetNeutral": "中性值",
+        "title": "默认调整"
+      },
       "displayColor": {
         "chooseFile": "选择配置文件…",
         "description": "将编辑视图从 sRGB 转换为显示器的色彩配置文件，使其与支持色彩管理的应用一致。不影响导出。",
@@ -2118,7 +2187,8 @@
           "notFound": "未找到显示器配置文件 – 假定为 sRGB",
           "off": "不转换 – 编辑视图假定为 sRGB 显示器",
           "srgb": "{{name}} 与 sRGB 一致 – 无需转换",
-          "unnamed": "未命名的配置文件"
+          "unnamed": "未命名的配置文件",
+          "wgpu": "启用直接 WGPU 渲染时不生效"
         },
         "title": "显示器色彩管理"
       },
@@ -2167,7 +2237,7 @@
         "baselineExposure": "基础曝光",
         "baselineExposureAmount": "基础量",
         "baselineExposureAmountDesc": "添加到 RAW 文件的曝光量。darktable 使用 +0.7 EV。",
-        "baselineExposureDesc": "将所有 RAW 文件提亮一个固定值（与 darktable 场景参考模式的默认值相同），如有 DNG BaselineExposure 标签也会一并加上。在此选项推出之前编辑的图像不受影响。",
+        "baselineExposureDesc": "将 RAW 文件提亮一个固定值；如有 DNG BaselineExposure 标签，则改用该标签的值。",
         "colorNr": "基础颜色降噪",
         "colorNrDesc": "在管线早期应用交叉双边滤波器以去除彩色噪点。值越高 = 降噪越强。",
         "defaultNonRawTonemapper": "默认非 RAW 色调映射",
@@ -2180,7 +2250,7 @@
         "enablePreprocessingNonRaws": "对非 RAW 图像启用",
         "enableTonemapperOverride": "启用色调映射覆盖",
         "highlightPreservation": "高光保护补偿",
-        "highlightPreservationDesc": "从 RAW 文件读取相机在高光保护模式下保留的曝光并予以恢复（富士 DR200/DR400、佳能高光色调优先和自动亮度优化、尼康动态 D-Lighting、奥林巴斯层次、宾得动态范围扩展）。在此选项推出之前编辑的图像不受影响。",
+        "highlightPreservationDesc": "恢复相机高光保护模式（如富士 DR200/DR400、尼康动态 D-Lighting）降低的曝光。",
         "highlightRecovery": "RAW 高光恢复",
         "highlightRecoveryDesc": "控制从 RAW 文件的裁剪高光中恢复细节的程度。较高的值可恢复更多细节，但可能引入紫色伪影。",
         "linearOptions": {
@@ -2215,15 +2285,14 @@
       "smallThumbnailRes": "网格缩略图分辨率",
       "smallThumbnailResDesc": "图库网格中显示的缩略图分辨率。",
       "staticDesc": "编辑器以固定分辨率渲染图像。此模式最快且最一致，非常适合低端硬件，优先考虑流畅性能而非像素完美的缩放。",
-      "staticPreviewRes": "静态预览分辨率",
-      "staticPreviewResDesc": "设置静态预览的分辨率，如裁剪模式、镜头校正和透视工具。不影响主编辑器预览。",
       "threads": "线程数",
       "thumbnailRes": "缩略图分辨率",
       "thumbnailResDesc": "确定生成的图库缩略图的分辨率。较高的值可在加载时产生更清晰的图像。",
       "title": "处理引擎",
       "wgpu": "WGPU 直接渲染",
       "wgpuDescAndroid": "绕过浏览器编码，实现即时响应的实时预览。（在 Android 上已禁用：原生 WGPU 表面创建目前不支持与移动端 Webview 同时运行。）",
-      "wgpuDescLinux": "绕过浏览器编码，实现即时响应的实时预览。（在 Linux 上已禁用：Tauri 使用 GTK 作为 Webview，与同一 X11 表面上的 WGPU 冲突并导致闪烁。）",
+      "wgpuDescLinuxExperimental": "在 Linux 上为实验性功能，可能不稳定。",
+      "wgpuDescLinuxX11": "在 X11 上不可用。",
       "wgpuDescRecommended": "绕过浏览器编码，实现即时响应的实时预览。强烈推荐以获得最佳性能。",
       "wgpuLabel": "启用直接 WGPU 渲染",
       "workerThreads": "缩略图工作线程数",
@@ -2265,6 +2334,7 @@
         "mediapipe": "感谢其快速的面部关键点和分割模型，为 AI 面部蒙版提供支持。",
         "negpy": "为负片转换逻辑提供了灵感。",
         "nind": "为 AI 模型提供支持，驱动了 RapidRAW 中的 AI 降噪功能。",
+        "span": "RapidRAW 的 AI 2 倍放大功能 RapidRes 的基础 AI 模型，由 RapidRAW 针对自身的 RAW 处理流程进行微调（作者 Philip Hofmann，CC BY 4.0）。",
         "rawler": "为优秀的 Rust 库提供支持，构成了本项目 RAW 文件处理的基础。",
         "sam2": "为提供基础模型，用于 AI 主体检测功能。",
         "spektrafilm": "感谢 Andrea Volpato 提供基于光谱的胶片模拟 LUT，为 RapidRAW 的内置胶片模拟提供支持。采用 CC BY-SA 4.0 许可。",
@@ -2340,13 +2410,11 @@
     "bottomBar": {
       "imagesSelected": "已选择 {{current}} / {{total}} 张图像",
       "tooltips": {
-        "collapseFilmstrip": "折叠胶片条",
         "collapseLeft": "折叠左侧面板",
         "collapseRight": "折叠右侧面板",
         "copyPasteSettings": "复制与粘贴设置",
         "copySettings": "复制设置",
         "customZoom": "点击输入自定义缩放百分比",
-        "expandFilmstrip": "展开胶片条",
         "expandLeft": "展开左侧面板",
         "expandRight": "展开右侧面板",
         "export": "导出",
@@ -2355,7 +2423,9 @@
         "rateStars_one": "评分 1 星",
         "rateStars_other": "评分 {{count}} 星",
         "resetZoom": "重置缩放以适应窗口",
-        "selectToRate": "选择一张图像以评分"
+        "selectToRate": "选择一张图像以评分",
+        "sortFilmstripByFolder": "按文件夹排序胶片栏",
+        "sortFilmstripByName": "按名称排序胶片栏"
       },
       "zoomLabel": "缩放",
       "zoomLabelReset": "重置缩放"

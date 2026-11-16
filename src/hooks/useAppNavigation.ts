@@ -1,20 +1,25 @@
 import { useCallback } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { open } from '@tauri-apps/plugin-dialog';
-import { homeDir } from '@tauri-apps/api/path';
+import { dirname, homeDir } from '@tauri-apps/api/path';
 import { toast } from 'react-toastify';
 import { useLibraryStore } from '../store/useLibraryStore';
 import { canvasToolState, useEditorStore } from '../store/useEditorStore';
 import { useUIStore } from '../store/useUIStore';
 import { useProcessStore } from '../store/useProcessStore';
 import { useSettingsStore } from '../store/useSettingsStore';
-import { Invokes, LibraryViewMode, ImageFile } from '../components/ui/AppProperties';
-import { INITIAL_ADJUSTMENTS, normalizeLoadedAdjustments } from '../utils/adjustments';
+import { Invokes } from '../types/invokes';
+import { LibraryViewMode } from '../types/settings';
+import { ImageFile } from '../types/library';
+import { INITIAL_ADJUSTMENTS } from '../utils/adjustments';
+import { adjustmentsFromMetadata } from '../utils/developDefaults';
 import { globalImageCache } from '../utils/ImageLRUCache';
+import { decodeImage } from '../utils/decodeImage';
 import { debouncedSave, debouncedSetHistory } from './useEditorActions';
+import { notifyEmbeddedPreview } from './useImageLoader';
 import { clearLibrarySelection } from './useLibraryActions';
 import { computeSortedLibrary } from './useSortedLibrary';
-import { getImmichAlbumImages, isImmichAlbumId } from '../components/immich/immichApi';
+import { getImmichAlbumImages, isImmichAlbumId } from '../utils/immichApi';
 import { getReturnSelection } from '../utils/librarySelection';
 
 export interface AppNavigationProps {
@@ -170,6 +175,7 @@ export function useAppNavigation({ clearThumbnailQueue, refs }: AppNavigationPro
       const { selectedImage, isSliderDragging, resetHistory, setEditor } = useEditorStore.getState();
       const { setLibrary } = useLibraryStore.getState();
       const { setUI } = useUIStore.getState();
+      const wasEditorVisible = useUIStore.getState().activeView === 'editor';
 
       if (openInEditor) {
         setUI({ activeView: 'editor' });
@@ -190,19 +196,22 @@ export function useAppNavigation({ clearThumbnailQueue, refs }: AppNavigationPro
 
       const cached = globalImageCache.get(path);
       const isFrontendCached = Boolean(cached && cached.selectedImage?.isReady);
-      const isCachedInBackend = isFrontendCached
+      const canKeepWgpuLive =
+        useSettingsStore.getState().appSettings?.useWgpuRenderer !== false &&
+        wasEditorVisible &&
+        useEditorStore.getState().wgpuPhase === 'live';
+      const isCachedInBackend = canKeepWgpuLive
         ? await invoke<boolean>('is_image_cached', { path }).catch(() => false)
         : false;
 
       if (generation !== imageSelectGeneration) return;
 
-      const hasDifferentResolution =
-        cached &&
-        (useEditorStore.getState().originalSize.width !== cached.originalSize.width ||
-          useEditorStore.getState().originalSize.height !== cached.originalSize.height);
+      const keepWgpuLive = canKeepWgpuLive && isCachedInBackend && useEditorStore.getState().wgpuPhase === 'live';
 
-      if (!isCachedInBackend || hasDifferentResolution) {
-        setEditor({ hasRenderedFirstFrame: false });
+      if (!keepWgpuLive) {
+        await decodeImage((isFrontendCached && cached?.finalPreviewUrl) || cachedMedium);
+        if (generation !== imageSelectGeneration) return;
+        setEditor({ wgpuPhase: 'hidden' });
       }
 
       selectedImagePathRef.current = path;
@@ -232,14 +241,13 @@ export function useAppNavigation({ clearThumbnailQueue, refs }: AppNavigationPro
         compactEditorPanelHeightOverride: null,
       });
 
-      if (isFrontendCached) {
+      if (isFrontendCached && cached) {
         setEditor({
           selectedImage: {
             ...cached.selectedImage,
             thumbnailUrl: cachedMedium || cached.selectedImage.thumbnailUrl,
           },
           originalSize: cached.originalSize,
-          previewSize: cached.previewSize,
           histogram: cached.histogram,
           waveform: cached.waveform,
           finalPreviewUrl: cached.finalPreviewUrl,
@@ -262,6 +270,7 @@ export function useAppNavigation({ clearThumbnailQueue, refs }: AppNavigationPro
             isBackendReadyRef.current = true;
             currentResRef.current = 0;
             setEditor({ originalSize: { width: _result.width, height: _result.height } });
+            notifyEmbeddedPreview(_result);
           })
           .catch((err: any) => {
             if (String(err).includes('cancelled')) return;
@@ -273,12 +282,7 @@ export function useAppNavigation({ clearThumbnailQueue, refs }: AppNavigationPro
         invoke(Invokes.LoadMetadata, { path })
           .then((metadata: any) => {
             if (selectedImagePathRef.current !== path) return;
-            let freshAdjustments: any;
-            if (metadata.adjustments && !metadata.adjustments.is_null) {
-              freshAdjustments = normalizeLoadedAdjustments(metadata.adjustments);
-            } else {
-              freshAdjustments = { ...INITIAL_ADJUSTMENTS };
-            }
+            const freshAdjustments = adjustmentsFromMetadata(metadata.adjustments);
             if (!isSliderDragging && JSON.stringify(cached.adjustments) !== JSON.stringify(freshAdjustments)) {
               setEditor({ adjustments: freshAdjustments });
               resetHistory(freshAdjustments);
@@ -307,7 +311,6 @@ export function useAppNavigation({ clearThumbnailQueue, refs }: AppNavigationPro
           width: 0,
         },
         originalSize: { width: 0, height: 0 },
-        previewSize: { width: 0, height: 0 },
         histogram: null,
         waveform: null,
         uncroppedAdjustedPreviewUrl: null,
@@ -365,7 +368,7 @@ export function useAppNavigation({ clearThumbnailQueue, refs }: AppNavigationPro
         globalImageCache.clear();
         setUI({ activeView: 'library' });
       } else {
-        setLibrary({ isViewLoading: true });
+        setLibrary({ isViewLoading: true, activeAlbumId: null });
       }
 
       try {
@@ -555,6 +558,15 @@ export function useAppNavigation({ clearThumbnailQueue, refs }: AppNavigationPro
     }
   }, [handleSelectSubfolder, handleSelectAlbum]);
 
+  const handleOpenContainingFolder = useCallback(
+    async (filePath: string) => {
+      const folderPath = await dirname(filePath);
+      if (!folderPath || useLibraryStore.getState().currentFolderPath === folderPath) return;
+      await handleSelectSubfolder(folderPath, false, undefined, true, true);
+    },
+    [handleSelectSubfolder],
+  );
+
   const handleOpenFolder = useCallback(async () => {
     const { osPlatform, appSettings, handleSettingsChange } = useSettingsStore.getState();
     const { rootPaths, folderTrees, setLibrary } = useLibraryStore.getState();
@@ -715,6 +727,7 @@ export function useAppNavigation({ clearThumbnailQueue, refs }: AppNavigationPro
     handleSelectSubfolder,
     handleSelectAlbum,
     handleOpenFolder,
+    handleOpenContainingFolder,
     handleNavBack,
     handleNavForward,
     handleContinueSession,

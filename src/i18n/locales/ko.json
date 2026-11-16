@@ -150,6 +150,8 @@
       "aiDenoise": "AI 노이즈 제거",
       "classicDenoise": "클래식 노이즈 제거",
       "aiDenoiseDetail": "디테일",
+      "aiUpscale": "RapidRes 2x",
+      "aiUpscaleDetail": "디테일",
       "blueYellow": "파랑/노랑",
       "centre": "중앙",
       "chromaticAberration": "색수차",
@@ -165,6 +167,7 @@
       "negativeGreen": "초록",
       "negativeRed": "빨강",
       "noiseReduction": "노이즈 감소",
+      "superResolution": "RapidRes",
       "presence": "외관",
       "redCyan": "빨강/시안",
       "sharpening": "선명도 향상",
@@ -295,6 +298,12 @@
       "autoAdjust": "자동 조정",
       "autoLensCorrection": "자동 렌즈 교정",
       "autoStraighten": "자동 수평 맞추기",
+      "backgroundColor": "배경색",
+      "bgBlack": "검정",
+      "bgDarkGrey": "진한 회색",
+      "bgLightGrey": "밝은 회색",
+      "bgNeutralGrey": "중성 회색 (18%)",
+      "bgWhite": "흰색",
       "cancel": "취소",
       "closeViewer": "보조 창 닫기",
       "colorLabel": "색상 레이블",
@@ -324,9 +333,14 @@
       "removeBlackWhite": "흑백 해제",
       "removeDenoise": "노이즈 제거 해제",
       "removeNegativeConversion": "네거티브 변환 해제",
+      "removeSuperResolution": "RapidRes 해제",
       "resetAdjustments": "조정값 초기화",
+      "resetToDefaults": "기본값으로 초기화",
+      "resetToNeutral": "중립 값으로 초기화",
       "stitchPanorama": "파노라마 스티칭",
+      "superResolution": "RapidRes (2x)",
       "tagging": "태그 지정",
+      "themeDefault": "테마 기본값",
       "undo": "실행 취소",
       "unflagged": "플래그 없음"
     },
@@ -387,6 +401,8 @@
       "deleteSelected": "선택 항목만 삭제",
       "denoise_one": "노이즈 제거",
       "denoise_other": "노이즈 제거",
+      "superResolution_one": "RapidRes (2x)",
+      "superResolution_other": "RapidRes (2x)",
       "duplicateImage": "이미지 복제",
       "enable": "사용",
       "exportImage_one": "이미지 내보내기",
@@ -510,6 +526,7 @@
       "createNewTitle": "새 생성형 편집 만들기",
       "createNewTooltip": "새 {{name}} 편집 만들기",
       "denoising": "AI 노이즈 제거 실행 중...",
+      "upscaling": "RapidRes 실행 중...",
       "dropzoneText": "여기에 놓아 새 편집을 만드세요",
       "editSettingsTitle": "편집 설정",
       "editsTitle": "편집",
@@ -711,11 +728,13 @@
       "cancel": "취소",
       "drawingActive": "그리기 활성화",
       "hint": "사진에서 수직이나 수평이 되어야 하는 가장자리를 따라 그리세요.",
+      "horizontalLine": "수평 안내선 {{index}}",
       "linesStatus": "활성 안내선",
       "toast": {
         "angleRejected": "선의 각도가 수평이나 수직에서 너무 벗어났습니다",
         "maxLines": "수직선 2개, 수평선 2개까지만 허용됩니다"
-      }
+      },
+      "verticalLine": "수직 안내선 {{index}}"
     },
     "layout": {
       "split": "분할"
@@ -830,6 +849,7 @@
         "focalLength": "초점 거리",
         "iso": "ISO",
         "lens": "렌즈",
+        "model": "모델",
         "shutterSpeed": "셔터 속도",
         "title": "카메라 세부 정보"
       },
@@ -874,6 +894,8 @@
     },
     "presets": {
       "amount": "양",
+      "defaultForAllCameras": "모든 카메라의 기본값",
+      "defaultForCamera": "{{camera}}의 기본값",
       "dialog": {
         "allPresetFiles": "모든 프리셋 파일",
         "exportAllTitle": "모든 프리셋 내보내기",
@@ -894,7 +916,11 @@
         "newPreset": "새 프리셋",
         "overwrite": "덮어쓰기",
         "renameFolder": "폴더 이름 변경",
-        "sortAll": "모두 알파벳순 정렬"
+        "setDefaultAllCameras": "모든 카메라의 기본값으로 설정",
+        "setDefaultForCamera": "{{camera}}의 기본값으로 설정",
+        "sortAll": "모두 알파벳순 정렬",
+        "unsetDefaultAllCameras": "모든 카메라의 기본값으로 사용 안 함",
+        "unsetDefaultForCamera": "{{camera}}의 기본값으로 사용 안 함"
       },
       "status": {
         "empty": "아직 저장된 프리셋이 없습니다. 직접 만들거나, 파일에서 가져오거나, 커뮤니티 프리셋을 둘러보세요.",
@@ -929,12 +955,16 @@
         "adjust": "조정",
         "crop": "자르기",
         "export": "내보내기",
+        "filmstrip": "필름스트립",
         "info": "정보",
         "inpaint": "인페인팅",
         "masks": "마스크",
         "presets": "프리셋",
         "tethering": "테더링"
       }
+    },
+    "toasts": {
+      "embeddedPreview": "RapidRAW가 이 RAW 파일을 디코딩하지 못해 카메라에 포함된 JPEG 미리보기를 표시하고 편집하고 있습니다. 실제 RAW보다 화질이 낮고 편집 여유도 적습니다."
     },
     "toolbar": {
       "history": "기록",
@@ -1101,6 +1131,10 @@
       "title": "아직 Immich에 없는 편집"
     },
     "export": {
+      "newAlbum": "새 앨범…",
+      "newAlbumName": "앨범 이름",
+      "createAlbum": "만들기",
+      "newAlbumFailed": "앨범을 만들 수 없습니다: {{error}}",
       "album": "앨범",
       "destination": "Immich",
       "noAlbum": "앨범 없음",
@@ -1109,16 +1143,19 @@
       "withOriginalDesc": "로컬 폴더의 이미지: 원본이 편집 내용과 함께 업로드되고 내보낸 파일이 그 위에 스택됩니다. Immich의 이미지는 항상 원본 위에 스택됩니다."
     },
     "section": {
+      "albums": "앨범",
       "empty": "서버에 앨범이 없습니다.",
       "error": "Immich에 연결할 수 없습니다.",
       "loading": "앨범 불러오는 중…",
       "refresh": "앨범 새로고침",
       "timeline": "타임라인",
-      "title": "Immich"
+      "title": "Immich",
+      "unassigned": "앨범 없음",
+      "unassignedHint": "이미지를 여기에 놓으면 앨범에 추가하지 않고 업로드합니다."
     },
     "settings": {
       "apiKey": "API 키",
-      "apiKeyDesc": "Immich의 계정 설정 → API 키에서 다음 권한으로 만드세요: album.read, albumAsset.create, albumAsset.delete, asset.read, asset.view, asset.download, asset.upload, asset.update, asset.delete, stack.read, stack.create, user.read",
+      "apiKeyDesc": "Immich의 계정 설정 → API 키에서 다음 권한으로 만드세요: album.read, album.create, albumAsset.create, albumAsset.delete, asset.read, asset.view, asset.download, asset.upload, asset.update, asset.delete, stack.read, stack.create, user.read",
       "connected": "{{user}}(으)로 연결됨 (Immich {{version}})",
       "description": "Immich 서버의 사진을 라이브러리에서 둘러보고 바로 편집하세요. 원본은 열 때 다운로드되며, 편집 내용은 Immich에 저장되어 모든 컴퓨터에서 똑같이 보입니다.",
       "keyInFile": "본인만 읽을 수 있는 파일에 저장됨: 사용 가능한 자격 증명 저장소가 없습니다. KDE에서는 KDE 지갑 설정에서 Secret Service 인터페이스를 켠 뒤 다시 저장하세요.",
@@ -1136,12 +1173,17 @@
       "pending": "Immich 전송 대기 중인 편집: {{number}}"
     },
     "toasts": {
+      "editsStayLocal": "{{fileName}}은(는) 다른 사람의 이미지라 Immich가 편집을 받지 않습니다. 편집 내용은 이 컴퓨터에 남습니다.",
       "backOnline": "Immich에 다시 연결되었으며 모든 편집 내용이 저장되었습니다.",
       "downloadFailed": "Immich에서 다운로드하지 못했습니다: {{error}}",
       "editsConflict": "{{fileName}}이(가) 다른 컴퓨터에서도 편집되었습니다. 내 편집 내용은 유지되고, 다른 버전은 가상 사본으로 보관됩니다.",
       "offline": "Immich에 연결할 수 없습니다. 편집 내용은 여기에 보관되며 다시 연결되면 전송됩니다.",
+      "transferFailed": "Immich에 추가하지 못함: {{number}} ({{error}})",
+      "transferred": "Immich에 추가됨: {{number}}",
+      "transferring": "Immich에 추가하는 중… {{current}}/{{total}}",
       "trashFailed": "Immich 휴지통으로 이동하지 못했습니다: {{error}}",
-      "uploaded": "Immich에 업로드됨: {{number}}"
+      "uploaded": "Immich에 업로드됨: {{number}}",
+      "uploadKeptCopy": "{{fileName}}은(는) 이미 다른 편집 내용으로 Immich에 있습니다. 해당 편집은 유지되고, 내 편집은 가상 사본으로 보관됩니다."
     }
   },
   "library": {
@@ -1150,6 +1192,7 @@
       "failed": "실패 ({{failedCount}})",
       "kinds": {
         "denoise": "AI 노이즈 제거 중",
+        "upscale": "RapidRes 확대 중",
         "depthMap": "깊이 분석 중",
         "depthMask": "깊이 마스크 생성 중",
         "faceMask": "얼굴 마스크 생성 중",
@@ -1443,10 +1486,7 @@
       "originalRatio": "원본 비율"
     },
     "thumbnailSize": {
-      "large": "크게",
-      "list": "목록",
-      "medium": "보통",
-      "small": "작게"
+      "list": "목록"
     },
     "tooltips": {
       "communityPresets": "커뮤니티 프리셋",
@@ -1539,6 +1579,7 @@
       "descReplace": "선택한 모든 설정을 덮어쓰고 나머지는 기본값으로 초기화합니다.",
       "groups": {
         "aiDenoise": "AI 노이즈 제거",
+        "aiUpscale": "RapidRes",
         "blackWhite": "흑백",
         "chromaticAberration": "색수차",
         "clarityDehaze": "명료도 및 디헤이즈",
@@ -1697,7 +1738,6 @@
       "selectManufacturer": "제조사 선택",
       "title": "렌즈 보정",
       "vignetting": "비네팅",
-      "waitingAutoDetect": "자동 감지 대기 중...",
       "zoomInTooltip": "확대",
       "zoomOutTooltip": "축소"
     },
@@ -1830,6 +1870,7 @@
       "limit": "한도",
       "modals": {
         "aiDenoiseMessage": "AI 노이즈 제거 캐시를 지우시겠습니까?\n\nAI 노이즈 제거가 켜진 이미지는 다시 처리해야 하며, 이미지당 몇 분이 걸릴 수 있습니다.",
+        "aiUpscaleMessage": "RapidRes 캐시를 지우시겠습니까?\n\nRapidRes가 켜진 이미지는 다시 확대 처리해야 합니다.",
         "aiMapsMessage": "깊이 및 노멀 맵을 지우시겠습니까?\n\n렌즈 블러, 안개 또는 리라이트를 사용하는 이미지는 다음에 열 때 맵을 다시 생성합니다.",
         "aiMessage": "모든 활성 루트 폴더의 모든 이미지에서 AI가 생성한 태그를 모두 제거하시겠습니까?\n\n사용자가 추가한 태그에는 영향을 주지 않습니다. 이 작업은 취소할 수 없습니다.",
         "allMessage": "모든 활성 루트 폴더의 모든 이미지에서 AI가 생성한 태그와 사용자가 추가한 태그를 모두 제거하시겠습니까?\n\n이 작업은 취소할 수 없습니다.",
@@ -1857,6 +1898,7 @@
       "show": "보기",
       "statuses": {
         "aiDenoiseSuccess": "AI 노이즈 제거 캐시를 지웠습니다.",
+        "aiUpscaleSuccess": "RapidRes 캐시를 지웠습니다.",
         "aiSuccess": "{{count}}개 파일이 업데이트되었습니다. AI 태그가 제거되었습니다.",
         "aiSuccess_one": "{{count}}개 파일이 업데이트되었습니다. AI 태그가 제거되었습니다.",
         "aiSuccess_other": "{{count}}개 파일이 업데이트되었습니다. AI 태그가 제거되었습니다.",
@@ -1873,6 +1915,8 @@
       "storage": {
         "aiDenoise": "AI 노이즈 제거",
         "aiDenoiseDesc": "캐시된 노이즈 제거 결과입니다.",
+        "aiUpscale": "RapidRes",
+        "aiUpscaleDesc": "캐시된 RapidRes 2배 확대 결과입니다.",
         "aiMaps": "깊이 및 노멀 맵",
         "aiMapsDesc": "렌즈 블러, 안개, 리라이트에 사용됩니다.",
         "immich": "Immich",
@@ -2102,6 +2146,31 @@
         "metal": "Metal",
         "vulkan": "Vulkan"
       },
+      "defaultAdjustments": {
+        "addCamera": "카메라 추가…",
+        "applyToNonRaw": "JPEG, TIFF, PNG 등 RAW가 아닌 파일에도 적용",
+        "applyToNonRawDesc": "끄면 RAW 파일에만 이 기본값이 적용됩니다. 카메라 JPEG는 보통 이미 처리되고 보정되어 있어 다시 적용하면 과해질 수 있습니다.",
+        "autoLensCorrection": "자동 렌즈 보정",
+        "autoLensCorrectionDesc": "각 이미지의 메타데이터에서 감지한 렌즈 프로필로 왜곡, 색수차, 비네팅을 보정합니다.",
+        "cameraDefaults": "카메라별 기본값",
+        "cameraDefaultsDesc": "특정 카메라의 이미지에 별도의 프리셋을 지정합니다. 여기에 없는 카메라는 위의 기본 프리셋을 사용하며, 렌즈 보정은 모든 카메라에 적용됩니다.",
+        "cameraPresetMissing": "선택한 프리셋이 삭제되어 이 카메라의 이미지가 다시 모든 카메라용 프리셋을 사용합니다.",
+        "description": "편집하지 않은 이미지의 시작 값과 '조정값 초기화'가 돌아가는 값을 설정합니다. 편집한 이미지는 설정이 유지됩니다. 기본값을 설정하면 RAW 썸네일이 카메라 내장 미리보기 대신 새로 만들어져 처음에는 더 느리게 로드됩니다.",
+        "lensCorrection": "렌즈 보정",
+        "noCamerasFound": "다른 카메라를 찾지 못했습니다. 해당 카메라 이미지가 있는 폴더를 열거나, 그 이미지를 편집하는 중에 프리셋을 마우스 오른쪽 버튼으로 클릭하세요.",
+        "noPreset": "없음 (중립)",
+        "preset": "기본 프리셋",
+        "presetDesc": "편집하지 않은 모든 이미지에 적용됩니다. 마스크, 자르기, 변형은 만든 이미지에만 맞기 때문에 제외됩니다.",
+        "presetMissing": "선택한 프리셋이 삭제되어 편집하지 않은 이미지가 다시 중립 값을 사용합니다.",
+        "removeCamera": "카메라 제거",
+        "sameAsAllCameras": "모든 카메라와 동일",
+        "scope": "적용 대상",
+        "sliderReset": "슬라이더 초기화",
+        "sliderResetDefaults": "기본 조정값",
+        "sliderResetDesc": "더블클릭이나 빠른 편집 등으로 슬라이더를 초기화할 때 돌아가는 값입니다. 마스크 슬라이더는 항상 중립 값으로 돌아갑니다.",
+        "sliderResetNeutral": "중립 값",
+        "title": "기본 조정값"
+      },
       "displayColor": {
         "chooseFile": "프로필 선택…",
         "description": "편집 화면을 sRGB에서 모니터 색상 프로필로 변환하여 색상 관리 앱과 일치시킵니다. 내보내기에는 영향을 주지 않습니다.",
@@ -2118,7 +2187,8 @@
           "notFound": "모니터 프로필을 찾을 수 없음 – sRGB로 가정",
           "off": "변환 없음 – 편집 화면은 sRGB 모니터를 가정합니다",
           "srgb": "{{name}}은(는) sRGB와 일치 – 변환 불필요",
-          "unnamed": "이름 없는 프로필"
+          "unnamed": "이름 없는 프로필",
+          "wgpu": "WGPU 직접 렌더링이 켜져 있는 동안에는 적용되지 않습니다"
         },
         "title": "디스플레이 색상 관리"
       },
@@ -2167,7 +2237,7 @@
         "baselineExposure": "기본 노출",
         "baselineExposureAmount": "기본량",
         "baselineExposureAmountDesc": "RAW 파일에 더하는 노출입니다. darktable은 +0.7 EV를 사용합니다.",
-        "baselineExposureDesc": "모든 RAW 파일을 일정량 밝힙니다(darktable의 장면 기준 기본값과 같은 방식). DNG BaselineExposure 태그가 있으면 그 값도 더합니다. 이 옵션이 생기기 전에 편집한 이미지는 영향을 받지 않습니다.",
+        "baselineExposureDesc": "RAW 파일을 일정량 밝힙니다. DNG BaselineExposure 태그가 있으면 대신 그 값을 사용합니다.",
         "colorNr": "기본 색상 노이즈 감소",
         "colorNrDesc": "파이프라인 초기에 교차 양방향 필터를 적용하여 색차 노이즈를 제거합니다. 값이 높을수록 노이즈 감소가 강해집니다.",
         "defaultNonRawTonemapper": "기본 비RAW 톤매퍼",
@@ -2180,7 +2250,7 @@
         "enablePreprocessingNonRaws": "RAW가 아닌 이미지에 활성화",
         "enableTonemapperOverride": "톤매퍼 재정의 활성화",
         "highlightPreservation": "하이라이트 보호 보정",
-        "highlightPreservationDesc": "하이라이트 보호 모드에서 카메라가 낮춘 노출을 RAW 파일에서 읽어 되돌립니다(후지필름 DR200/DR400, 캐논 하이라이트 톤 우선 및 자동 밝기 최적화, 니콘 액티브 D-라이팅, 올림푸스 계조, 펜탁스 DR 확장). 이 옵션이 생기기 전에 편집한 이미지는 영향을 받지 않습니다.",
+        "highlightPreservationDesc": "카메라 하이라이트 보호 모드(후지필름 DR200/DR400, 니콘 액티브 D-라이팅 등)에서 낮춘 노출을 되돌립니다.",
         "highlightRecovery": "RAW 하이라이트 복구",
         "highlightRecoveryDesc": "RAW 파일에서 클리핑된 하이라이트로부터 얼마나 많은 디테일을 복구할지 제어합니다. 값이 높을수록 더 많은 디테일을 복구하지만 보라색 아티팩트가 생길 수 있습니다.",
         "linearOptions": {
@@ -2215,15 +2285,14 @@
       "smallThumbnailRes": "그리드 썸네일 해상도",
       "smallThumbnailResDesc": "라이브러리 그리드에 표시되는 썸네일의 해상도입니다.",
       "staticDesc": "편집기가 고정된 해상도로 이미지를 렌더링합니다. 이 모드는 가장 빠르고 일관성이 있어, 픽셀 단위 정밀 확대보다 부드러운 성능이 우선시되는 저사양 하드웨어에 이상적입니다.",
-      "staticPreviewRes": "정적 미리보기 해상도",
-      "staticPreviewResDesc": "자르기 모드, 렌즈 보정, 원근 도구 등 정적 미리보기의 해상도를 설정합니다. 메인 편집기 미리보기에는 영향을 주지 않습니다.",
       "threads": "스레드",
       "thumbnailRes": "썸네일 해상도",
       "thumbnailResDesc": "생성되는 라이브러리 썸네일의 해상도를 결정합니다. 값이 높을수록 로딩 중 더 선명한 이미지를 제공합니다.",
       "title": "처리 엔진",
       "wgpu": "WGPU 직접 렌더링",
       "wgpuDescAndroid": "브라우저 인코딩을 우회하여 즉각적으로 반응하는 실시간 미리보기를 제공합니다. (Android에서 비활성화됨: 네이티브 WGPU 서피스 생성이 현재 모바일 웹뷰와 함께 지원되지 않습니다.)",
-      "wgpuDescLinux": "브라우저 인코딩을 우회하여 즉각적으로 반응하는 실시간 미리보기를 제공합니다. (Linux에서 비활성화됨: Tauri는 웹뷰에 GTK를 사용하는데, 이는 동일한 X11 서피스에서 WGPU와 충돌하여 깜박임을 유발합니다.)",
+      "wgpuDescLinuxExperimental": "Linux에서는 실험적 기능이며 불안정할 수 있습니다.",
+      "wgpuDescLinuxX11": "X11에서는 사용할 수 없습니다.",
       "wgpuDescRecommended": "브라우저 인코딩을 우회하여 즉각적으로 반응하는 실시간 미리보기를 제공합니다. 성능을 위해 적극 권장합니다.",
       "wgpuLabel": "직접 WGPU 렌더링 활성화",
       "workerThreads": "썸네일 워커 스레드",
@@ -2265,6 +2334,7 @@
         "mediapipe": "AI 얼굴 마스크를 구동하는 빠른 얼굴 랜드마크 및 분할 모델에 감사드립니다.",
         "negpy": "네거티브 변환 로직에 영감을 주었습니다.",
         "nind": "RapidRAW의 AI 노이즈 감소 기능을 구동하는 AI 모델을 제공해 주었습니다.",
+        "span": "RapidRAW의 AI 2배 확대 기능인 RapidRes의 기본 AI 모델로, RapidRAW가 자체 RAW 처리에 맞게 미세 조정했습니다 (Philip Hofmann 제작, CC BY 4.0).",
         "rawler": "이 프로젝트의 RAW 파일 처리 기반이 되는 훌륭한 Rust 크레이트를 제공해 주었습니다.",
         "sam2": "AI 피사체 감지 기능에 사용되는 파운데이션 모델을 제공해 주었습니다.",
         "spektrafilm": "RapidRAW의 내장 필름 에뮬레이션을 구동하는, Andrea Volpato의 스펙트럼 기반 필름 에뮬레이션 LUT를 제공해 주셔서. CC BY-SA 4.0 라이선스입니다.",
@@ -2340,13 +2410,11 @@
     "bottomBar": {
       "imagesSelected": "이미지 {{total}}개 중 {{current}}개 선택됨",
       "tooltips": {
-        "collapseFilmstrip": "필름스트립 접기",
         "collapseLeft": "왼쪽 패널 접기",
         "collapseRight": "오른쪽 패널 접기",
         "copyPasteSettings": "설정 복사 및 붙여넣기",
         "copySettings": "설정 복사",
         "customZoom": "클릭하여 사용자 지정 확대/축소 비율 입력",
-        "expandFilmstrip": "필름스트립 펼치기",
         "expandLeft": "왼쪽 패널 펼치기",
         "expandRight": "오른쪽 패널 펼치기",
         "export": "내보내기",
@@ -2355,7 +2423,9 @@
         "rateStars_one": "1점 평가",
         "rateStars_other": "{{count}}점 평가",
         "resetZoom": "창에 맞게 확대/축소 초기화",
-        "selectToRate": "평가할 이미지를 선택하세요"
+        "selectToRate": "평가할 이미지를 선택하세요",
+        "sortFilmstripByFolder": "필름스트립을 폴더별로 정렬",
+        "sortFilmstripByName": "필름스트립을 이름순으로 정렬"
       },
       "zoomLabel": "확대/축소",
       "zoomLabelReset": "확대/축소 초기화"

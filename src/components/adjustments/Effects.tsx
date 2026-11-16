@@ -19,22 +19,24 @@ import {
   getRelightLightColor,
   MotionBlurLayer,
   MotionBlurType,
+  areSectionPropsEqual,
 } from '../../utils/adjustments';
 import Dropdown from '../ui/Dropdown';
-import LUTControl from '../ui/LUTControl';
+import LUTControl from './LUTControl';
 import ColorField, { normalizeHexColor, useParsedTextField } from '../ui/ColorField';
 import { ColorSwatch } from './Color';
-import { AppSettings } from '../ui/AppProperties';
+import { AppSettings } from '../../types/settings';
 import Text from '../ui/Text';
 import AdjustmentSubSection from './AdjustmentSubSection';
 import { TextVariants } from '../../types/typography';
-import { DepthRangePicker } from '../ui/DepthRangePicker';
+import { DepthRangePicker } from './DepthRangePicker';
+import DepthScope from './depthScope/DepthScope';
+import { ScenePatch } from './depthScope/scene';
 import { selectAiModelDownloadStatus, useProcessStore } from '../../store/useProcessStore';
 import { useSettingsStore } from '../../store/useSettingsStore';
 import { canvasToolState, useEditorStore } from '../../store/useEditorStore';
 import { useContextMenu } from '../../context/ContextMenuContext';
 import { useEditorActions } from '../../hooks/useEditorActions';
-import { areSectionPropsEqual } from '../../utils/adjustments';
 
 interface EffectsPanelProps {
   adjustments: Adjustments;
@@ -251,6 +253,10 @@ function EffectsPanel({
         ...prev,
         relightNormalMap: b64,
       }));
+      const { relightEnabled, relightLights } = useEditorStore.getState().adjustments;
+      if (relightEnabled) {
+        focusRelightLight(relightLights);
+      }
     } catch (e) {
       toast.error(`Failed to generate normal map: ${e}`);
       setAdjustments((prev: Partial<Adjustments>) => ({ ...prev, relightEnabled: false }));
@@ -291,6 +297,10 @@ function EffectsPanel({
     } finally {
       setIsGeneratingMotionDepth(false);
     }
+  };
+
+  const handleScenePatch = (patch: ScenePatch) => {
+    setAdjustments((prev: Partial<Adjustments>) => ({ ...prev, ...patch }));
   };
 
   const handleAdjustmentChange = (key: string, value: boolean | number | string) => {
@@ -339,9 +349,10 @@ function EffectsPanel({
     handleAdjustmentChange(Effect.RelightEnabled, enabled);
     if (!enabled) {
       setEditor({ isRelightPickerActive: false });
-    }
-    if (enabled && !adjustments.relightNormalMap) {
+    } else if (!adjustments.relightNormalMap) {
       handleGenerateRelightNormalMap();
+    } else {
+      focusRelightLight(adjustments.relightLights);
     }
   };
 
@@ -371,14 +382,27 @@ function EffectsPanel({
     });
   };
 
-  const handleLightChange = (key: keyof RelightLight, value: number | string) => {
+  const focusRelightLight = (lights: Array<RelightLight> = []) => {
+    if (!lights.length) {
+      handleAddLight();
+      return;
+    }
+    setEditor({
+      activeRelightLightId: lights[0].id,
+      ...canvasToolState({ isRelightPickerActive: true }),
+    });
+  };
+
+  const handleLightPatch = (patch: Partial<RelightLight>) => {
     setAdjustments((prev: Partial<Adjustments>) => ({
       ...prev,
       relightLights: (prev.relightLights || []).map((light: RelightLight) =>
-        light.id === activeRelightLightId ? { ...light, [key]: value } : light,
+        light.id === activeRelightLightId ? { ...light, ...patch } : light,
       ),
     }));
   };
+
+  const handleLightChange = (key: keyof RelightLight, value: number | string) => handleLightPatch({ [key]: value });
 
   const handleLightSliderChange = (key: keyof RelightLight) => (e: SliderChangeEvent) =>
     handleLightChange(key, parseInt(String(e.target.value), 10));
@@ -445,6 +469,7 @@ function EffectsPanel({
           title={t('adjustments.effects.creative')}
         >
           <Slider
+            resetKey="glowAmount"
             label={t('adjustments.effects.glow')}
             max={100}
             min={0}
@@ -455,6 +480,7 @@ function EffectsPanel({
           />
 
           <Slider
+            resetKey="halationAmount"
             label={t('adjustments.effects.halation')}
             max={100}
             min={0}
@@ -468,6 +494,7 @@ function EffectsPanel({
 
           {!isForMask && (
             <Slider
+              resetKey="flareAmount"
               label={t('adjustments.effects.lightFlares')}
               max={100}
               min={0}
@@ -490,6 +517,7 @@ function EffectsPanel({
         >
           <div className="space-y-4">
             <Slider
+              resetKey="motionBlurAmount"
               label={t('adjustments.effects.amount')}
               max={100}
               min={0}
@@ -501,6 +529,7 @@ function EffectsPanel({
 
             {(adjustments.motionBlurType ?? 'linear') === 'linear' && (
               <Slider
+                resetKey="motionBlurAngle"
                 label={t('adjustments.effects.motionBlurAngle')}
                 max={90}
                 min={-90}
@@ -513,6 +542,7 @@ function EffectsPanel({
             )}
 
             <Slider
+              resetKey="motionBlurHighlights"
               label={t('adjustments.effects.motionBlurHighlights')}
               max={100}
               min={0}
@@ -573,17 +603,34 @@ function EffectsPanel({
                 {isGeneratingMotionDepth ? (
                   <MapGenerationStatus label={t('editor.ai.generatingDepthMap')} />
                 ) : (
-                  <Slider
-                    label={t('adjustments.effects.amount')}
-                    max={100}
-                    min={0}
-                    defaultValue={50}
-                    onChange={(e: SliderChangeEvent) => handleAdjustmentChange(Effect.MotionBlurDepth, e.target.value)}
-                    step={1}
-                    value={adjustments.motionBlurDepth ?? 50}
-                    onDragStateChange={onDragStateChange}
-                    fillOrigin="min"
-                  />
+                  <>
+                    {adjustments.motionBlurDepthEnabled && (
+                      <DepthScope
+                        mapKey="motionBlurDepthMap"
+                        scene={{
+                          kind: 'motion',
+                          amount: adjustments.motionBlurAmount ?? 0,
+                          parallax: adjustments.motionBlurDepth ?? 50,
+                          angle: adjustments.motionBlurAngle ?? 0,
+                          radial: adjustments.motionBlurType === 'zoom',
+                        }}
+                      />
+                    )}
+                    <Slider
+                      resetKey="motionBlurDepth"
+                      label={t('adjustments.effects.amount')}
+                      max={100}
+                      min={0}
+                      defaultValue={50}
+                      onChange={(e: SliderChangeEvent) =>
+                        handleAdjustmentChange(Effect.MotionBlurDepth, e.target.value)
+                      }
+                      step={1}
+                      value={adjustments.motionBlurDepth ?? 50}
+                      onDragStateChange={onDragStateChange}
+                      fillOrigin="min"
+                    />
+                  </>
                 )}
               </SpatialEffect>
             )}
@@ -610,6 +657,7 @@ function EffectsPanel({
                   ) : (
                     <>
                       <Slider
+                        resetKey="lensBlurAmount"
                         label={t('adjustments.effects.amount')}
                         max={100}
                         min={0}
@@ -624,6 +672,7 @@ function EffectsPanel({
                       />
 
                       <Slider
+                        resetKey="lensBlurDiffusion"
                         label={t('adjustments.effects.lensDiffusion')}
                         max={100}
                         min={0}
@@ -646,15 +695,31 @@ function EffectsPanel({
                         }
                       />
 
+                      {adjustments.lensBlurEnabled && (
+                        <DepthScope
+                          mapKey="lensBlurDepthMap"
+                          scene={{
+                            kind: 'lensBlur',
+                            minDepth: adjustments.lensBlurMinDepth ?? 10,
+                            maxDepth: adjustments.lensBlurMaxDepth ?? 90,
+                            minFade: adjustments.lensBlurMinFade ?? 10,
+                            maxFade: adjustments.lensBlurMaxFade ?? 10,
+                            amount: adjustments.lensBlurAmount ?? 50,
+                          }}
+                          onChange={handleScenePatch}
+                          onDragStateChange={onDragStateChange}
+                        />
+                      )}
+
                       <DepthRangePicker
-                        minDepth={100 - (adjustments.lensBlurMaxDepth ?? 100)}
-                        maxDepth={100 - (adjustments.lensBlurMinDepth ?? 20)}
-                        minFade={adjustments.lensBlurMaxFade ?? 20}
-                        maxFade={adjustments.lensBlurMinFade ?? 20}
-                        defaultMinDepth={0}
-                        defaultMaxDepth={80}
-                        defaultMinFade={20}
-                        defaultMaxFade={20}
+                        minDepth={100 - (adjustments.lensBlurMaxDepth ?? 90)}
+                        maxDepth={100 - (adjustments.lensBlurMinDepth ?? 10)}
+                        minFade={adjustments.lensBlurMaxFade ?? 10}
+                        maxFade={adjustments.lensBlurMinFade ?? 10}
+                        defaultMinDepth={10}
+                        defaultMaxDepth={90}
+                        defaultMinFade={10}
+                        defaultMaxFade={10}
                         onChange={(values: {
                           minDepth: number;
                           maxDepth: number;
@@ -685,18 +750,21 @@ function EffectsPanel({
                     ) : (
                       <>
                         <Slider
+                          resetKey="relightAmbient"
                           label={t('adjustments.effects.relightAmbient')}
                           max={100}
                           min={-100}
+                          defaultValue={-50}
                           onChange={(e: SliderChangeEvent) =>
                             handleAdjustmentChange(Effect.RelightAmbient, e.target.value)
                           }
                           step={1}
-                          value={adjustments.relightAmbient ?? 0}
+                          value={adjustments.relightAmbient ?? -50}
                           onDragStateChange={onDragStateChange}
                         />
 
                         <Slider
+                          resetKey="relightSoftness"
                           label={t('adjustments.effects.relightSoftness')}
                           max={100}
                           min={0}
@@ -711,6 +779,7 @@ function EffectsPanel({
                         />
 
                         <Slider
+                          resetKey="relightShine"
                           label={t('adjustments.effects.relightShine')}
                           max={100}
                           min={0}
@@ -730,6 +799,7 @@ function EffectsPanel({
 
                         {adjustments.relightShadows && (
                           <Slider
+                            resetKey="relightShadowSoftness"
                             label={t('adjustments.effects.relightShadowSoftness')}
                             max={100}
                             min={0}
@@ -817,7 +887,7 @@ function EffectsPanel({
                                 label={t('adjustments.effects.relightIntensity')}
                                 max={100}
                                 min={0}
-                                defaultValue={60}
+                                defaultValue={40}
                                 onChange={handleLightSliderChange('intensity')}
                                 step={1}
                                 value={activeLight.intensity}
@@ -827,6 +897,19 @@ function EffectsPanel({
 
                               {activeLight.type !== 'directional' && (
                                 <>
+                                  <DepthScope
+                                    mapKey="relightNormalMap"
+                                    scene={{
+                                      kind: 'relight',
+                                      lights: relightLights,
+                                      activeId: activeLight.id,
+                                      ambient: adjustments.relightAmbient ?? -50,
+                                      softness: adjustments.relightSoftness ?? 25,
+                                    }}
+                                    onChange={handleLightPatch}
+                                    onDragStateChange={onDragStateChange}
+                                  />
+
                                   <Slider
                                     label={t('adjustments.effects.relightDepth')}
                                     max={100}
@@ -952,6 +1035,7 @@ function EffectsPanel({
                   ) : (
                     <>
                       <Slider
+                        resetKey="fogAmount"
                         label={t('adjustments.effects.amount')}
                         max={100}
                         min={0}
@@ -963,7 +1047,25 @@ function EffectsPanel({
                         fillOrigin="min"
                       />
 
+                      {adjustments.fogEnabled && (
+                        <DepthScope
+                          mapKey="fogDepthMap"
+                          scene={{
+                            kind: 'fog',
+                            amount: adjustments.fogAmount ?? 50,
+                            start: adjustments.fogStart ?? 0,
+                            density: adjustments.fogDensity ?? 50,
+                            height: adjustments.fogHeight ?? 0,
+                            temperature: adjustments.fogTemperature ?? 0,
+                            tint: adjustments.fogTint ?? 0,
+                          }}
+                          onChange={handleScenePatch}
+                          onDragStateChange={onDragStateChange}
+                        />
+                      )}
+
                       <Slider
+                        resetKey="fogStart"
                         label={t('adjustments.effects.fogStart')}
                         max={100}
                         min={0}
@@ -976,6 +1078,7 @@ function EffectsPanel({
                       />
 
                       <Slider
+                        resetKey="fogDensity"
                         label={t('adjustments.effects.fogDensity')}
                         max={100}
                         min={0}
@@ -988,6 +1091,7 @@ function EffectsPanel({
                       />
 
                       <Slider
+                        resetKey="fogHeight"
                         label={t('adjustments.effects.fogHeight')}
                         max={100}
                         min={0}
@@ -1000,6 +1104,7 @@ function EffectsPanel({
                       />
 
                       <Slider
+                        resetKey="fogVariation"
                         label={t('adjustments.effects.fogVariation')}
                         max={100}
                         min={0}
@@ -1012,6 +1117,7 @@ function EffectsPanel({
                       />
 
                       <Slider
+                        resetKey="fogGlow"
                         label={t('adjustments.effects.glow')}
                         max={100}
                         min={0}
@@ -1024,6 +1130,7 @@ function EffectsPanel({
                       />
 
                       <Slider
+                        resetKey="fogTemperature"
                         label={t('adjustments.color.temperature')}
                         max={100}
                         min={-100}
@@ -1037,6 +1144,7 @@ function EffectsPanel({
                       />
 
                       <Slider
+                        resetKey="fogTint"
                         label={t('adjustments.color.tint')}
                         max={100}
                         min={-100}
@@ -1058,7 +1166,7 @@ function EffectsPanel({
               <LUTControl
                 lutPath={adjustments.lutPath || null}
                 lutName={adjustments.lutName || null}
-                lutIntensity={adjustments.lutIntensity || 100}
+                lutIntensity={adjustments.lutIntensity ?? 100}
                 onLutSelect={handleLutSelect}
                 onLutHover={onLutHover}
                 onIntensityChange={handleLutIntensityChange}
@@ -1079,6 +1187,7 @@ function EffectsPanel({
                 onPointerDown={() => setEditor(canvasToolState({ activeCenterMarker: 'vignette' }))}
               >
                 <Slider
+                  resetKey="vignetteAmount"
                   label={t('adjustments.effects.amount')}
                   max={100}
                   min={-100}
@@ -1089,6 +1198,7 @@ function EffectsPanel({
                   onDragStateChange={onDragStateChange}
                 />
                 <Slider
+                  resetKey="vignetteMidpoint"
                   defaultValue={50}
                   label={t('adjustments.effects.midpoint')}
                   max={100}
@@ -1100,6 +1210,7 @@ function EffectsPanel({
                   fillOrigin="min"
                 />
                 <Slider
+                  resetKey="vignetteRoundness"
                   label={t('adjustments.effects.roundness')}
                   max={100}
                   min={-100}
@@ -1109,6 +1220,7 @@ function EffectsPanel({
                   onDragStateChange={onDragStateChange}
                 />
                 <Slider
+                  resetKey="vignetteFeather"
                   defaultValue={50}
                   label={t('adjustments.effects.feather')}
                   max={100}
@@ -1126,6 +1238,7 @@ function EffectsPanel({
           {!hiddenTools.includes('grain') && (
             <AdjustmentSubSection id="grain" order={toolOrder.indexOf('grain')} title={t('adjustments.effects.grain')}>
               <Slider
+                resetKey="grainAmount"
                 label={t('adjustments.effects.amount')}
                 max={100}
                 min={0}
@@ -1135,6 +1248,7 @@ function EffectsPanel({
                 onDragStateChange={onDragStateChange}
               />
               <Slider
+                resetKey="grainSize"
                 defaultValue={25}
                 label={t('adjustments.effects.size')}
                 max={100}
@@ -1146,6 +1260,7 @@ function EffectsPanel({
                 fillOrigin="min"
               />
               <Slider
+                resetKey="grainRoughness"
                 defaultValue={50}
                 label={t('adjustments.effects.roughness')}
                 max={100}

@@ -150,6 +150,8 @@
       "aiDenoise": "AIノイズ除去",
       "classicDenoise": "クラシックノイズ除去",
       "aiDenoiseDetail": "ディテール",
+      "aiUpscale": "RapidRes 2x",
+      "aiUpscaleDetail": "ディテール",
       "blueYellow": "ブルー/イエロー",
       "centre": "中央",
       "chromaticAberration": "色収差",
@@ -165,6 +167,7 @@
       "negativeGreen": "グリーン",
       "negativeRed": "レッド",
       "noiseReduction": "ノイズ低減",
+      "superResolution": "RapidRes",
       "presence": "外観",
       "redCyan": "レッド/シアン",
       "sharpening": "シャープ",
@@ -295,6 +298,12 @@
       "autoAdjust": "自動補正",
       "autoLensCorrection": "自動レンズ補正",
       "autoStraighten": "自動角度補正",
+      "backgroundColor": "背景色",
+      "bgBlack": "黒",
+      "bgDarkGrey": "ダークグレー",
+      "bgLightGrey": "ライトグレー",
+      "bgNeutralGrey": "ニュートラルグレー (18%)",
+      "bgWhite": "白",
       "cancel": "キャンセル",
       "closeViewer": "セカンドウィンドウを閉じる",
       "colorLabel": "カラーラベル",
@@ -324,9 +333,14 @@
       "removeBlackWhite": "白黒を解除",
       "removeDenoise": "ノイズ低減を解除",
       "removeNegativeConversion": "ネガ反転を解除",
+      "removeSuperResolution": "RapidResを解除",
       "resetAdjustments": "補正設定をリセット",
+      "resetToDefaults": "デフォルトにリセット",
+      "resetToNeutral": "ニュートラルにリセット",
       "stitchPanorama": "パノラマ写真を作成",
+      "superResolution": "RapidRes (2x)",
       "tagging": "タグ付け",
+      "themeDefault": "テーマの既定",
       "undo": "元に戻す",
       "unflagged": "フラグなし"
     },
@@ -387,6 +401,8 @@
       "deleteSelected": "選択したもののみ削除",
       "denoise_one": "ノイズ低減",
       "denoise_other": "ノイズ低減",
+      "superResolution_one": "RapidRes (2x)",
+      "superResolution_other": "RapidRes (2x)",
       "duplicateImage": "画像を複製",
       "enable": "有効にする",
       "exportImage_one": "画像を書き出し",
@@ -510,6 +526,7 @@
       "createNewTitle": "新しい生成編集を作成",
       "createNewTooltip": "新しい {{name}} 編集を作成",
       "denoising": "AIノイズ除去を実行中...",
+      "upscaling": "RapidResを実行中...",
       "dropzoneText": "ここにドロップして新しい編集を作成",
       "editSettingsTitle": "編集設定",
       "editsTitle": "編集一覧",
@@ -711,11 +728,13 @@
       "cancel": "キャンセル",
       "drawingActive": "描画中",
       "hint": "垂直または水平であるべき写真の縁に沿って描画します。",
+      "horizontalLine": "水平ガイド {{index}}",
       "linesStatus": "アクティブなガイドライン",
       "toast": {
         "angleRejected": "線の角度が水平または垂直から離れすぎています",
         "maxLines": "垂直線と水平線はそれぞれ最大2本まで許可されています"
-      }
+      },
+      "verticalLine": "垂直ガイド {{index}}"
     },
     "layout": {
       "split": "分割"
@@ -830,6 +849,7 @@
         "focalLength": "焦点距離",
         "iso": "ISO感度",
         "lens": "レンズ",
+        "model": "モデル",
         "shutterSpeed": "シャッタースピード",
         "title": "カメラ情報"
       },
@@ -874,6 +894,8 @@
     },
     "presets": {
       "amount": "適用量",
+      "defaultForAllCameras": "すべてのカメラのデフォルト",
+      "defaultForCamera": "{{camera}} のデフォルト",
       "dialog": {
         "allPresetFiles": "すべてのプリセットファイル",
         "exportAllTitle": "すべてのプリセットを書き出し",
@@ -894,7 +916,11 @@
         "newPreset": "新規プリセット",
         "overwrite": "上書き",
         "renameFolder": "フォルダ名を変更",
-        "sortAll": "すべて名前順に並べ替え"
+        "setDefaultAllCameras": "すべてのカメラのデフォルトに設定",
+        "setDefaultForCamera": "{{camera}} のデフォルトに設定",
+        "sortAll": "すべて名前順に並べ替え",
+        "unsetDefaultAllCameras": "すべてのカメラのデフォルトから外す",
+        "unsetDefaultForCamera": "{{camera}} のデフォルトから外す"
       },
       "status": {
         "empty": "保存されたプリセットはまだありません。作成、インポート、またはコミュニティのプリセットを探してみましょう。",
@@ -929,12 +955,16 @@
         "adjust": "補正",
         "crop": "切り抜き",
         "export": "書き出し",
+        "filmstrip": "フィルムストリップ",
         "info": "情報",
         "inpaint": "インペイント",
         "masks": "マスク",
         "presets": "プリセット",
         "tethering": "テザー撮影"
       }
+    },
+    "toasts": {
+      "embeddedPreview": "RapidRAW はこの RAW ファイルをデコードできなかったため、カメラに埋め込まれた JPEG プレビューを表示・編集しています。本来の RAW より画質が低く、編集の余裕も少なくなります。"
     },
     "toolbar": {
       "history": "履歴",
@@ -1101,6 +1131,10 @@
       "title": "Immich に未送信の編集"
     },
     "export": {
+      "newAlbum": "新しいアルバム…",
+      "newAlbumName": "アルバム名",
+      "createAlbum": "作成",
+      "newAlbumFailed": "アルバムを作成できませんでした: {{error}}",
       "album": "アルバム",
       "destination": "Immich",
       "noAlbum": "アルバムなし",
@@ -1109,16 +1143,19 @@
       "withOriginalDesc": "ローカルフォルダーの画像の場合: オリジナルが編集内容とともにアップロードされ、エクスポートがその上にスタックされます。Immich の画像は常にオリジナルの上にスタックされます。"
     },
     "section": {
+      "albums": "アルバム",
       "empty": "サーバーにアルバムがありません。",
       "error": "Immich に接続できません。",
       "loading": "アルバムを読み込み中…",
       "refresh": "アルバムを更新",
       "timeline": "タイムライン",
-      "title": "Immich"
+      "title": "Immich",
+      "unassigned": "アルバムなし",
+      "unassignedHint": "ここに画像をドロップすると、アルバムに追加せずにアップロードします。"
     },
     "settings": {
       "apiKey": "API キー",
-      "apiKeyDesc": "Immich の「アカウント設定 → API キー」で、次の権限を付けて作成してください: album.read, albumAsset.create, albumAsset.delete, asset.read, asset.view, asset.download, asset.upload, asset.update, asset.delete, stack.read, stack.create, user.read",
+      "apiKeyDesc": "Immich の「アカウント設定 → API キー」で、次の権限を付けて作成してください: album.read, album.create, albumAsset.create, albumAsset.delete, asset.read, asset.view, asset.download, asset.upload, asset.update, asset.delete, stack.read, stack.create, user.read",
       "connected": "{{user}} として接続しました (Immich {{version}})",
       "description": "Immich サーバーの写真をライブラリで閲覧し、そのまま編集できます。オリジナルは開いたときにダウンロードされ、編集内容は Immich に保存されるので、どのコンピューターでも同じに見えます。",
       "keyInFile": "本人だけが読めるファイルに保存されています。利用できる資格情報ストアがありません。KDE の場合は、KDE ウォレットの設定で Secret Service インターフェースを有効にしてから、もう一度保存してください。",
@@ -1136,12 +1173,17 @@
       "pending": "Immich への送信待ちの編集: {{number}}"
     },
     "toasts": {
+      "editsStayLocal": "{{fileName}} は他のユーザーのものなので、Immich は編集を受け付けません。編集内容はこのコンピューターに残ります。",
       "backOnline": "Immich に再び接続でき、すべての編集内容が保存されました。",
       "downloadFailed": "Immich からダウンロードできませんでした: {{error}}",
       "editsConflict": "{{fileName}} は別のコンピューターでも編集されています。あなたの編集内容はそのまま残り、もう一方のバージョンは仮想コピーとして保存されます。",
       "offline": "Immich に接続できません。編集内容はここに保持され、接続が戻りしだい送信されます。",
+      "transferFailed": "Immich に追加できませんでした: {{number}} ({{error}})",
+      "transferred": "Immich に追加しました: {{number}}",
+      "transferring": "Immich に追加中… {{current}}/{{total}}",
       "trashFailed": "Immich のゴミ箱に移動できませんでした: {{error}}",
-      "uploaded": "Immich にアップロードしました: {{number}}"
+      "uploaded": "Immich にアップロードしました: {{number}}",
+      "uploadKeptCopy": "{{fileName}} は別の編集内容で既に Immich にあります。そちらはそのまま残り、あなたの編集は仮想コピーとして保存されます。"
     }
   },
   "library": {
@@ -1150,6 +1192,7 @@
       "failed": "失敗（{{failedCount}}）",
       "kinds": {
         "denoise": "AIノイズ除去中",
+        "upscale": "RapidResで拡大中",
         "depthMap": "深度を解析中",
         "depthMask": "深度マスクを生成中",
         "faceMask": "顔マスクを生成中",
@@ -1443,10 +1486,7 @@
       "originalRatio": "オリジナル比率"
     },
     "thumbnailSize": {
-      "large": "大",
-      "list": "リスト",
-      "medium": "中",
-      "small": "小"
+      "list": "リスト"
     },
     "tooltips": {
       "communityPresets": "コミュニティプリセット",
@@ -1539,6 +1579,7 @@
       "descReplace": "選択したすべての設定を上書きし、残りの設定をデフォルトにリセットします。",
       "groups": {
         "aiDenoise": "AIノイズ除去",
+        "aiUpscale": "RapidRes",
         "blackWhite": "白黒",
         "chromaticAberration": "色収差",
         "clarityDehaze": "明瞭度とかすみの除去",
@@ -1697,7 +1738,6 @@
       "selectManufacturer": "メーカーを選択",
       "title": "レンズ補正",
       "vignetting": "周辺光量",
-      "waitingAutoDetect": "自動検出を待機中...",
       "zoomInTooltip": "拡大",
       "zoomOutTooltip": "縮小"
     },
@@ -1830,6 +1870,7 @@
       "limit": "上限",
       "modals": {
         "aiDenoiseMessage": "AIノイズ除去キャッシュを消去してもよろしいですか？\n\nAIノイズ除去が有効な画像は再度処理する必要があり、1枚あたり数分かかる場合があります。",
+        "aiUpscaleMessage": "RapidResキャッシュを消去してもよろしいですか？\n\nRapidResが有効な画像は再度拡大処理する必要があります。",
         "aiMapsMessage": "深度・法線マップをクリアしてもよろしいですか？\n\nレンズブラー、フォグ、リライトを使用している画像は、次に開いたときにマップを再生成します。",
         "aiMessage": "本当にすべてのアクティブなルートフォルダ内の画像から、AI生成されたタグをすべて削除しますか？\n\n手動で追加したタグには影響しません。この操作は取り消せません。",
         "allMessage": "本当にすべてのアクティブなルートフォルダ内の画像から、AI生成および手動追加されたタグをすべて削除しますか？\n\nこの操作は取り消せません。",
@@ -1857,6 +1898,7 @@
       "show": "表示",
       "statuses": {
         "aiDenoiseSuccess": "AIノイズ除去キャッシュを消去しました。",
+        "aiUpscaleSuccess": "RapidResキャッシュを消去しました。",
         "aiSuccess": "{{count}} 件のファイルを更新しました。AIタグを削除しました。",
         "aiSuccess_one": "{{count}} 件のファイルを更新しました。AIタグを削除しました。",
         "aiSuccess_other": "{{count}} 件のファイルを更新しました。AIタグを削除しました。",
@@ -1873,6 +1915,8 @@
       "storage": {
         "aiDenoise": "AI ノイズ除去",
         "aiDenoiseDesc": "キャッシュされたノイズ除去結果。",
+        "aiUpscale": "RapidRes",
+        "aiUpscaleDesc": "キャッシュされたRapidResの2倍拡大結果。",
         "aiMaps": "深度・法線マップ",
         "aiMapsDesc": "レンズブラー、フォグ、リライトで使用されます。",
         "immich": "Immich",
@@ -2102,6 +2146,31 @@
         "metal": "Metal",
         "vulkan": "Vulkan"
       },
+      "defaultAdjustments": {
+        "addCamera": "カメラを追加…",
+        "applyToNonRaw": "JPEG、TIFF、PNG など RAW 以外のファイルにも適用",
+        "applyToNonRawDesc": "オフの場合、このデフォルトは RAW ファイルにのみ適用されます。カメラ JPEG は通常すでに処理・補正済みのため、再適用すると効きすぎることがあります。",
+        "autoLensCorrection": "自動レンズ補正",
+        "autoLensCorrectionDesc": "各画像のメタデータから検出したレンズプロファイルで、歪曲収差、色収差、周辺減光を補正します。",
+        "cameraDefaults": "カメラ別のデフォルト",
+        "cameraDefaultsDesc": "特定のカメラの画像に専用のプリセットを設定します。ここにないカメラには上のデフォルトのプリセットが適用され、レンズ補正はすべてのカメラに適用されます。",
+        "cameraPresetMissing": "選択したプリセットが削除されたため、このカメラの画像は再びすべてのカメラ用のプリセットを使用します。",
+        "description": "未編集の画像の初期状態と「補正設定をリセット」で戻る値を設定します。編集済みの画像の設定は変わりません。デフォルトを設定すると、RAW のサムネイルはカメラの埋め込みプレビューではなく生成されるため、最初は読み込みが遅くなります。",
+        "lensCorrection": "レンズ補正",
+        "noCamerasFound": "他のカメラが見つかりません。そのカメラの画像があるフォルダを開くか、その画像を編集中にプリセットを右クリックしてください。",
+        "noPreset": "なし（ニュートラル）",
+        "preset": "デフォルトのプリセット",
+        "presetDesc": "未編集のすべての画像に適用されます。マスク、切り抜き、変形は作成した画像にしか合わないため除外されます。",
+        "presetMissing": "選択したプリセットが削除されたため、未編集の画像は再びニュートラル値を使用します。",
+        "removeCamera": "カメラを削除",
+        "sameAsAllCameras": "すべてのカメラと同じ",
+        "scope": "適用対象",
+        "sliderReset": "スライダーのリセット",
+        "sliderResetDefaults": "デフォルトの補正",
+        "sliderResetDesc": "ダブルクリックやスピード編集などでスライダーをリセットしたときに戻る値です。マスクのスライダーは常にニュートラル値に戻ります。",
+        "sliderResetNeutral": "ニュートラル値",
+        "title": "デフォルトの補正"
+      },
       "displayColor": {
         "chooseFile": "プロファイルを選択…",
         "description": "編集ビューを sRGB からモニターのカラープロファイルに変換し、カラーマネジメント対応アプリと一致させます。書き出しには影響しません。",
@@ -2118,7 +2187,8 @@
           "notFound": "モニタープロファイルが見つかりません – sRGB とみなします",
           "off": "変換なし – 編集ビューは sRGB モニターを前提とします",
           "srgb": "{{name}} は sRGB と一致 – 変換は不要です",
-          "unnamed": "名前のないプロファイル"
+          "unnamed": "名前のないプロファイル",
+          "wgpu": "WGPU 直接レンダリングが有効な間は適用されません"
         },
         "title": "ディスプレイのカラーマネジメント"
       },
@@ -2167,7 +2237,7 @@
         "baselineExposure": "ベース露出",
         "baselineExposureAmount": "ベース量",
         "baselineExposureAmountDesc": "RAWファイルに加える露出量です。darktableは+0.7 EVを使用します。",
-        "baselineExposureDesc": "すべてのRAWファイルを一定量明るくします（darktableのシーンリファード既定値と同様）。DNGのBaselineExposureタグがある場合はその値も加えます。このオプションの追加前に編集した画像には影響しません。",
+        "baselineExposureDesc": "RAWファイルを一定量明るくします。DNGのBaselineExposureタグがある場合は、代わりにその値を使います。",
         "colorNr": "カラーノイズ低減 (基本)",
         "colorNrDesc": "パイプラインの初期段階でクロスバイラテラルフィルタを適用し、カラーノイズを除去します。値が大きいほど効果が強まります。",
         "defaultNonRawTonemapper": "標準トーンマッパー (RAW以外)",
@@ -2180,7 +2250,7 @@
         "enablePreprocessingNonRaws": "RAW以外の画像にも適用",
         "enableTonemapperOverride": "トーンマッパーの上書きを有効化",
         "highlightPreservation": "ハイライト保護の補正",
-        "highlightPreservationDesc": "ハイライト保護モードでカメラが抑えた露出を、RAWファイルから読み取って補います（富士フイルム DR200/DR400、キヤノン 高輝度側・階調優先とオートライティングオプティマイザ、ニコン アクティブD-ライティング、オリンパス 階調、ペンタックス Dレンジ補正）。このオプションの追加前に編集した画像には影響しません。",
+        "highlightPreservationDesc": "カメラのハイライト保護モード（富士フイルム DR200/DR400、ニコン アクティブD-ライティングなど）で抑えられた露出を戻します。",
         "highlightRecovery": "RAWハイライト再現",
         "highlightRecoveryDesc": "RAWファイルで白とびしたハイライトから再現する情報のレベルを設定します。値を高くするとディテールが戻りますが、紫色のアーティファクトが発生する場合があります。",
         "linearOptions": {
@@ -2215,15 +2285,14 @@
       "smallThumbnailRes": "グリッドサムネイルの解像度",
       "smallThumbnailResDesc": "ライブラリのグリッドに表示されるサムネイルの解像度。",
       "staticDesc": "画像を固定の解像度でレンダリングします。このモードは最も軽量かつ安定しており、ズーム精度よりも軽快な動作を優先する低スペック環境に最適です。",
-      "staticPreviewRes": "静的プレビュー解像度",
-      "staticPreviewResDesc": "切り抜き、レンズ補正、変形ツールなどを使用する際のプレビュー解像度を設定します。メインエディタのプレビューには影響しません。",
       "threads": "スレッド数",
       "thumbnailRes": "サムネイル解像度",
       "thumbnailResDesc": "生成されるライブラリ用サムネイルの解像度を指定します。高い値にすると、ロード中もシャープに表示されます。",
       "title": "処理エンジン",
       "wgpu": "WGPUダイレクトレンダリング",
       "wgpuDescAndroid": "ブラウザエンコードをバイパスし、即座に反応するプレビューを実現します。（Androidでは無効: モバイルのWebview環境下でのネイティブWGPUサーフェスの作成は現在サポートされていません。）",
-      "wgpuDescLinux": "ブラウザエンコードをバイパスし、即座に反応するプレビューを実現します。（Linuxでは無効: TauriはGTKウェブビューを使用しており、同一X11サーフェス上でWGPUと競合してちらつきが発生するためです。）",
+      "wgpuDescLinuxExperimental": "Linuxでは実験的な機能で、不安定な場合があります。",
+      "wgpuDescLinuxX11": "X11では利用できません。",
       "wgpuDescRecommended": "ブラウザエンコードをバイパスし、即座に反応するライブプレビューを実現します。パフォーマンス向上のため、強く推奨します。",
       "wgpuLabel": "WGPUダイレクトレンダリングを有効化",
       "workerThreads": "サムネイルワーカー数",
@@ -2265,6 +2334,7 @@
         "mediapipe": "AI顔マスクを支える高速な顔ランドマークおよびセグメンテーションモデルに。",
         "negpy": "ネガ反転アルゴリズムのヒントとなりました。",
         "nind": "AIノイズ低減機能を支えるAIモデルを提供しています。",
+        "span": "RapidRAWのAI 2倍拡大機能RapidResのベースとなるAIモデルです。RapidRAWが独自のRAW処理に合わせてファインチューニングしています（Philip Hofmann作、CC BY 4.0）。",
         "rawler": "RAWファイル処理の基盤となる優れたRustライブラリを提供しています。",
         "sam2": "AI被写体検出機能の基盤となるモデルを提供しています。",
         "spektrafilm": "RapidRAW の内蔵フィルムエミュレーションを支える、Andrea Volpato 氏によるスペクトルベースのフィルムエミュレーション LUT を提供してくださったことに。ライセンスは CC BY-SA 4.0 です。",
@@ -2340,13 +2410,11 @@
     "bottomBar": {
       "imagesSelected": "{{total}}枚中 {{current}}枚の画像を選択中",
       "tooltips": {
-        "collapseFilmstrip": "フィルムストリップをたたむ",
         "collapseLeft": "左パネルを折りたたむ",
         "collapseRight": "右パネルを折りたたむ",
         "copyPasteSettings": "補正設定のコピーと貼り付け",
         "copySettings": "補正設定をコピー",
         "customZoom": "クリックしてカスタムのズーム倍率を入力",
-        "expandFilmstrip": "フィルムストリップを展開",
         "expandLeft": "左パネルを展開",
         "expandRight": "右パネルを展開",
         "export": "書き出し",
@@ -2355,7 +2423,9 @@
         "rateStars_one": "星1に評価",
         "rateStars_other": "星 {{count}} に評価",
         "resetZoom": "ズームをウィンドウサイズに合わせる",
-        "selectToRate": "画像を選択して評価を設定"
+        "selectToRate": "画像を選択して評価を設定",
+        "sortFilmstripByFolder": "フィルムストリップをフォルダー順に並べる",
+        "sortFilmstripByName": "フィルムストリップを名前順に並べる"
       },
       "zoomLabel": "ズーム",
       "zoomLabelReset": "ズームをリセット"

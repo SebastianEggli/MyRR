@@ -7,7 +7,8 @@ import { useUIStore } from '../store/useUIStore';
 import { useSettingsStore } from '../store/useSettingsStore';
 import { useLibraryStore } from '../store/useLibraryStore';
 import { Adjustments, COPYABLE_ADJUSTMENT_KEYS } from '../utils/adjustments';
-import { Invokes, Panel } from '../components/ui/AppProperties';
+import { Invokes } from '../types/invokes';
+import { Panel } from '../types/ui';
 import { debouncedSave, getOriginalAdjustments } from './useEditorActions';
 import { globalImageCache } from '../utils/ImageLRUCache';
 import { prepareAdjustmentsPayload } from '../utils/backendPayload';
@@ -207,8 +208,8 @@ export function useImageProcessing(
             const url = URL.createObjectURL(blob);
 
             setEditor((state) => {
-              if (state.interactivePatch && state.interactivePatch.url)
-                setTimeout(() => URL.revokeObjectURL(state.interactivePatch.url), 100);
+              const previousUrl = state.interactivePatch?.url;
+              if (previousUrl) setTimeout(() => URL.revokeObjectURL(previousUrl), 100);
               return {
                 interactivePatch: {
                   url,
@@ -234,8 +235,9 @@ export function useImageProcessing(
             });
 
             setEditor((state) => {
-              if (state.interactivePatch && state.interactivePatch.url) {
-                setTimeout(() => URL.revokeObjectURL(state.interactivePatch.url), 500);
+              const previousUrl = state.interactivePatch?.url;
+              if (previousUrl) {
+                setTimeout(() => URL.revokeObjectURL(previousUrl), 500);
               }
               return { interactivePatch: null };
             });
@@ -333,11 +335,32 @@ export function useImageProcessing(
     [],
   );
 
+  const fittedDisplayMax = useMemo(() => {
+    if (!selectedImage?.width || !selectedImage?.height) return 0;
+    const isSwapped = (adjustments.orientationSteps || 0) % 2 === 1;
+    const width = adjustments.crop ? adjustments.crop.width : isSwapped ? selectedImage.height : selectedImage.width;
+    const height = adjustments.crop ? adjustments.crop.height : isSwapped ? selectedImage.width : selectedImage.height;
+    const containerWidth = baseRenderSize.containerWidth || window.innerWidth;
+    const containerHeight = baseRenderSize.containerHeight || window.innerHeight;
+    if (!width || !height || !containerWidth || !containerHeight) return 0;
+    return Math.max(width, height) * Math.min(containerWidth / width, containerHeight / height);
+  }, [
+    selectedImage?.width,
+    selectedImage?.height,
+    adjustments.crop,
+    adjustments.orientationSteps,
+    baseRenderSize.containerWidth,
+    baseRenderSize.containerHeight,
+  ]);
+
   const calculateTargetRes = useCallback(
-    (displayMax: number = displaySize.width === 0 ? 0 : Math.max(displaySize.width, displaySize.height)) => {
+    (displayMax: number = fittedDisplayMax * (transformWrapperRef.current?.instance.transformState?.scale || 1)) => {
       const dpr = getDevicePixelRatio();
+      const upscale = adjustments.aiUpscaleEnabled ? 2 : 1;
       const originalMax =
-        originalSize.width > 0 && originalSize.height > 0 ? Math.max(originalSize.width, originalSize.height) : 0;
+        originalSize.width > 0 && originalSize.height > 0
+          ? Math.max(originalSize.width, originalSize.height) * upscale
+          : 0;
       return calculateTargetResolution(
         appSettings,
         displayMax,
@@ -345,7 +368,7 @@ export function useImageProcessing(
         originalMax,
       );
     },
-    [appSettings, displaySize.width, displaySize.height, originalSize],
+    [appSettings, fittedDisplayMax, transformWrapperRef, originalSize, adjustments.aiUpscaleEnabled],
   );
 
   const uncroppedTargetRes = useMemo(() => {
@@ -431,7 +454,6 @@ export function useImageProcessing(
     return () => {
       requestHiFiZoom.cancel();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     activeView,
     displaySize.width,
@@ -533,7 +555,6 @@ export function useImageProcessing(
     return () => {
       if (dragIdleTimer.current) clearTimeout(dragIdleTimer.current);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     activeView,
     adjustments,

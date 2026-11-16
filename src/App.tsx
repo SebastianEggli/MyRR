@@ -12,7 +12,6 @@ import {
   useSensors,
   Modifier,
   MeasuringStrategy,
-  pointerWithin,
 } from '@dnd-kit/core';
 import clsx from 'clsx';
 
@@ -25,9 +24,12 @@ import AppModals from './components/modals/AppModals';
 
 import SidePanelArea from './components/panel/SidePanelArea';
 import { PANEL_ICONS } from './components/panel/PanelSwitcher';
+import DockedFilmstrip from './components/panel/DockedFilmstrip';
+import { getDropPlacement, layoutCollisionDetection, type LayoutDropData } from './utils/layoutDrop';
 import Controls from './components/panel/right/ControlsPanel';
 import MetadataPanel from './components/panel/right/MetadataPanel';
 import CropPanel from './components/panel/right/CropPanel';
+import AdjustmentSliderResetProvider from './components/adjustments/AdjustmentSliderResetProvider';
 import MasksPanel from './components/panel/right/MasksPanel';
 import AIPanel from './components/panel/right/AIPanel';
 import PresetsPanel from './components/panel/right/PresetsPanel';
@@ -56,12 +58,12 @@ import { useTauriListeners } from './hooks/useTauriListeners';
 import { transferFiles, useFileOperations } from './hooks/useFileOperations';
 import { useAppContextMenus } from './hooks/useAppContextMenus';
 import { useSortedLibrary } from './hooks/useSortedLibrary';
-import { getEditorImageList } from './utils/imageGrouping';
 import { useImagePreloader } from './hooks/useImagePreloader';
+import { getEditorImageList } from './utils/imageGrouping';
 import { useAppNavigation } from './hooks/useAppNavigation';
 import { useExternalEditSession } from './hooks/useExternalEditSession';
-import ExternalEditBar from './components/ui/ExternalEditBar';
-import { Status } from './components/ui/ExportImportProperties';
+import ExternalEditBar from './components/panel/ExternalEditBar';
+import { Status } from './types/export';
 
 import { useEditorActions } from './hooks/useEditorActions';
 import { useLibraryActions } from './hooks/useLibraryActions';
@@ -71,21 +73,15 @@ import { useAppInitialization } from './hooks/useAppInitialization';
 import { useAndroidBackHandler } from './hooks/useAndroidBackHandler';
 import './i18n';
 
-import {
-  Invokes,
-  ImageFile,
-  LibraryViewMode,
-  Panel,
-  PanelRegion,
-  Theme,
-  ThumbnailSize,
-  ThumbnailAspectRatio,
-} from './components/ui/AppProperties';
+import { Invokes } from './types/invokes';
+import { ImageFile } from './types/library';
+import { LibraryViewMode, Theme, ThumbnailSize, ThumbnailAspectRatio } from './types/settings';
+import { Panel, PanelRegion } from './types/ui';
 
 import ImageProcessingManager from './components/managers/ImageProcessingManager';
 import ImageLoaderManager from './components/managers/ImageLoaderManager';
-import { isImmichAlbumId } from './components/immich/immichApi';
-import { useImmichEvents } from './components/immich/useImmichEvents';
+import { isImmichAlbumId } from './utils/immichApi';
+import { useImmichEvents } from './hooks/useImmichEvents';
 
 const DND_MEASURING = { droppable: { strategy: MeasuringStrategy.Always } };
 
@@ -177,7 +173,8 @@ function App() {
     setUI,
     setPanel,
     setLayoutDragItem,
-    movePanel,
+    dropPanel,
+    dockFilmstripToBottom,
   } = useUIStore(
     useShallow((state) => ({
       activeView: state.activeView,
@@ -195,7 +192,8 @@ function App() {
       setUI: state.setUI,
       setPanel: state.setPanel,
       setLayoutDragItem: state.setLayoutDragItem,
-      movePanel: state.movePanel,
+      dropPanel: state.dropPanel,
+      dockFilmstripToBottom: state.dockFilmstripToBottom,
     })),
   );
 
@@ -209,16 +207,15 @@ function App() {
     })),
   );
 
-  const { selectedImage, activeMaskContainerId, activeAiPatchContainerId, hasRenderedFirstFrame, setEditor } =
-    useEditorStore(
-      useShallow((state) => ({
-        selectedImage: state.selectedImage,
-        activeMaskContainerId: state.activeMaskContainerId,
-        activeAiPatchContainerId: state.activeAiPatchContainerId,
-        hasRenderedFirstFrame: state.hasRenderedFirstFrame,
-        setEditor: state.setEditor,
-      })),
-    );
+  const { selectedImage, activeMaskContainerId, activeAiPatchContainerId, wgpuPhase, setEditor } = useEditorStore(
+    useShallow((state) => ({
+      selectedImage: state.selectedImage,
+      activeMaskContainerId: state.activeMaskContainerId,
+      activeAiPatchContainerId: state.activeAiPatchContainerId,
+      wgpuPhase: state.wgpuPhase,
+      setEditor: state.setEditor,
+    })),
+  );
 
   const { exportState, setExportState } = useProcessStore(
     useShallow((state) => ({
@@ -359,6 +356,7 @@ function App() {
     handleSelectSubfolder,
     handleSelectAlbum,
     handleOpenFolder,
+    handleOpenContainingFolder,
     handleNavBack,
     handleNavForward,
     handleContinueSession,
@@ -371,7 +369,7 @@ function App() {
     externalEditSession,
     isFinishing: isExternalEditFinishing,
     finishExternalEdit,
-  } = useExternalEditSession(handleImageSelect);
+  } = useExternalEditSession(handleImageSelect, handleOpenContainingFolder);
 
   const {
     handleRate,
@@ -484,6 +482,7 @@ function App() {
     handleSelectSubfolder,
     refreshImageList: handleLibraryRefresh,
     markGenerated,
+    prevAdjustmentsRef,
   });
 
   useAndroidBackHandler();
@@ -765,11 +764,19 @@ function App() {
             />
           );
         case Panel.Adjustments:
-          return <Controls />;
+          return (
+            <AdjustmentSliderResetProvider>
+              <Controls />
+            </AdjustmentSliderResetProvider>
+          );
         case Panel.Metadata:
           return <MetadataPanel />;
         case Panel.Crop:
-          return <CropPanel />;
+          return (
+            <AdjustmentSliderResetProvider>
+              <CropPanel />
+            </AdjustmentSliderResetProvider>
+          );
         case Panel.Masks:
           return <MasksPanel />;
         case Panel.Ai:
@@ -778,6 +785,19 @@ function App() {
           return <PresetsPanel onNavigateToCommunity={() => setUI({ activeView: 'community' })} />;
         case Panel.Tethering:
           return <TetheringPanel onLibraryRefresh={handleLibraryRefresh} onImageSelect={handleImageSelect} />;
+        case Panel.Filmstrip:
+          return (
+            <DockedFilmstrip
+              imageList={sortedImageList}
+              groupBadgeInfo={groupBadgeInfo}
+              onClearSelection={handleClearSelection}
+              onContextMenu={handleThumbnailContextMenu}
+              onEmptyAreaContextMenu={handleMainLibraryContextMenu}
+              onImageSelect={handleImageClick}
+              onRequestThumbnails={requestThumbnails}
+              thumbnailAspectRatio={thumbnailAspectRatio}
+            />
+          );
         default:
           return null;
       }
@@ -801,6 +821,14 @@ function App() {
       appSettings,
       handleSettingsChange,
       rootPaths,
+      sortedImageList,
+      handleClearSelection,
+      handleThumbnailContextMenu,
+      handleMainLibraryContextMenu,
+      handleImageClick,
+      requestThumbnails,
+      thumbnailAspectRatio,
+      groupBadgeInfo,
     ],
   );
 
@@ -809,10 +837,7 @@ function App() {
 
   const shouldHideFolderTree = useCompactPanels || useWidePanels;
   const isWgpuActive =
-    activeView === 'editor' &&
-    appSettings?.useWgpuRenderer !== false &&
-    selectedImage?.isReady &&
-    hasRenderedFirstFrame;
+    activeView === 'editor' && appSettings?.useWgpuRenderer !== false && !!selectedImage && wgpuPhase === 'live';
   const useMacWindowShell = osPlatform === 'macos' && !appSettings?.decorations && !isWindowFullScreen && !isFullScreen;
 
   const layoutSensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
@@ -841,13 +866,28 @@ function App() {
     }
   };
 
-  const handleDragEnd = (e: any) => {
+  const resetDragState = () => {
     setLayoutDragItem(null);
     setActiveImageDragItem(null);
+  };
+
+  const handleDragEnd = (e: any) => {
+    resetDragState();
     const { active, over } = e;
 
-    if (active.data.current?.type === 'layout-tab' && over?.data.current?.type === 'layout-region') {
-      movePanel(active.data.current.panel as Panel, over.data.current.region as PanelRegion);
+    if (active.data.current?.type === 'layout-tab' && over) {
+      const panel = active.data.current.panel as Panel;
+      const dropData = over.data.current;
+      if (dropData?.type === 'layout-region' || dropData?.type === 'layout-split') {
+        const target = dropData as LayoutDropData;
+        dropPanel(panel, {
+          region: target.region,
+          split: target.type === 'layout-split',
+          placement: getDropPlacement(target.side, over.rect, active.rect.current.translated),
+        });
+      } else if (dropData?.type === 'layout-bottom' && panel === Panel.Filmstrip) {
+        dockFilmstripToBottom();
+      }
     }
 
     if (appSettings?.hideCollapsedPanels && active.data.current?.type === 'layout-tab' && over?.data.current?.region) {
@@ -931,7 +971,8 @@ function App() {
             sensors={layoutSensors}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
-            collisionDetection={pointerWithin}
+            onDragCancel={resetDragState}
+            collisionDetection={layoutCollisionDetection}
             measuring={DND_MEASURING}
           >
             <div className="flex flex-row grow h-full min-h-0">

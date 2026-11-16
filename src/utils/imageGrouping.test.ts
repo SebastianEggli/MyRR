@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { LibraryViewMode } from '../components/ui/AppProperties';
+import { LibraryViewMode } from '../types/settings';
 import { getEditorImageList, getFolderOfPath, groupImagesByFolder, orderImagesByFolder } from './imageGrouping';
 
 const img = (path: string) => ({ path });

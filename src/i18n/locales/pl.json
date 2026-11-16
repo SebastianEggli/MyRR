@@ -150,6 +150,8 @@
       "aiDenoise": "Odszumianie AI",
       "classicDenoise": "Klasyczne odszumianie",
       "aiDenoiseDetail": "Szczegóły",
+      "aiUpscale": "RapidRes 2x",
+      "aiUpscaleDetail": "Szczegóły",
       "blueYellow": "Niebieski/Żółty",
       "centre": "Środek",
       "chromaticAberration": "Aberracja chromatyczna",
@@ -165,6 +167,7 @@
       "negativeGreen": "Zielony",
       "negativeRed": "Czerwony",
       "noiseReduction": "Redukcja szumu",
+      "superResolution": "RapidRes",
       "presence": "Prezencja",
       "redCyan": "Czerwony/Cyjan",
       "sharpening": "Wyostrzanie",
@@ -295,6 +298,12 @@
       "autoAdjust": "Auto-korekta",
       "autoLensCorrection": "Automatyczna korekcja obiektywu",
       "autoStraighten": "Automatyczne prostowanie",
+      "backgroundColor": "Kolor tła",
+      "bgBlack": "Czarny",
+      "bgDarkGrey": "Ciemnoszary",
+      "bgLightGrey": "Jasnoszary",
+      "bgNeutralGrey": "Neutralny szary (18%)",
+      "bgWhite": "Biały",
       "cancel": "Anuluj",
       "closeViewer": "Zamknij drugie okno",
       "colorLabel": "Etykieta koloru",
@@ -326,9 +335,14 @@
       "removeBlackWhite": "Usuń konwersję czarno-białą",
       "removeDenoise": "Usuń odszumianie",
       "removeNegativeConversion": "Usuń konwersję negatywu",
+      "removeSuperResolution": "Usuń RapidRes",
       "resetAdjustments": "Resetuj ustawienia",
+      "resetToDefaults": "Resetuj do domyślnych",
+      "resetToNeutral": "Resetuj do neutralnych",
       "stitchPanorama": "Złóż panoramę",
+      "superResolution": "RapidRes (2x)",
       "tagging": "Tagowanie",
+      "themeDefault": "Domyślny motywu",
       "undo": "Cofnij",
       "unflagged": "Bez oznaczenia"
     },
@@ -411,6 +425,10 @@
       "denoise_many": "Odszumianie",
       "denoise_one": "Odszumianie",
       "denoise_other": "Odszumianie",
+      "superResolution_few": "RapidRes (2x)",
+      "superResolution_many": "RapidRes (2x)",
+      "superResolution_one": "RapidRes (2x)",
+      "superResolution_other": "RapidRes (2x)",
       "duplicateImage": "Duplikuj obraz",
       "enable": "Włącz",
       "exportImage_few": "Eksportuj {{count}} obrazy",
@@ -544,6 +562,7 @@
       "createNewTitle": "Utwórz nową edycję generatywną",
       "createNewTooltip": "Utwórz nową edycję {{name}}",
       "denoising": "Trwa odszumianie AI...",
+      "upscaling": "Trwa RapidRes...",
       "dropzoneText": "Upuść tutaj, aby utworzyć nową edycję",
       "editSettingsTitle": "Ustawienia edycji",
       "editsTitle": "Edycje",
@@ -760,11 +779,13 @@
       "cancel": "Anuluj",
       "drawingActive": "Rysowanie aktywne",
       "hint": "Rysuj wzdłuż krawędzi na zdjęciu, które powinny być pionowe lub poziome.",
+      "horizontalLine": "Pozioma linia pomocnicza {{index}}",
       "linesStatus": "Aktywne linie pomocnicze",
       "toast": {
         "angleRejected": "Kąt linii jest zbyt odległy od poziomu lub pionu",
         "maxLines": "Dozwolone są maksymalnie 2 linie pionowe i 2 poziome"
-      }
+      },
+      "verticalLine": "Pionowa linia pomocnicza {{index}}"
     },
     "layout": {
       "split": "Podziel"
@@ -881,6 +902,7 @@
         "focalLength": "Ogniskowa",
         "iso": "ISO",
         "lens": "Obiektyw",
+        "model": "Model",
         "shutterSpeed": "Czas otwarcia migawki",
         "title": "Szczegóły aparatu"
       },
@@ -925,6 +947,8 @@
     },
     "presets": {
       "amount": "Siła",
+      "defaultForAllCameras": "Domyślny dla wszystkich aparatów",
+      "defaultForCamera": "Domyślny dla {{camera}}",
       "dialog": {
         "allPresetFiles": "Wszystkie pliki presetów",
         "exportAllTitle": "Eksportuj wszystkie presety",
@@ -945,7 +969,11 @@
         "newPreset": "Nowy preset",
         "overwrite": "Nadpisz",
         "renameFolder": "Zmień nazwę folderu",
-        "sortAll": "Sortuj wszystko alfabetycznie"
+        "setDefaultAllCameras": "Ustaw jako domyślny dla wszystkich aparatów",
+        "setDefaultForCamera": "Ustaw jako domyślny dla {{camera}}",
+        "sortAll": "Sortuj wszystko alfabetycznie",
+        "unsetDefaultAllCameras": "Przestań używać jako domyślny dla wszystkich aparatów",
+        "unsetDefaultForCamera": "Przestań używać jako domyślny dla {{camera}}"
       },
       "status": {
         "empty": "Brak zapisanych presetów. Utwórz własne, zaimportuj z pliku lub odkryj presety społeczności.",
@@ -980,12 +1008,16 @@
         "adjust": "Dopasuj",
         "crop": "Kadruj",
         "export": "Eksportuj",
+        "filmstrip": "Pasek z klatkami",
         "info": "Informacje",
         "inpaint": "Inpaint",
         "masks": "Maski",
         "presets": "Presety",
         "tethering": "Tethering (Połączenie przewodowe)"
       }
+    },
+    "toasts": {
+      "embeddedPreview": "RapidRAW nie mógł zdekodować tego pliku RAW, więc widzisz i edytujesz osadzony podgląd JPEG z aparatu. Spodziewaj się niższej jakości i mniejszego zapasu do edycji niż w prawdziwym pliku RAW."
     },
     "toolbar": {
       "history": "Historia",
@@ -1156,6 +1188,10 @@
       "title": "Edycje jeszcze nie w Immich"
     },
     "export": {
+      "newAlbum": "Nowy album…",
+      "newAlbumName": "Nazwa albumu",
+      "createAlbum": "Utwórz",
+      "newAlbumFailed": "Nie udało się utworzyć albumu: {{error}}",
       "album": "Album",
       "destination": "Immich",
       "noAlbum": "Bez albumu",
@@ -1164,16 +1200,19 @@
       "withOriginalDesc": "Dla zdjęć z folderu lokalnego: oryginał jest przesyłany wraz z edycjami, a eksport układany na nim w stos. Zdjęcia z Immich są zawsze układane na swoim oryginale."
     },
     "section": {
+      "albums": "Albumy",
       "empty": "Brak albumów na serwerze.",
       "error": "Immich jest niedostępny.",
       "loading": "Wczytywanie albumów…",
       "refresh": "Odśwież albumy",
       "timeline": "Oś czasu",
-      "title": "Immich"
+      "title": "Immich",
+      "unassigned": "Bez albumu",
+      "unassignedHint": "Przeciągnij tu zdjęcia, aby przesłać je bez dodawania do albumu."
     },
     "settings": {
       "apiKey": "Klucz API",
-      "apiKeyDesc": "Utwórz go w Immich w Ustawieniach konta → Klucze API z tymi uprawnieniami: album.read, albumAsset.create, albumAsset.delete, asset.read, asset.view, asset.download, asset.upload, asset.update, asset.delete, stack.read, stack.create i user.read.",
+      "apiKeyDesc": "Utwórz go w Immich w Ustawieniach konta → Klucze API z tymi uprawnieniami: album.read, album.create, albumAsset.create, albumAsset.delete, asset.read, asset.view, asset.download, asset.upload, asset.update, asset.delete, stack.read, stack.create i user.read.",
       "connected": "Połączono jako {{user}} (Immich {{version}})",
       "description": "Przeglądaj zdjęcia z serwera Immich w bibliotece i edytuj je bezpośrednio. Oryginały są pobierane przy otwarciu, a edycje zapisywane w Immich, więc wyglądają tak samo na każdym komputerze.",
       "keyInFile": "Zapisano w pliku, który możesz odczytać tylko Ty: brak dostępnego magazynu poświadczeń. W KDE włącz interfejs Secret Service w ustawieniach Portfela KDE i zapisz ponownie.",
@@ -1191,12 +1230,17 @@
       "pending": "Edycje czekające na Immich: {{number}}"
     },
     "toasts": {
+      "editsStayLocal": "{{fileName}} należy do kogoś innego, więc Immich nie przyjmuje dla niego edycji. Twoje edycje zostaną na tym komputerze.",
       "backOnline": "Immich jest znowu dostępny, a wszystkie edycje zostały w nim zapisane.",
       "downloadFailed": "Nie udało się pobrać z Immich: {{error}}",
       "editsConflict": "{{fileName}} edytowano także na innym komputerze. Twoje edycje pozostają, a druga wersja jest zachowana jako kopia wirtualna.",
       "offline": "Immich jest niedostępny. Twoje edycje pozostają tutaj i zostaną wysłane, gdy tylko będzie dostępny.",
+      "transferFailed": "Nie dodano do Immich: {{number}} ({{error}})",
+      "transferred": "Dodano do Immich: {{number}}",
+      "transferring": "Dodawanie do Immich… {{current}}/{{total}}",
       "trashFailed": "Nie udało się przenieść do kosza Immich: {{error}}",
-      "uploaded": "Przesłano do Immich: {{number}}"
+      "uploaded": "Przesłano do Immich: {{number}}",
+      "uploadKeptCopy": "{{fileName}} jest już w Immich z innymi edycjami. Pozostają one bez zmian, a Twoje edycje są zachowane jako kopia wirtualna."
     }
   },
   "library": {
@@ -1205,6 +1249,7 @@
       "failed": "Nieudane ({{failedCount}})",
       "kinds": {
         "denoise": "Odszumianie AI",
+        "upscale": "Powiększanie RapidRes",
         "depthMap": "Analiza głębi",
         "depthMask": "Generowanie maski głębi",
         "faceMask": "Generowanie maski twarzy",
@@ -1513,10 +1558,7 @@
       "originalRatio": "Oryginalne proporcje"
     },
     "thumbnailSize": {
-      "large": "Duży",
-      "list": "Lista",
-      "medium": "Średni",
-      "small": "Mały"
+      "list": "Lista"
     },
     "tooltips": {
       "communityPresets": "Presety społeczności",
@@ -1609,6 +1651,7 @@
       "descReplace": "Nadpisuje wszystkie wybrane ustawienia, przywracając resztę do wartości domyślnych.",
       "groups": {
         "aiDenoise": "Odszumianie AI",
+        "aiUpscale": "RapidRes",
         "blackWhite": "Czarno-białe",
         "chromaticAberration": "Aberracja chromatyczna",
         "clarityDehaze": "Przejrzystość i Usuwanie mgły",
@@ -1775,7 +1818,6 @@
       "selectManufacturer": "Wybierz producenta",
       "title": "Korekcja obiektywu",
       "vignetting": "Winietowanie",
-      "waitingAutoDetect": "Oczekiwanie na automatyczne wykrycie...",
       "zoomInTooltip": "Przybliż",
       "zoomOutTooltip": "Oddal"
     },
@@ -1912,6 +1954,7 @@
       "limit": "Limit",
       "modals": {
         "aiDenoiseMessage": "Czy na pewno chcesz wyczyścić pamięć podręczną odszumiania AI?\n\nZdjęcia z włączonym odszumianiem AI trzeba będzie odszumić ponownie, co może zająć kilka minut na zdjęcie.",
+        "aiUpscaleMessage": "Czy na pewno chcesz wyczyścić pamięć podręczną RapidRes?\n\nZdjęcia z włączonym RapidRes trzeba będzie powiększyć ponownie.",
         "aiMapsMessage": "Czy na pewno chcesz wyczyścić mapy głębi i normalnych?\n\nZdjęcia używające rozmycia obiektywu, mgły lub ponownego oświetlenia wygenerują mapy ponownie przy następnym otwarciu.",
         "aiMessage": "Czy na pewno chcesz usunąć wszystkie tagi generowane przez AI z wszystkich obrazów we wszystkich aktywnych folderach głównych?\n\nTo nie wpłynie na tagi dodane przez użytkownika. Tej akcji nie można cofnąć.",
         "allMessage": "Czy na pewno chcesz usunąć wszystkie tagi generowane przez AI i dodane przez użytkownika z wszystkich obrazów we wszystkich aktywnych folderach głównych?\n\nTej akcji nie można cofnąć.",
@@ -1939,6 +1982,7 @@
       "show": "Pokaż",
       "statuses": {
         "aiDenoiseSuccess": "Pamięć podręczna odszumiania AI została wyczyszczona.",
+        "aiUpscaleSuccess": "Pamięć podręczna RapidRes została wyczyszczona.",
         "aiSuccess": "Zaktualizowano {{count}} plików. Tagi AI usunięte.",
         "aiSuccess_few": "Zaktualizowano {{count}} pliki. Tagi AI usunięte.",
         "aiSuccess_many": "Zaktualizowano {{count}} plików. Tagi AI usunięte.",
@@ -1961,6 +2005,8 @@
       "storage": {
         "aiDenoise": "Odszumianie AI",
         "aiDenoiseDesc": "Zapisane wyniki odszumiania.",
+        "aiUpscale": "RapidRes",
+        "aiUpscaleDesc": "Zapisane powiększenia 2x RapidRes.",
         "aiMaps": "Mapy głębi i normalnych",
         "aiMapsDesc": "Używane przez rozmycie obiektywu, mgłę i ponowne oświetlenie.",
         "immich": "Immich",
@@ -2190,6 +2236,31 @@
         "metal": "Metal",
         "vulkan": "Vulkan"
       },
+      "defaultAdjustments": {
+        "addCamera": "Dodaj aparat…",
+        "applyToNonRaw": "Stosuj także do plików JPEG, TIFF, PNG i innych plików innych niż RAW",
+        "applyToNonRawDesc": "Gdy wyłączone, tylko pliki RAW używają tych ustawień. Pliki JPEG z aparatu są zwykle już przetworzone i skorygowane, więc ponowne zastosowanie może być przesadą.",
+        "autoLensCorrection": "Automatyczna korekcja obiektywu",
+        "autoLensCorrectionDesc": "Koryguje dystorsję, aberrację chromatyczną i winietowanie na podstawie profilu obiektywu wykrytego w metadanych każdego zdjęcia.",
+        "cameraDefaults": "Ustawienia domyślne dla aparatów",
+        "cameraDefaultsDesc": "Nadaj zdjęciom z wybranych aparatów własny preset. Aparaty spoza listy używają domyślnego presetu powyżej, a korekcja obiektywu dotyczy wszystkich aparatów.",
+        "cameraPresetMissing": "Wybrany preset został usunięty, więc zdjęcia z tego aparatu znów używają presetu dla wszystkich aparatów.",
+        "description": "Określ, od czego zaczynają nieedytowane zdjęcia i do czego wraca „Resetuj ustawienia”; edytowane zdjęcia zachowują swoje ustawienia. Przy ustawieniach domyślnych miniatury RAW są generowane zamiast używać wbudowanego podglądu aparatu i na początku ładują się wolniej.",
+        "lensCorrection": "Korekcja obiektywu",
+        "noCamerasFound": "Nie znaleziono innych aparatów. Otwórz folder ze zdjęciami z aparatu albo kliknij preset prawym przyciskiem podczas edycji jednego z jego zdjęć.",
+        "noPreset": "Brak (neutralne)",
+        "preset": "Domyślny preset",
+        "presetDesc": "Stosowany do każdego nieedytowanego zdjęcia. Maski, kadrowanie i transformacje są pomijane, bo pasują tylko do zdjęcia, na którym je utworzono.",
+        "presetMissing": "Wybrany preset został usunięty, więc nieedytowane zdjęcia znów używają wartości neutralnych.",
+        "removeCamera": "Usuń aparat",
+        "sameAsAllCameras": "Jak dla wszystkich aparatów",
+        "scope": "Dotyczy",
+        "sliderReset": "Resetowanie suwaków",
+        "sliderResetDefaults": "Domyślne ustawienia",
+        "sliderResetDesc": "Wartość, do której wraca suwak po zresetowaniu, na przykład dwuklikiem lub w szybkiej edycji. Suwaki masek zawsze wracają do wartości neutralnej.",
+        "sliderResetNeutral": "Wartość neutralna",
+        "title": "Domyślne ustawienia"
+      },
       "displayColor": {
         "chooseFile": "Wybierz profil…",
         "description": "Konwertuje widok edycji z sRGB do profilu kolorów monitora, aby zgadzał się z aplikacjami z zarządzaniem kolorami. Nie wpływa na eksport.",
@@ -2206,7 +2277,8 @@
           "notFound": "Nie znaleziono profilu monitora – zakładam sRGB",
           "off": "Brak konwersji – widok edycji zakłada monitor sRGB",
           "srgb": "{{name}} odpowiada sRGB – konwersja niepotrzebna",
-          "unnamed": "Profil bez nazwy"
+          "unnamed": "Profil bez nazwy",
+          "wgpu": "Nie działa, gdy włączone jest bezpośrednie renderowanie WGPU"
         },
         "title": "Zarządzanie kolorem monitora"
       },
@@ -2255,7 +2327,7 @@
         "baselineExposure": "Ekspozycja bazowa",
         "baselineExposureAmount": "Wartość bazowa",
         "baselineExposureAmountDesc": "Ekspozycja dodawana do plików RAW. darktable używa +0,7 EV.",
-        "baselineExposureDesc": "Rozjaśnia wszystkie pliki RAW o stałą wartość, podobnie jak domyślne ustawienie darktable w trybie scene-referred, oraz uwzględnia znacznik DNG BaselineExposure, jeśli występuje. Nie wpływa na zdjęcia edytowane przed wprowadzeniem tej opcji.",
+        "baselineExposureDesc": "Rozjaśnia pliki RAW o stałą wartość lub, jeśli występuje, o wartość znacznika DNG BaselineExposure.",
         "colorNr": "Bazowa redukcja szumu koloru",
         "colorNrDesc": "Stosuje filtr na wczesnym etapie w celu usunięcia szumu koloru (Chroma). Wyższa wartość = Silniejsza redukcja szumów.",
         "defaultNonRawTonemapper": "Domyślne mapowanie tonów (Non-RAW)",
@@ -2268,7 +2340,7 @@
         "enablePreprocessingNonRaws": "Włącz dla innych niż RAW",
         "enableTonemapperOverride": "Włącz nadpisywanie mapowania tonów",
         "highlightPreservation": "Kompensacja ochrony świateł",
-        "highlightPreservationDesc": "Przywraca ekspozycję, którą aparat ograniczył w trybach ochrony świateł, odczytaną z pliku RAW (Fujifilm DR200/DR400, Canon Priorytet jasnych partii obrazu i Auto Lighting Optimizer, Nikon Aktywna funkcja D-Lighting, gradacja Olympus, rozszerzenie zakresu dynamiki Pentax). Nie wpływa na zdjęcia edytowane przed wprowadzeniem tej opcji.",
+        "highlightPreservationDesc": "Przywraca ekspozycję obniżoną przez tryby ochrony świateł aparatu, np. Fujifilm DR200/DR400 lub Nikon Aktywna funkcja D-Lighting.",
         "highlightRecovery": "Odzyskiwanie świateł w RAW",
         "highlightRecoveryDesc": "Decyduje o tym, ile detali zostanie odzyskanych z obciętych świateł w plikach RAW. Wyższe wartości odzyskują więcej, ale mogą wprowadzać fioletowe artefakty.",
         "linearOptions": {
@@ -2303,15 +2375,14 @@
       "smallThumbnailRes": "Rozdzielczość miniatur w siatce",
       "smallThumbnailResDesc": "Rozdzielczość miniatur wyświetlanych w siatce biblioteki.",
       "staticDesc": "Edytor renderuje obraz w stałej rozdzielczości. Ten tryb jest najszybszy i najbardziej spójny, idealny dla słabszych komputerów, gdzie priorytetem jest płynne działanie a nie perfekcyjna jakość po zbliżeniu.",
-      "staticPreviewRes": "Rozdzielczość statycznego podglądu",
-      "staticPreviewResDesc": "Określa rozdzielczość dla statycznych podglądów, takich jak tryb kadrowania i narzędzia perspektywy. Nie wpływa to na podgląd głównego edytora.",
       "threads": "Wątki",
       "thumbnailRes": "Rozdzielczość miniatur",
       "thumbnailResDesc": "Decyduje o rozdzielczości generowanych miniatur w bibliotece. Wyższa wartość da ostrzejszy obraz po wczytaniu.",
       "title": "Silnik przetwarzania",
       "wgpu": "Bezpośrednie renderowanie WGPU",
       "wgpuDescAndroid": "Omija enkoder przeglądarki dla najszybszego podglądu. (Wyłączone na Androidzie: Tworzenie powierzchni WGPU obecnie nie jest obsługiwane wraz z WebView.)",
-      "wgpuDescLinux": "Omija enkoder przeglądarki. (Wyłączone na Linuksie: Tauri używa GTK dla WebView, co wchodzi w konflikt z WGPU na tej samej powierzchni X11, wywołując migotanie.)",
+      "wgpuDescLinuxExperimental": "Funkcja eksperymentalna w systemie Linux, może działać niestabilnie.",
+      "wgpuDescLinuxX11": "Niedostępne w X11.",
       "wgpuDescRecommended": "Omija kodowanie w przeglądarce pozwalając na natychmiastowe reakcje podglądu. Wysoce zalecane dla zachowania płynności.",
       "wgpuLabel": "Włącz bezpośrednie renderowanie WGPU",
       "workerThreads": "Liczba wątków miniatur",
@@ -2353,6 +2424,7 @@
         "mediapipe": "Za szybkie modele punktów charakterystycznych twarzy i segmentacji, które napędzają maski twarzy AI.",
         "negpy": "Za inspirację stojącą za rozwiązaniem do inwersji negatywów.",
         "nind": "Za dostarczenie modeli AI, które stanowią silnik odszumiający RapidRAW.",
+        "span": "Za bazowy model AI w RapidRes, powiększaniu 2x AI w RapidRAW, dostrojony przez RapidRAW do własnego przetwarzania RAW (autor Philip Hofmann, CC BY 4.0).",
         "rawler": "Za świetną bibliotekę w Rust, dostarczającą fundament dla przetwarzania plików RAW w tym projekcie.",
         "sam2": "Za dostarczenie bazowego modelu do wykrywania i wycinania obiektów za pomocą AI.",
         "spektrafilm": "Za oparte na danych spektralnych LUT-y emulacji filmu autorstwa Andrei Volpato, napędzające wbudowane emulacje filmowe RapidRAW. Licencja CC BY-SA 4.0.",
@@ -2428,13 +2500,11 @@
     "bottomBar": {
       "imagesSelected": "Zaznaczono {{current}} z {{total}} obrazów",
       "tooltips": {
-        "collapseFilmstrip": "Zwiń pasek z klatkami",
         "collapseLeft": "Zwiń lewy panel",
         "collapseRight": "Zwiń prawy panel",
         "copyPasteSettings": "Kopiuj i Wklej Ustawienia",
         "copySettings": "Kopiuj Ustawienia",
         "customZoom": "Kliknij, aby wpisać niestandardowy procent przybliżenia",
-        "expandFilmstrip": "Rozwiń pasek z klatkami",
         "expandLeft": "Rozwiń lewy panel",
         "expandRight": "Rozwiń prawy panel",
         "export": "Eksport",
@@ -2445,7 +2515,9 @@
         "rateStars_one": "Oceń na 1 gwiazdkę",
         "rateStars_other": "Oceń na {{count}} gwiazdek",
         "resetZoom": "Dopasuj do okna",
-        "selectToRate": "Zaznacz obraz, aby ocenić"
+        "selectToRate": "Zaznacz obraz, aby ocenić",
+        "sortFilmstripByFolder": "Sortuj pasek miniatur według folderu",
+        "sortFilmstripByName": "Sortuj pasek miniatur według nazwy"
       },
       "zoomLabel": "Przybliżenie",
       "zoomLabelReset": "Zresetuj powiększenie"

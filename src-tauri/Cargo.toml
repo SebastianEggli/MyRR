@@ -19,6 +19,7 @@ tauri-plugin-dialog = "2.7.2"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 image = "0.25.10"
+moxcms = "0.8.1"
 png = "0.18.1"
 tiff = "0.11.3"
 base64 = "0.23"
@@ -75,7 +76,7 @@ imgref = "1.12.2"
 sysinfo = "0.39.6"
 tauri-plugin-http = "2.8.0"
 tauri-plugin-store = "2.5.0"
-moxcms = "0.8"
+zstd = "0.13"
 
 [target.'cfg(any(target_os = "windows", target_os = "macos", target_os = "linux"))'.dependencies]
 trash = "5.2.6"
@@ -129,6 +130,9 @@ zbus-secret-service-keyring-store = { version = "1", features = ["rt-tokio-crypt
 gtk = "0.18.2"
 webkit2gtk = "=2.0.2"
 tauri-plugin-wayland-nvidia-quirk = "0.1.0"
+wayland-client = "0.31"
+wayland-backend = { version = "0.3", features = ["client_system"] }
+wayland-protocols = { version = "0.32", features = ["client"] }
 
 [build-dependencies]
 tauri-build = { version = "2.6", features = [] }
@@ -151,7 +155,3 @@ strip = true
 
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(feature, values("cargo-clippy"))'] }
-
-# rawler with fast preview paths (DNG proxies, CR3/ORF previews). Drop once merged into the fork.
-[patch."https://github.com/CyberTimon/RapidRAW-DngLab.git"]
-rawler = { git = "https://github.com/SebastianEggli/RapidRAW-DngLab.git", branch = "dng-proxy-ifd-upstream" }

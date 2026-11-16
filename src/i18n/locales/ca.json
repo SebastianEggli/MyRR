@@ -150,6 +150,8 @@
       "aiDenoise": "Reducció de soroll IA",
       "classicDenoise": "Reducció de soroll clàssica",
       "aiDenoiseDetail": "Detall",
+      "aiUpscale": "RapidRes 2x",
+      "aiUpscaleDetail": "Detall",
       "blueYellow": "Blau/Groc",
       "centre": "Centre",
       "chromaticAberration": "Aberració cromàtica",
@@ -165,6 +167,7 @@
       "negativeGreen": "Verd",
       "negativeRed": "Vermell",
       "noiseReduction": "Reducció de soroll",
+      "superResolution": "RapidRes",
       "presence": "Presència",
       "redCyan": "Vermell/Cian",
       "sharpening": "Enfocament",
@@ -295,6 +298,12 @@
       "autoAdjust": "Ajustament automàtic",
       "autoLensCorrection": "Correcció d'objectiu automàtica",
       "autoStraighten": "Redreçar automàticament",
+      "backgroundColor": "Color de fons",
+      "bgBlack": "Negre",
+      "bgDarkGrey": "Gris fosc",
+      "bgLightGrey": "Gris clar",
+      "bgNeutralGrey": "Gris neutre (18%)",
+      "bgWhite": "Blanc",
       "cancel": "Cancel·lar",
       "closeViewer": "Tanca la segona finestra",
       "colorLabel": "Etiqueta de color",
@@ -325,9 +334,14 @@
       "removeBlackWhite": "Treure blanc i negre",
       "removeDenoise": "Treure reducció de soroll",
       "removeNegativeConversion": "Treure conversió de negatiu",
+      "removeSuperResolution": "Treure RapidRes",
       "resetAdjustments": "Restablir ajustaments",
+      "resetToDefaults": "Restablir als valors per defecte",
+      "resetToNeutral": "Restablir a neutre",
       "stitchPanorama": "Unir panorama",
+      "superResolution": "RapidRes (2x)",
       "tagging": "Etiquetatge",
+      "themeDefault": "Predeterminat del tema",
       "undo": "Desfer",
       "unflagged": "Sense marca"
     },
@@ -399,6 +413,9 @@
       "denoise_many": "Reduir soroll",
       "denoise_one": "Reduir soroll",
       "denoise_other": "Reduir soroll",
+      "superResolution_many": "RapidRes (2x)",
+      "superResolution_one": "RapidRes (2x)",
+      "superResolution_other": "RapidRes (2x)",
       "duplicateImage": "Duplicar imatge",
       "enable": "Activar",
       "exportImage_many": "Exportar {{count}} imatges",
@@ -527,6 +544,7 @@
       "createNewTitle": "Crear nova edició generativa",
       "createNewTooltip": "Crear nova edició {{name}}",
       "denoising": "Executant la reducció de soroll IA...",
+      "upscaling": "Executant RapidRes...",
       "dropzoneText": "Deixeu anar aquí per crear una edició nova",
       "editSettingsTitle": "Configuració d'edició",
       "editsTitle": "Edicions",
@@ -737,11 +755,13 @@
       "cancel": "Cancel·lar",
       "drawingActive": "Dibuix actiu",
       "hint": "Dibuixa al llarg de les vores de la foto que haurien de ser verticals o horitzontals.",
+      "horizontalLine": "Guia horitzontal núm. {{index}}",
       "linesStatus": "Línies guia actives",
       "toast": {
         "angleRejected": "L'angle de la línia està massa lluny de l'horitzontal o vertical",
         "maxLines": "Es permeten com a màxim 2 línies verticals i 2 horitzontals"
-      }
+      },
+      "verticalLine": "Guia vertical núm. {{index}}"
     },
     "layout": {
       "split": "Dividir"
@@ -857,6 +877,7 @@
         "focalLength": "Distància focal",
         "iso": "ISO",
         "lens": "Objectiu",
+        "model": "Model",
         "shutterSpeed": "Velocitat d'obturació",
         "title": "Detalls de la càmera"
       },
@@ -901,6 +922,8 @@
     },
     "presets": {
       "amount": "Quantitat",
+      "defaultForAllCameras": "Predeterminat per a totes les càmeres",
+      "defaultForCamera": "Predeterminat per a {{camera}}",
       "dialog": {
         "allPresetFiles": "Tots els fitxers d'ajustos preestablerts",
         "exportAllTitle": "Exportar tots els ajustos preestablerts",
@@ -921,7 +944,11 @@
         "newPreset": "Nou ajust preestablert",
         "overwrite": "Sobreescriure",
         "renameFolder": "Reanomenar carpeta",
-        "sortAll": "Ordenar-ho tot alfabèticament"
+        "setDefaultAllCameras": "Definir com a predeterminat per a totes les càmeres",
+        "setDefaultForCamera": "Definir com a predeterminat per a {{camera}}",
+        "sortAll": "Ordenar-ho tot alfabèticament",
+        "unsetDefaultAllCameras": "Deixar d'usar com a predeterminat per a totes les càmeres",
+        "unsetDefaultForCamera": "Deixar d'usar com a predeterminat per a {{camera}}"
       },
       "status": {
         "empty": "Encara no s'ha desat cap ajust preestablert. Creeu el vostre, importeu-ne des d'un fitxer o exploreu els de la comunitat.",
@@ -956,12 +983,16 @@
         "adjust": "Ajustar",
         "crop": "Retallar",
         "export": "Exportar",
+        "filmstrip": "Tira d'imatges",
         "info": "Informació",
         "inpaint": "Inpainting",
         "masks": "Màscares",
         "presets": "Ajustos preestablerts",
         "tethering": "Captura connectada"
       }
+    },
+    "toasts": {
+      "embeddedPreview": "RapidRAW no ha pogut descodificar aquest fitxer RAW, així que estàs veient i editant la previsualització JPEG incrustada de la càmera. Espera menys qualitat i menys marge d'edició que amb un RAW real."
     },
     "toolbar": {
       "history": "Historial",
@@ -1130,6 +1161,10 @@
       "title": "Edicions encara no a Immich"
     },
     "export": {
+      "newAlbum": "Àlbum nou…",
+      "newAlbumName": "Nom de l'àlbum",
+      "createAlbum": "Crea",
+      "newAlbumFailed": "No s'ha pogut crear l'àlbum: {{error}}",
       "album": "Àlbum",
       "destination": "Immich",
       "noAlbum": "Sense àlbum",
@@ -1138,16 +1173,19 @@
       "withOriginalDesc": "Per a imatges d'una carpeta local: l'original es puja amb les seves edicions i l'exportació s'apila a sobre. Les imatges d'Immich sempre s'apilen sobre el seu original."
     },
     "section": {
+      "albums": "Àlbums",
       "empty": "No hi ha àlbums al servidor.",
       "error": "No es pot accedir a Immich.",
       "loading": "Carregant àlbums…",
       "refresh": "Actualitza els àlbums",
       "timeline": "Cronologia",
-      "title": "Immich"
+      "title": "Immich",
+      "unassigned": "Sense àlbum",
+      "unassignedHint": "Arrossega imatges aquí per pujar-les sense afegir-les a cap àlbum."
     },
     "settings": {
       "apiKey": "Clau d'API",
-      "apiKeyDesc": "Crea'n una a Immich a Configuració del compte → Claus d'API amb aquests permisos: album.read, albumAsset.create, albumAsset.delete, asset.read, asset.view, asset.download, asset.upload, asset.update, asset.delete, stack.read, stack.create i user.read.",
+      "apiKeyDesc": "Crea'n una a Immich a Configuració del compte → Claus d'API amb aquests permisos: album.read, album.create, albumAsset.create, albumAsset.delete, asset.read, asset.view, asset.download, asset.upload, asset.update, asset.delete, stack.read, stack.create i user.read.",
       "connected": "Connectat com a {{user}} (Immich {{version}})",
       "description": "Explora les fotos del teu servidor Immich a la biblioteca i edita-les directament. Els originals es descarreguen quan els obres, i les edicions es desen a Immich, de manera que es veuen igual a tots els ordinadors.",
       "keyInFile": "Desada en un fitxer que només tu pots llegir: no hi ha cap magatzem de credencials disponible. A KDE, activa la interfície Secret Service a la configuració de KDE Wallet i torna a desar.",
@@ -1165,12 +1203,17 @@
       "pending": "Edicions pendents d'enviar a Immich: {{number}}"
     },
     "toasts": {
+      "editsStayLocal": "{{fileName}} pertany a una altra persona, així que Immich no n'accepta edicions. Les teves edicions es queden en aquest ordinador.",
       "backOnline": "Immich torna a estar disponible i totes les edicions s'hi han desat.",
       "downloadFailed": "No s'ha pogut descarregar d'Immich: {{error}}",
       "editsConflict": "{{fileName}} també s'ha editat en un altre ordinador. Les teves edicions es mantenen i l'altra versió es conserva com a còpia virtual.",
       "offline": "No es pot accedir a Immich. Les teves edicions es guarden aquí i s'enviaran quan torni a estar disponible.",
+      "transferFailed": "No afegides a Immich: {{number}} ({{error}})",
+      "transferred": "Afegides a Immich: {{number}}",
+      "transferring": "S'està afegint a Immich… {{current}}/{{total}}",
       "trashFailed": "No s'ha pogut moure a la paperera d'Immich: {{error}}",
-      "uploaded": "Pujades a Immich: {{number}}"
+      "uploaded": "Pujades a Immich: {{number}}",
+      "uploadKeptCopy": "{{fileName}} ja és a Immich amb altres edicions. Aquestes es mantenen i les teves es desen com a còpia virtual."
     }
   },
   "library": {
@@ -1179,6 +1222,7 @@
       "failed": "Fallits ({{failedCount}})",
       "kinds": {
         "denoise": "Reduint soroll amb IA",
+        "upscale": "Ampliant amb RapidRes",
         "depthMap": "Analitzant la profunditat",
         "depthMask": "Generant la màscara de profunditat",
         "faceMask": "Generant la màscara de cara",
@@ -1481,10 +1525,7 @@
       "originalRatio": "Proporció original"
     },
     "thumbnailSize": {
-      "large": "Gran",
-      "list": "Llista",
-      "medium": "Mitjana",
-      "small": "Petita"
+      "list": "Llista"
     },
     "tooltips": {
       "communityPresets": "Ajustos preestablerts de la comunitat",
@@ -1577,6 +1618,7 @@
       "descReplace": "Sobreescriu tota la configuració seleccionada, restablint la resta als seus valors predeterminats.",
       "groups": {
         "aiDenoise": "Reducció de soroll amb IA",
+        "aiUpscale": "RapidRes",
         "blackWhite": "Blanc i negre",
         "chromaticAberration": "Aberració cromàtica",
         "clarityDehaze": "Claredat i Eliminar boira",
@@ -1739,7 +1781,6 @@
       "selectManufacturer": "Seleccioneu el fabricant",
       "title": "Correcció de l'objectiu",
       "vignetting": "Vinyetatge",
-      "waitingAutoDetect": "S'està esperant l'autodetecció...",
       "zoomInTooltip": "Apropar",
       "zoomOutTooltip": "Allunyar"
     },
@@ -1874,6 +1915,7 @@
       "limit": "Límit",
       "modals": {
         "aiDenoiseMessage": "Segur que vols esborrar la memòria cau de reducció de soroll IA?\n\nLes imatges amb la reducció de soroll IA activada s'hauran de tornar a processar, cosa que pot trigar diversos minuts per imatge.",
+        "aiUpscaleMessage": "Segur que vols esborrar la memòria cau de RapidRes?\n\nLes imatges amb RapidRes activat s'hauran de tornar a ampliar.",
         "aiMapsMessage": "Segur que vols buidar els mapes de profunditat i normals?\n\nLes imatges que fan servir desenfocament d’objectiu, boira o reil·luminació regeneraran els mapes el proper cop que s’obrin.",
         "aiMessage": "Esteu segur que voleu eliminar totes les etiquetes generades per IA de totes les imatges a totes les carpetes arrel actives?\n\nAixò no afectarà les etiquetes afegides pels usuaris. Aquesta acció no es pot desfer.",
         "allMessage": "Esteu segur que voleu eliminar totes les etiquetes generades per IA i les afegides pels usuaris de totes les imatges a totes les carpetes arrel actives?\n\nAquesta acció no es pot desfer.",
@@ -1901,6 +1943,7 @@
       "show": "Mostrar",
       "statuses": {
         "aiDenoiseSuccess": "Memòria cau de reducció de soroll IA esborrada correctament.",
+        "aiUpscaleSuccess": "Memòria cau de RapidRes esborrada correctament.",
         "aiSuccess": "{{count}} fitxers actualitzats. S'han eliminat les etiquetes d'IA.",
         "aiSuccess_many": "{{count}} fitxers actualitzats. S'han eliminat les etiquetes d'IA.",
         "aiSuccess_one": "{{count}} fitxer actualitzat. S'han eliminat les etiquetes d'IA.",
@@ -1920,6 +1963,8 @@
       "storage": {
         "aiDenoise": "Reducció de soroll IA",
         "aiDenoiseDesc": "Resultats de reducció de soroll a la memòria cau.",
+        "aiUpscale": "RapidRes",
+        "aiUpscaleDesc": "Ampliacions 2x de RapidRes a la memòria cau.",
         "aiMaps": "Mapes de profunditat i normals",
         "aiMapsDesc": "Els fan servir el desenfocament d’objectiu, la boira i la reil·luminació.",
         "immich": "Immich",
@@ -2149,6 +2194,31 @@
         "metal": "Metal",
         "vulkan": "Vulkan"
       },
+      "defaultAdjustments": {
+        "addCamera": "Afegir càmera…",
+        "applyToNonRaw": "Aplicar també a JPEG, TIFF, PNG i altres fitxers no RAW",
+        "applyToNonRawDesc": "Si està desactivat, només els fitxers RAW fan servir aquests valors. Els JPEG de la càmera solen estar ja processats i corregits, i aplicar-los de nou pot ser excessiu.",
+        "autoLensCorrection": "Correcció automàtica d'objectiu",
+        "autoLensCorrectionDesc": "Corregeix la distorsió, l'aberració cromàtica i el vinyetatge amb el perfil d'objectiu detectat a les metadades de cada imatge.",
+        "cameraDefaults": "Valors per defecte per càmera",
+        "cameraDefaultsDesc": "Dona a les imatges de càmeres concretes el seu propi preajust. Les càmeres no llistades fan servir el preajust per defecte de dalt, i la correcció d'objectiu s'aplica a totes les càmeres.",
+        "cameraPresetMissing": "El preajust escollit s'ha eliminat, per això les imatges d'aquesta càmera tornen a fer servir el de totes les càmeres.",
+        "description": "Defineix amb què comencen les imatges sense editar i on torna «Restablir ajustaments»; les imatges editades conserven la seva configuració. Amb valors per defecte, les miniatures RAW es generen en lloc de fer servir la previsualització incrustada de la càmera i triguen més al principi.",
+        "lensCorrection": "Correcció d'objectiu",
+        "noCamerasFound": "No s'han trobat altres càmeres. Obre una carpeta amb imatges d'una càmera o fes clic dret en un preajust mentre edites una de les seves imatges.",
+        "noPreset": "Cap (neutre)",
+        "preset": "Preajust per defecte",
+        "presetDesc": "S'aplica a cada imatge sense editar. S'ometen màscares, retalls i transformacions, perquè només encaixen amb la imatge on es van crear.",
+        "presetMissing": "El preajust escollit s'ha eliminat, per això les imatges sense editar tornen a fer servir valors neutres.",
+        "removeCamera": "Treure la càmera",
+        "sameAsAllCameras": "Igual que totes les càmeres",
+        "scope": "S'aplica a",
+        "sliderReset": "Restabliment dels controls lliscants",
+        "sliderResetDefaults": "Ajustaments per defecte",
+        "sliderResetDesc": "El valor al qual torna un control lliscant quan el restableixes, per exemple amb doble clic o a l'edició ràpida. Els controls de màscara sempre tornen al seu valor neutre.",
+        "sliderResetNeutral": "Valor neutre",
+        "title": "Ajustaments per defecte"
+      },
       "displayColor": {
         "chooseFile": "Tria un perfil…",
         "description": "Converteix la vista d'edició de sRGB al perfil de color del monitor perquè coincideixi amb les aplicacions amb gestió del color. No afecta les exportacions.",
@@ -2165,7 +2235,8 @@
           "notFound": "No s'ha trobat cap perfil de monitor – se suposa sRGB",
           "off": "Sense conversió – la vista d'edició suposa un monitor sRGB",
           "srgb": "{{name}} coincideix amb sRGB – no cal convertir",
-          "unnamed": "Perfil sense nom"
+          "unnamed": "Perfil sense nom",
+          "wgpu": "No s'aplica mentre el renderitzat WGPU directe està activat"
         },
         "title": "Gestió del color de la pantalla"
       },
@@ -2214,7 +2285,7 @@
         "baselineExposure": "Exposició base",
         "baselineExposureAmount": "Quantitat base",
         "baselineExposureAmountDesc": "Exposició afegida als fitxers RAW. darktable utilitza +0,7 EV.",
-        "baselineExposureDesc": "Aclareix tots els fitxers RAW en una quantitat fixa, com el valor per defecte de darktable en mode referit a l'escena, més l'etiqueta DNG BaselineExposure si n'hi ha. Les imatges editades abans que existís aquesta opció no es veuen afectades.",
+        "baselineExposureDesc": "Aclareix els fitxers RAW en una quantitat fixa, o en el valor de l'etiqueta DNG BaselineExposure si n'hi ha.",
         "colorNr": "Reducció de soroll de color base",
         "colorNrDesc": "Aplica un filtre bilateral creuat d'hora a la canonada per eliminar el soroll de croma. Valor més alt = Més reducció.",
         "defaultNonRawTonemapper": "Mapejador de tons predeterminat No-RAW",
@@ -2227,7 +2298,7 @@
         "enablePreprocessingNonRaws": "Activar per a No-RAW",
         "enableTonemapperOverride": "Activar la sobreescriptura del mapejador de tons",
         "highlightPreservation": "Compensació de la preservació de llums",
-        "highlightPreservationDesc": "Restaura l'exposició que la càmera ha reservat en els modes de preservació de les llums, llegida del fitxer RAW (Fujifilm DR200/DR400, Prioritat de to de les llums i Optimitzador automàtic de la il·luminació de Canon, D-Lighting actiu de Nikon, gradació d'Olympus, expansió de rang dinàmic de Pentax). Les imatges editades abans que existís aquesta opció no es veuen afectades.",
+        "highlightPreservationDesc": "Restaura l'exposició reduïda pels modes de preservació de llums de la càmera, com Fujifilm DR200/DR400 o D-Lighting actiu de Nikon.",
         "highlightRecovery": "Recuperació de llums altes RAW",
         "highlightRecoveryDesc": "Controla la quantitat de detalls que es recuperen de les llums altes retallades als fitxers RAW. Valors més alts recuperen més detalls però poden introduir artefactes de color porpra.",
         "linearOptions": {
@@ -2262,15 +2333,14 @@
       "smallThumbnailRes": "Resolució de les miniatures de la quadrícula",
       "smallThumbnailResDesc": "Resolució de les miniatures que es mostren a la quadrícula de la biblioteca.",
       "staticDesc": "L'editor renderitza la imatge a una resolució fixa. Aquest mode és el més ràpid i consistent, la qual cosa el fa ideal per a maquinari de gamma baixa on es prioritza el rendiment suau per damunt d'un zoom amb píxels perfectes.",
-      "staticPreviewRes": "Resolució de la vista prèvia estàtica",
-      "staticPreviewResDesc": "Estableix la resolució per a les vistes prèvies estàtiques com ara el mode de retall, la correcció de l'objectiu i les eines de perspectiva. No afecta la vista prèvia principal de l'editor.",
       "threads": "Fils (Threads)",
       "thumbnailRes": "Resolució de la miniatura",
       "thumbnailResDesc": "Determina la resolució de les miniatures generades per a la biblioteca. Valors més alts produeixen imatges més nítides durant la càrrega.",
       "title": "Motor de processament",
       "wgpu": "Renderització directa WGPU",
       "wgpuDescAndroid": "Omet la codificació del navegador per a unes vistes prèvies en directe que responen a l'instant. (Desactivat a Android: La creació de la superfície nativa WGPU actualment no és compatible juntament amb la vista web mòbil.)",
-      "wgpuDescLinux": "Omet la codificació del navegador per a unes vistes prèvies en directe que responen a l'instant. (Desactivat a Linux: Tauri utilitza GTK per a les vistes web, la qual cosa entra en conflicte amb WGPU a la mateixa superfície X11 i causa parpellejos.)",
+      "wgpuDescLinuxExperimental": "Experimental a Linux i pot ser inestable.",
+      "wgpuDescLinuxX11": "No disponible a X11.",
       "wgpuDescRecommended": "Omet la codificació del navegador per a unes vistes prèvies en directe que responen a l'instant. Molt recomanat pel seu rendiment.",
       "wgpuLabel": "Activar la renderització directa WGPU",
       "workerThreads": "Fils de treball per a les miniatures",
@@ -2312,6 +2382,7 @@
         "mediapipe": "Pels models ràpids de punts facials i segmentació que impulsen les màscares de cara amb IA.",
         "negpy": "Per la inspiració que hi ha darrere de la lògica de conversió de negatius.",
         "nind": "Per proporcionar els models d'IA que impulsen les capacitats de reducció de soroll per IA a RapidRAW.",
+        "span": "Pel model d'IA base de RapidRes, l'ampliació 2x amb IA de RapidRAW, ajustat per RapidRAW al seu propi processament RAW (de Philip Hofmann, CC BY 4.0).",
         "rawler": "Per l'excel·lent component de Rust que proporciona la base per al processament de fitxers RAW en aquest projecte.",
         "sam2": "Per proporcionar el model de base utilitzat per a les capacitats de detecció de subjectes per IA.",
         "spektrafilm": "Per les LUTs d'emulació de pel·lícula basades en espectres, d'Andrea Volpato, que impulsen les emulacions integrades de RapidRAW. Amb llicència CC BY-SA 4.0.",
@@ -2387,13 +2458,11 @@
     "bottomBar": {
       "imagesSelected": "{{current}} de {{total}} imatges seleccionades",
       "tooltips": {
-        "collapseFilmstrip": "Contraure Tira d'imatges",
         "collapseLeft": "Plegar el panell esquerre",
         "collapseRight": "Plegar el panell dret",
         "copyPasteSettings": "Copiar i enganxar ajustaments",
         "copySettings": "Copiar ajustaments",
         "customZoom": "Feu clic per introduir un percentatge de zoom personalitzat",
-        "expandFilmstrip": "Expandir Tira d'imatges",
         "expandLeft": "Desplegar el panell esquerre",
         "expandRight": "Desplegar el panell dret",
         "export": "Exportar",
@@ -2403,7 +2472,9 @@
         "rateStars_one": "Puntuar amb 1 estrella",
         "rateStars_other": "Puntuar amb {{count}} estrelles",
         "resetZoom": "Restablir zoom per ajustar a la finestra",
-        "selectToRate": "Seleccioneu una imatge per puntuar"
+        "selectToRate": "Seleccioneu una imatge per puntuar",
+        "sortFilmstripByFolder": "Ordena la tira per carpeta",
+        "sortFilmstripByName": "Ordena la tira per nom"
       },
       "zoomLabel": "Zoom",
       "zoomLabelReset": "Restablir zoom"

@@ -150,6 +150,8 @@
       "aiDenoise": "AI 降噪",
       "classicDenoise": "經典降噪",
       "aiDenoiseDetail": "細節",
+      "aiUpscale": "RapidRes 2x",
+      "aiUpscaleDetail": "細節",
       "blueYellow": "藍/黃",
       "centre": "置中",
       "chromaticAberration": "色差",
@@ -165,6 +167,7 @@
       "negativeGreen": "綠色",
       "negativeRed": "紅色",
       "noiseReduction": "降噪",
+      "superResolution": "RapidRes",
       "presence": "質感",
       "redCyan": "紅/青",
       "sharpening": "銳化",
@@ -295,6 +298,12 @@
       "autoAdjust": "自動調整",
       "autoLensCorrection": "自動鏡頭校正",
       "autoStraighten": "自動拉直",
+      "backgroundColor": "背景顏色",
+      "bgBlack": "黑色",
+      "bgDarkGrey": "深灰色",
+      "bgLightGrey": "淺灰色",
+      "bgNeutralGrey": "中性灰 (18%)",
+      "bgWhite": "白色",
       "cancel": "取消",
       "closeViewer": "關閉第二視窗",
       "colorLabel": "顏色標籤",
@@ -324,9 +333,14 @@
       "removeBlackWhite": "移除黑白",
       "removeDenoise": "移除降噪",
       "removeNegativeConversion": "移除負片轉換",
+      "removeSuperResolution": "移除 RapidRes",
       "resetAdjustments": "重置調整",
+      "resetToDefaults": "重置為預設值",
+      "resetToNeutral": "重置為中性值",
       "stitchPanorama": "拼接全景圖",
+      "superResolution": "RapidRes (2x)",
       "tagging": "標籤",
+      "themeDefault": "主題預設",
       "undo": "復原",
       "unflagged": "無標記"
     },
@@ -387,6 +401,8 @@
       "deleteSelected": "僅刪除選中項",
       "denoise_one": "降噪",
       "denoise_other": "降噪",
+      "superResolution_one": "RapidRes (2x)",
+      "superResolution_other": "RapidRes (2x)",
       "duplicateImage": "複製影像",
       "enable": "啟用",
       "exportImage_one": "匯出影像",
@@ -510,6 +526,7 @@
       "createNewTitle": "建立新的生成式編輯",
       "createNewTooltip": "建立新的 {{name}} 編輯",
       "denoising": "正在進行 AI 降噪...",
+      "upscaling": "正在執行 RapidRes...",
       "dropzoneText": "拖放到此處以建立新編輯",
       "editSettingsTitle": "編輯設定",
       "editsTitle": "編輯",
@@ -711,11 +728,13 @@
       "cancel": "取消",
       "drawingActive": "繪圖中",
       "hint": "沿著照片中應該是垂直或水平的邊緣繪製。",
+      "horizontalLine": "水平引導線 {{index}}",
       "linesStatus": "活躍引導線",
       "toast": {
         "angleRejected": "線條角度偏離水平或垂直太遠",
         "maxLines": "最多允許 2 條垂直線和 2 條水平線"
-      }
+      },
+      "verticalLine": "垂直引導線 {{index}}"
     },
     "layout": {
       "split": "拆分"
@@ -830,6 +849,7 @@
         "focalLength": "焦距",
         "iso": "ISO",
         "lens": "鏡頭",
+        "model": "型號",
         "shutterSpeed": "快門速度",
         "title": "相機詳情"
       },
@@ -874,6 +894,8 @@
     },
     "presets": {
       "amount": "數量",
+      "defaultForAllCameras": "所有相機的預設值",
+      "defaultForCamera": "{{camera}} 的預設值",
       "dialog": {
         "allPresetFiles": "所有預設檔案",
         "exportAllTitle": "匯出所有預設",
@@ -894,7 +916,11 @@
         "newPreset": "新建預設",
         "overwrite": "覆蓋",
         "renameFolder": "重新命名資料夾",
-        "sortAll": "全部按字母排序"
+        "setDefaultAllCameras": "設為所有相機的預設值",
+        "setDefaultForCamera": "設為 {{camera}} 的預設值",
+        "sortAll": "全部按字母排序",
+        "unsetDefaultAllCameras": "不再作為所有相機的預設值",
+        "unsetDefaultForCamera": "不再作為 {{camera}} 的預設值"
       },
       "status": {
         "empty": "尚未儲存預設。建立您自己的預設、從檔案匯入或探索社群預設。",
@@ -929,12 +955,16 @@
         "adjust": "調整",
         "crop": "裁剪",
         "export": "匯出",
+        "filmstrip": "膠片條",
         "info": "資訊",
         "inpaint": "修復",
         "masks": "遮色片",
         "presets": "預設",
         "tethering": "連線拍攝"
       }
+    },
+    "toasts": {
+      "embeddedPreview": "RapidRAW 無法解碼此 RAW 檔案，因此您看到和編輯的是相機內嵌的 JPEG 預覽。畫質會低於真正的 RAW，可調整的空間也更小。"
     },
     "toolbar": {
       "history": "歷史記錄",
@@ -1101,6 +1131,10 @@
       "title": "編輯尚未同步到 Immich"
     },
     "export": {
+      "newAlbum": "新增相簿…",
+      "newAlbumName": "相簿名稱",
+      "createAlbum": "建立",
+      "newAlbumFailed": "無法建立相簿：{{error}}",
       "album": "相簿",
       "destination": "Immich",
       "noAlbum": "不加入相簿",
@@ -1109,16 +1143,19 @@
       "withOriginalDesc": "對於本機資料夾中的影像：原始檔會連同編輯內容一起上傳，匯出的影像會堆疊在其上方。來自 Immich 的影像一律堆疊在其原始檔上。"
     },
     "section": {
+      "albums": "相簿",
       "empty": "伺服器上沒有相簿。",
       "error": "無法連線到 Immich。",
       "loading": "正在載入相簿…",
       "refresh": "重新整理相簿",
       "timeline": "時間軸",
-      "title": "Immich"
+      "title": "Immich",
+      "unassigned": "不在任何相簿中",
+      "unassignedHint": "將影像拖到這裡即可上傳，但不加入任何相簿。"
     },
     "settings": {
       "apiKey": "API 金鑰",
-      "apiKeyDesc": "請在 Immich 的「帳戶設定 → API 金鑰」中建立，並授予以下權限：album.read, albumAsset.create, albumAsset.delete, asset.read, asset.view, asset.download, asset.upload, asset.update, asset.delete, stack.read, stack.create、user.read。",
+      "apiKeyDesc": "請在 Immich 的「帳戶設定 → API 金鑰」中建立，並授予以下權限：album.read, album.create, albumAsset.create, albumAsset.delete, asset.read, asset.view, asset.download, asset.upload, asset.update, asset.delete, stack.read, stack.create、user.read。",
       "connected": "已以 {{user}} 身分連線 (Immich {{version}})",
       "description": "在圖庫中瀏覽 Immich 伺服器上的照片並直接編輯。原始檔會在開啟時下載，編輯內容會儲存到 Immich，因此在每台電腦上看起來都一樣。",
       "keyInFile": "已儲存在只有你能讀取的檔案中：沒有可用的認證資訊儲存區。在 KDE 中，請在 KDE 錢包設定裡啟用 Secret Service 介面，然後重新儲存。",
@@ -1136,12 +1173,17 @@
       "pending": "等待同步到 Immich 的編輯：{{number}}"
     },
     "toasts": {
+      "editsStayLocal": "{{fileName}} 屬於其他人，因此 Immich 不接受對它的編輯。你的編輯會保留在這台電腦上。",
       "backOnline": "Immich 已重新連線，所有編輯內容都已儲存。",
       "downloadFailed": "無法從 Immich 下載：{{error}}",
       "editsConflict": "{{fileName}} 也在另一台電腦上被編輯過。你的編輯內容會保留，另一個版本已儲存為虛擬副本。",
       "offline": "無法連線到 Immich。你的編輯內容會保留在這裡，並在恢復連線後傳送。",
+      "transferFailed": "未能新增到 Immich：{{number}}（{{error}}）",
+      "transferred": "已新增到 Immich：{{number}}",
+      "transferring": "正在新增到 Immich… {{current}}/{{total}}",
       "trashFailed": "無法移至 Immich 垃圾桶：{{error}}",
-      "uploaded": "已上傳到 Immich：{{number}}"
+      "uploaded": "已上傳到 Immich：{{number}}",
+      "uploadKeptCopy": "{{fileName}} 已在 Immich 中，且有其他編輯。那些編輯會保留，你的編輯將作為虛擬副本保存。"
     }
   },
   "library": {
@@ -1150,6 +1192,7 @@
       "failed": "失敗（{{failedCount}}）",
       "kinds": {
         "denoise": "正在 AI 降噪",
+        "upscale": "正在 RapidRes 放大",
         "depthMap": "正在分析深度",
         "depthMask": "正在產生深度遮罩",
         "faceMask": "正在產生臉部遮罩",
@@ -1443,10 +1486,7 @@
       "originalRatio": "原始比例"
     },
     "thumbnailSize": {
-      "large": "大",
-      "list": "列表",
-      "medium": "中",
-      "small": "小"
+      "list": "列表"
     },
     "tooltips": {
       "communityPresets": "社群預設",
@@ -1539,6 +1579,7 @@
       "descReplace": "覆蓋所有選中的設定，其餘重置為預設值。",
       "groups": {
         "aiDenoise": "AI 降噪",
+        "aiUpscale": "RapidRes",
         "blackWhite": "黑白",
         "chromaticAberration": "色差",
         "clarityDehaze": "清晰度與去朦朧",
@@ -1697,7 +1738,6 @@
       "selectManufacturer": "選擇製造商",
       "title": "鏡頭校正",
       "vignetting": "暗角",
-      "waitingAutoDetect": "等待自動檢測...",
       "zoomInTooltip": "放大",
       "zoomOutTooltip": "縮小"
     },
@@ -1830,6 +1870,7 @@
       "limit": "上限",
       "modals": {
         "aiDenoiseMessage": "確定要清除 AI 降噪快取嗎？\n\n啟用 AI 降噪的影像需要重新降噪，每張影像可能需要數分鐘。",
+        "aiUpscaleMessage": "確定要清除 RapidRes 快取嗎？\n\n啟用 RapidRes 的影像需要重新放大。",
         "aiMapsMessage": "確定要清除深度與法線貼圖嗎？\n\n使用鏡頭模糊、霧效或重新打光的影像會在下次開啟時重新產生貼圖。",
         "aiMessage": "您確定要從所有活動根資料夾中的所有影像中移除所有 AI 生成的標籤嗎？\n\n這不會影響使用者新增的標籤。此操作無法復原。",
         "allMessage": "您確定要從所有活動根資料夾中的所有影像中移除所有 AI 生成和使用者新增的標籤嗎？\n\n此操作無法復原。",
@@ -1857,6 +1898,7 @@
       "show": "顯示",
       "statuses": {
         "aiDenoiseSuccess": "AI 降噪快取已成功清除。",
+        "aiUpscaleSuccess": "RapidRes 快取已成功清除。",
         "aiSuccess": "{{count}} 個檔案已更新。AI 標籤已移除。",
         "aiSuccess_one": "{{count}} 個檔案已更新。AI 標籤已移除。",
         "aiSuccess_other": "{{count}} 個檔案已更新。AI 標籤已移除。",
@@ -1873,6 +1915,8 @@
       "storage": {
         "aiDenoise": "AI 降噪",
         "aiDenoiseDesc": "快取的降噪結果。",
+        "aiUpscale": "RapidRes",
+        "aiUpscaleDesc": "快取的 RapidRes 2 倍放大結果。",
         "aiMaps": "深度與法線貼圖",
         "aiMapsDesc": "用於鏡頭模糊、霧效和重新打光。",
         "immich": "Immich",
@@ -2102,6 +2146,31 @@
         "metal": "Metal",
         "vulkan": "Vulkan"
       },
+      "defaultAdjustments": {
+        "addCamera": "新增相機…",
+        "applyToNonRaw": "同時套用於 JPEG、TIFF、PNG 等非 RAW 檔案",
+        "applyToNonRawDesc": "關閉時僅 RAW 檔案使用這些預設值。相機直出的 JPEG 通常已處理並校正，再次套用可能會過度。",
+        "autoLensCorrection": "自動鏡頭校正",
+        "autoLensCorrectionDesc": "依據從每張影像中繼資料辨識出的鏡頭描述檔，校正變形、色差與暗角。",
+        "cameraDefaults": "依相機設定預設值",
+        "cameraDefaultsDesc": "為特定相機的影像設定專屬的預設集。未列出的相機使用上方的預設預設集，鏡頭校正適用於所有相機。",
+        "cameraPresetMissing": "所選預設集已被刪除，因此此相機的影像重新使用所有相機的預設集。",
+        "description": "設定未編輯影像的初始值以及「重置調整」恢復到的值；已編輯的影像會保留各自的設定。設定預設值後，RAW 縮圖會重新算繪而不使用相機內嵌預覽，因此首次載入較慢。",
+        "lensCorrection": "鏡頭校正",
+        "noCamerasFound": "找不到其他相機。請開啟包含該相機影像的資料夾，或在編輯其影像時於預設集上按右鍵。",
+        "noPreset": "無（中性）",
+        "preset": "預設預設集",
+        "presetDesc": "套用於所有未編輯的影像。遮罩、裁切與變形只適合建立它們的影像，因此會被略過。",
+        "presetMissing": "所選預設集已被刪除，因此未編輯的影像重新使用中性值。",
+        "removeCamera": "移除相機",
+        "sameAsAllCameras": "與所有相機相同",
+        "scope": "套用於",
+        "sliderReset": "滑桿重置",
+        "sliderResetDefaults": "預設調整",
+        "sliderResetDesc": "透過雙擊或快速編輯等方式重置滑桿時恢復到的值。遮罩滑桿一律重置為中性值。",
+        "sliderResetNeutral": "中性值",
+        "title": "預設調整"
+      },
       "displayColor": {
         "chooseFile": "選擇描述檔…",
         "description": "將編輯檢視從 sRGB 轉換為顯示器的色彩描述檔，使其與支援色彩管理的應用程式一致。不影響匯出。",
@@ -2118,7 +2187,8 @@
           "notFound": "找不到顯示器描述檔 – 假設為 sRGB",
           "off": "不轉換 – 編輯檢視假設為 sRGB 顯示器",
           "srgb": "{{name}} 與 sRGB 相符 – 無需轉換",
-          "unnamed": "未命名的描述檔"
+          "unnamed": "未命名的描述檔",
+          "wgpu": "啟用直接 WGPU 算繪時不會套用"
         },
         "title": "顯示器色彩管理"
       },
@@ -2167,7 +2237,7 @@
         "baselineExposure": "基礎曝光",
         "baselineExposureAmount": "基礎量",
         "baselineExposureAmountDesc": "加到 RAW 檔案的曝光量。darktable 使用 +0.7 EV。",
-        "baselineExposureDesc": "將所有 RAW 檔案提亮一個固定值（與 darktable 場景參考模式的預設值相同），如有 DNG BaselineExposure 標籤也會一併加上。在此選項推出之前編輯的影像不受影響。",
+        "baselineExposureDesc": "將 RAW 檔案提亮一個固定值；如有 DNG BaselineExposure 標籤，則改用該標籤的值。",
         "colorNr": "基礎顏色降噪",
         "colorNrDesc": "在管線早期應用交叉雙邊濾波器以去除彩色噪點。值越高 = 降噪越強。",
         "defaultNonRawTonemapper": "預設非 RAW 色調映射",
@@ -2180,7 +2250,7 @@
         "enablePreprocessingNonRaws": "對非 RAW 影像啟用",
         "enableTonemapperOverride": "啟用色調映射覆蓋",
         "highlightPreservation": "高光保護補償",
-        "highlightPreservationDesc": "從 RAW 檔案讀取相機在高光保護模式下保留的曝光並予以恢復（富士 DR200/DR400、Canon 高光色調優先與自動亮度優化、Nikon 動態 D-Lighting、Olympus 層次、Pentax 動態範圍擴展）。在此選項推出之前編輯的影像不受影響。",
+        "highlightPreservationDesc": "恢復相機高光保護模式（如富士 DR200/DR400、Nikon 動態 D-Lighting）降低的曝光。",
         "highlightRecovery": "RAW 亮部恢復",
         "highlightRecoveryDesc": "控制從 RAW 檔案的裁剪亮部中恢復細節的程度。較高的值可恢復更多細節，但可能引入紫色偽影。",
         "linearOptions": {
@@ -2215,15 +2285,14 @@
       "smallThumbnailRes": "網格縮圖解析度",
       "smallThumbnailResDesc": "圖庫網格中顯示的縮圖解析度。",
       "staticDesc": "編輯器以固定解析度渲染影像。此模式最快且最一致，非常適合低端硬體，優先考慮流暢效能而非畫素完美的縮放。",
-      "staticPreviewRes": "靜態預覽解析度",
-      "staticPreviewResDesc": "設定靜態預覽的解析度，如裁剪模式、鏡頭校正和透視工具。不影響主編輯器預覽。",
       "threads": "執行緒數",
       "thumbnailRes": "縮圖解析度",
       "thumbnailResDesc": "確定生成的相簿縮圖的解析度。較高的值可在載入時產生更清晰的影像。",
       "title": "處理引擎",
       "wgpu": "WGPU 直接渲染",
       "wgpuDescAndroid": "繞過瀏覽器編碼，實現即時回應的即時預覽。（在 Android 上已停用：原生 WGPU 表面建立目前不支援與移動端 Webview 同時執行。）",
-      "wgpuDescLinux": "繞過瀏覽器編碼，實現即時回應的即時預覽。（在 Linux 上已停用：Tauri 使用 GTK 作為 Webview，與同一 X11 表面上的 WGPU 衝突並導致閃爍。）",
+      "wgpuDescLinuxExperimental": "在 Linux 上為實驗性功能，可能不穩定。",
+      "wgpuDescLinuxX11": "在 X11 上無法使用。",
       "wgpuDescRecommended": "繞過瀏覽器編碼，實現即時回應的即時預覽。強烈推薦以獲得最佳效能。",
       "wgpuLabel": "啟用直接 WGPU 渲染",
       "workerThreads": "縮圖工作執行緒數",
@@ -2265,6 +2334,7 @@
         "mediapipe": "感謝其快速的臉部特徵點與分割模型，為 AI 臉部遮罩提供支援。",
         "negpy": "為負片轉換邏輯提供了靈感。",
         "nind": "為 AI 模型提供支援，驅動了 RapidRAW 中的 AI 降噪功能。",
+        "span": "RapidRAW 的 AI 2 倍放大功能 RapidRes 的基礎 AI 模型，由 RapidRAW 針對自身的 RAW 處理流程進行微調（作者 Philip Hofmann，CC BY 4.0）。",
         "rawler": "為優秀的 Rust 庫提供支援，構成了本專案 RAW 檔案處理的基礎。",
         "sam2": "為提供基礎模型，用於 AI 主體檢測功能。",
         "spektrafilm": "感謝 Andrea Volpato 提供基於光譜的底片模擬 LUT，為 RapidRAW 的內建底片模擬提供支援。採用 CC BY-SA 4.0 授權。",
@@ -2340,13 +2410,11 @@
     "bottomBar": {
       "imagesSelected": "已選擇 {{current}} / {{total}} 張影像",
       "tooltips": {
-        "collapseFilmstrip": "摺疊膠片條",
         "collapseLeft": "折疊左側面板",
         "collapseRight": "折疊右側面板",
         "copyPasteSettings": "複製與貼上設定",
         "copySettings": "複製設定",
         "customZoom": "點選輸入自定義縮放百分比",
-        "expandFilmstrip": "展開膠片條",
         "expandLeft": "展開左側面板",
         "expandRight": "展開右側面板",
         "export": "匯出",
@@ -2355,7 +2423,9 @@
         "rateStars_one": "評分 1 星",
         "rateStars_other": "評分 {{count}} 星",
         "resetZoom": "重置縮放以適應視窗",
-        "selectToRate": "選擇一張影像以評分"
+        "selectToRate": "選擇一張影像以評分",
+        "sortFilmstripByFolder": "依資料夾排序底片列",
+        "sortFilmstripByName": "依名稱排序底片列"
       },
       "zoomLabel": "縮放",
       "zoomLabelReset": "重置縮放"

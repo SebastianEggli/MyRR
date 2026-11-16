@@ -7,7 +7,8 @@ import Button from '../../ui/Button';
 import Dropdown, { OptionItem } from '../../ui/Dropdown';
 import Text from '../../ui/Text';
 import { TextColors, TextVariants } from '../../../types/typography';
-import { AppSettings, DisplayColorManagementMode, DisplayProfileInfo, Invokes } from '../../ui/AppProperties';
+import { AppSettings, DisplayColorManagementMode, DisplayProfileInfo } from '../../../types/settings';
+import { Invokes } from '../../../types/invokes';
 import { useSettingsStore } from '../../../store/useSettingsStore';
 
 interface DisplayColorSettingsProps {
@@ -63,6 +64,9 @@ export default function DisplayColorSettings({ appSettings, onSettingsChange }: 
 
   const status = (() => {
     if (!info) return null;
+    if (info.blockedByWgpu) {
+      return { color: TextColors.secondary, text: t('settings.processing.displayColor.status.wgpu') };
+    }
     if (info.error) {
       return {
         color: TextColors.error,

@@ -150,6 +150,8 @@
       "aiDenoise": "AI odšumění",
       "classicDenoise": "Klasické odšumění",
       "aiDenoiseDetail": "Detail",
+      "aiUpscale": "RapidRes 2x",
+      "aiUpscaleDetail": "Detail",
       "blueYellow": "Modrá/Žlutá",
       "centre": "Střed",
       "chromaticAberration": "Chromatická aberace",
@@ -165,6 +167,7 @@
       "negativeGreen": "Zelená",
       "negativeRed": "Červená",
       "noiseReduction": "Redukce šumu",
+      "superResolution": "RapidRes",
       "presence": "Prezence",
       "redCyan": "Červená/Azurová",
       "sharpening": "Doostření",
@@ -295,6 +298,12 @@
       "autoAdjust": "Automaticky upravit",
       "autoLensCorrection": "Auto korekce objektivu",
       "autoStraighten": "Automaticky vyrovnat",
+      "backgroundColor": "Barva pozadí",
+      "bgBlack": "Černá",
+      "bgDarkGrey": "Tmavě šedá",
+      "bgLightGrey": "Světle šedá",
+      "bgNeutralGrey": "Neutrální šedá (18 %)",
+      "bgWhite": "Bílá",
       "cancel": "Zrušit",
       "closeViewer": "Zavřít druhé okno",
       "colorLabel": "Barevný štítek",
@@ -326,9 +335,14 @@
       "removeBlackWhite": "Odebrat černobílou",
       "removeDenoise": "Odebrat odšumění",
       "removeNegativeConversion": "Odebrat převod negativu",
+      "removeSuperResolution": "Odebrat RapidRes",
       "resetAdjustments": "Obnovit nastavení",
+      "resetToDefaults": "Obnovit na výchozí",
+      "resetToNeutral": "Obnovit na neutrální",
       "stitchPanorama": "Složit panorama",
+      "superResolution": "RapidRes (2x)",
       "tagging": "Otagování",
+      "themeDefault": "Výchozí podle motivu",
       "undo": "Zpět",
       "unflagged": "Bez vlajky"
     },
@@ -411,6 +425,10 @@
       "denoise_many": "Odšumit",
       "denoise_one": "Odšumit",
       "denoise_other": "Odšumit",
+      "superResolution_few": "RapidRes (2x)",
+      "superResolution_many": "RapidRes (2x)",
+      "superResolution_one": "RapidRes (2x)",
+      "superResolution_other": "RapidRes (2x)",
       "duplicateImage": "Duplikovat snímek",
       "enable": "Zapnout",
       "exportImage_few": "Exportovat {{count}} snímky",
@@ -544,6 +562,7 @@
       "createNewTitle": "Vytvořit novou generativní úpravu",
       "createNewTooltip": "Vytvořit novou {{name}} úpravu",
       "denoising": "Probíhá AI odšumění...",
+      "upscaling": "Probíhá RapidRes...",
       "dropzoneText": "Přetažením sem vytvoříte novou úpravu",
       "editSettingsTitle": "Upravit nastavení",
       "editsTitle": "Úpravy",
@@ -760,11 +779,13 @@
       "cancel": "Zrušit",
       "drawingActive": "Kreslení aktivní",
       "hint": "Kreslete podél hran na fotografii, které mají být svislé nebo vodorovné.",
+      "horizontalLine": "Vodorovná vodicí čára č. {{index}}",
       "linesStatus": "Aktivní vodicí čáry",
       "toast": {
         "angleRejected": "Úhel čáry je příliš daleko od vodorovného nebo svislého směru",
         "maxLines": "Povoleny jsou maximálně 2 svislé a 2 vodorovné čáry"
-      }
+      },
+      "verticalLine": "Svislá vodicí čára č. {{index}}"
     },
     "layout": {
       "split": "Rozdělit"
@@ -881,6 +902,7 @@
         "focalLength": "Ohnisková vzdálenost",
         "iso": "ISO",
         "lens": "Objektiv",
+        "model": "Model",
         "shutterSpeed": "Rychlost závěrky",
         "title": "Podrobnosti o fotoaparátu"
       },
@@ -925,6 +947,8 @@
     },
     "presets": {
       "amount": "Množství",
+      "defaultForAllCameras": "Výchozí pro všechny fotoaparáty",
+      "defaultForCamera": "Výchozí pro {{camera}}",
       "dialog": {
         "allPresetFiles": "Všechny soubory s presety",
         "exportAllTitle": "Exportovat všechny presety",
@@ -945,7 +969,11 @@
         "newPreset": "Nový preset",
         "overwrite": "Přepsat",
         "renameFolder": "Přejmenovat složku",
-        "sortAll": "Seřadit vše podle abecedy"
+        "setDefaultAllCameras": "Nastavit jako výchozí pro všechny fotoaparáty",
+        "setDefaultForCamera": "Nastavit jako výchozí pro {{camera}}",
+        "sortAll": "Seřadit vše podle abecedy",
+        "unsetDefaultAllCameras": "Přestat používat jako výchozí pro všechny fotoaparáty",
+        "unsetDefaultForCamera": "Přestat používat jako výchozí pro {{camera}}"
       },
       "status": {
         "empty": "Zatím nejsou uloženy žádné presety. Vytvořte si vlastní, importujte ze souboru nebo prozkoumejte presety komunity.",
@@ -980,12 +1008,16 @@
         "adjust": "Upravit",
         "crop": "Oříznout",
         "export": "Export",
+        "filmstrip": "Filmový pás",
         "info": "Info",
         "inpaint": "Retuš",
         "masks": "Masky",
         "presets": "Presety",
         "tethering": "Tetherované snímání"
       }
+    },
+    "toasts": {
+      "embeddedPreview": "RapidRAW nedokázal dekódovat tento soubor RAW, takže vidíte a upravujete vložený náhled JPEG z fotoaparátu. Počítejte s nižší kvalitou a menší rezervou pro úpravy než u skutečného RAW."
     },
     "toolbar": {
       "history": "Historie",
@@ -1156,6 +1188,10 @@
       "title": "Úpravy ještě nejsou v Immichi"
     },
     "export": {
+      "newAlbum": "Nové album…",
+      "newAlbumName": "Název alba",
+      "createAlbum": "Vytvořit",
+      "newAlbumFailed": "Album se nepodařilo vytvořit: {{error}}",
       "album": "Album",
       "destination": "Immich",
       "noAlbum": "Žádné album",
@@ -1164,16 +1200,19 @@
       "withOriginalDesc": "Pro obrázky z místní složky: originál se nahraje i s úpravami a export se umístí na něj do zásobníku. Obrázky z Immiche se vždy skládají na svůj originál."
     },
     "section": {
+      "albums": "Alba",
       "empty": "Na serveru nejsou žádná alba.",
       "error": "Immich není dostupný.",
       "loading": "Načítání alb…",
       "refresh": "Obnovit alba",
       "timeline": "Časová osa",
-      "title": "Immich"
+      "title": "Immich",
+      "unassigned": "Bez alba",
+      "unassignedHint": "Přetáhněte sem obrázky a nahrajte je bez přidání do alba."
     },
     "settings": {
       "apiKey": "API klíč",
-      "apiKeyDesc": "Vytvořte jej v Immichi v Nastavení účtu → API klíče s těmito oprávněními: album.read, albumAsset.create, albumAsset.delete, asset.read, asset.view, asset.download, asset.upload, asset.update, asset.delete, stack.read, stack.create a user.read.",
+      "apiKeyDesc": "Vytvořte jej v Immichi v Nastavení účtu → API klíče s těmito oprávněními: album.read, album.create, albumAsset.create, albumAsset.delete, asset.read, asset.view, asset.download, asset.upload, asset.update, asset.delete, stack.read, stack.create a user.read.",
       "connected": "Připojeno jako {{user}} (Immich {{version}})",
       "description": "Procházejte fotky ze svého serveru Immich v knihovně a upravujte je přímo. Originály se stahují při otevření a úpravy se ukládají do Immiche, takže vypadají stejně na každém počítači.",
       "keyInFile": "Uloženo v souboru, který můžete číst jen vy: není k dispozici žádné úložiště přihlašovacích údajů. V KDE zapněte rozhraní Secret Service v nastavení KDE Wallet a uložte znovu.",
@@ -1191,12 +1230,17 @@
       "pending": "Úpravy čekající na Immich: {{number}}"
     },
     "toasts": {
+      "editsStayLocal": "{{fileName}} patří někomu jinému, proto pro něj Immich nepřijímá úpravy. Tvé úpravy zůstanou v tomto počítači.",
       "backOnline": "Immich je opět dostupný a všechny úpravy jsou v něm uložené.",
       "downloadFailed": "Stažení z Immiche se nezdařilo: {{error}}",
       "editsConflict": "{{fileName}} byl upraven také na jiném počítači. Vaše úpravy zůstávají a druhá verze je uložena jako virtuální kopie.",
       "offline": "Immich není dostupný. Vaše úpravy zůstávají zde a odešlou se, jakmile bude opět dostupný.",
+      "transferFailed": "Nepřidáno do Immiche: {{number}} ({{error}})",
+      "transferred": "Přidáno do Immiche: {{number}}",
+      "transferring": "Přidávání do Immiche… {{current}}/{{total}}",
       "trashFailed": "Přesun do koše Immiche se nezdařil: {{error}}",
-      "uploaded": "Nahráno do Immiche: {{number}}"
+      "uploaded": "Nahráno do Immiche: {{number}}",
+      "uploadKeptCopy": "{{fileName}} už je v Immichu s jinými úpravami. Ty zůstanou a tvé úpravy se uloží jako virtuální kopie."
     }
   },
   "library": {
@@ -1205,6 +1249,7 @@
       "failed": "Selhalo ({{failedCount}})",
       "kinds": {
         "denoise": "AI odšumování",
+        "upscale": "Zvětšování RapidRes",
         "depthMap": "Analýza hloubky",
         "depthMask": "Vytváření hloubkové masky",
         "faceMask": "Generování masky obličeje",
@@ -1513,10 +1558,7 @@
       "originalRatio": "Původní poměr"
     },
     "thumbnailSize": {
-      "large": "Velký",
-      "list": "Seznam",
-      "medium": "Střední",
-      "small": "Malý"
+      "list": "Seznam"
     },
     "tooltips": {
       "communityPresets": "Presety komunity",
@@ -1609,6 +1651,7 @@
       "descReplace": "Přepíše všechna vybraná nastavení, zbytek obnoví na výchozí hodnoty.",
       "groups": {
         "aiDenoise": "AI odšumění",
+        "aiUpscale": "RapidRes",
         "blackWhite": "Černobílá",
         "chromaticAberration": "Chromatická aberace",
         "clarityDehaze": "Zřetelnost a odmlžení",
@@ -1775,7 +1818,6 @@
       "selectManufacturer": "Vyberte výrobce",
       "title": "Korekce objektivu",
       "vignetting": "Vinětace",
-      "waitingAutoDetect": "Čekání na automatickou detekci...",
       "zoomInTooltip": "Přiblížit",
       "zoomOutTooltip": "Oddálit"
     },
@@ -1912,6 +1954,7 @@
       "limit": "Limit",
       "modals": {
         "aiDenoiseMessage": "Opravdu chcete vymazat mezipaměť AI odšumění?\n\nSnímky se zapnutým AI odšuměním bude nutné znovu odšumět, což může trvat několik minut na snímek.",
+        "aiUpscaleMessage": "Opravdu chcete vymazat mezipaměť RapidRes?\n\nSnímky se zapnutým RapidRes bude nutné znovu zvětšit.",
         "aiMapsMessage": "Opravdu chcete vymazat hloubkové a normálové mapy?\n\nObrázky s rozostřením objektivu, mlhou nebo přesvícením si mapy při dalším otevření vytvoří znovu.",
         "aiMessage": "Opravdu chcete odstranit všechny značky generované AI ze všech snímků ve všech aktivních kořenových složkách?\n\nUživatelem přidané značky tím nebudou dotčeny. Tuto akci nelze vrátit.",
         "allMessage": "Opravdu chcete odstranit všechny značky generované umělou inteligencí i přidané uživatelem ze všech snímků ve všech aktivních kořenových složkách?\n\nTuto akci nelze vrátit.",
@@ -1939,6 +1982,7 @@
       "show": "Zobrazit",
       "statuses": {
         "aiDenoiseSuccess": "Mezipaměť AI odšumění byla úspěšně vymazána.",
+        "aiUpscaleSuccess": "Mezipaměť RapidRes byla úspěšně vymazána.",
         "aiSuccess": "{{count}} souborů aktualizováno. Značky AI odstraněny.",
         "aiSuccess_few": "{{count}} soubory aktualizovány. Značky AI odstraněny.",
         "aiSuccess_many": "{{count}} souboru aktualizováno. Značky AI odstraněny.",
@@ -1961,6 +2005,8 @@
       "storage": {
         "aiDenoise": "AI odšumění",
         "aiDenoiseDesc": "Uložené výsledky odšumění.",
+        "aiUpscale": "RapidRes",
+        "aiUpscaleDesc": "Uložená 2x zvětšení RapidRes.",
         "aiMaps": "Hloubkové a normálové mapy",
         "aiMapsDesc": "Používá je rozostření objektivu, mlha a přesvícení.",
         "immich": "Immich",
@@ -2190,6 +2236,31 @@
         "metal": "Metal",
         "vulkan": "Vulkan"
       },
+      "defaultAdjustments": {
+        "addCamera": "Přidat fotoaparát…",
+        "applyToNonRaw": "Použít také na JPEG, TIFF, PNG a další soubory jiné než RAW",
+        "applyToNonRawDesc": "Když je vypnuto, tyto hodnoty používají jen soubory RAW. JPEG z fotoaparátu jsou obvykle už zpracované a opravené, takže opětovné použití může být přehnané.",
+        "autoLensCorrection": "Automatická korekce objektivu",
+        "autoLensCorrectionDesc": "Opraví zkreslení, chromatickou vadu a vinětaci pomocí profilu objektivu rozpoznaného z metadat každého snímku.",
+        "cameraDefaults": "Výchozí hodnoty pro fotoaparáty",
+        "cameraDefaultsDesc": "Dejte snímkům z konkrétních fotoaparátů vlastní předvolbu. Fotoaparáty, které tu nejsou, používají výchozí předvolbu výše a korekce objektivu platí pro všechny fotoaparáty.",
+        "cameraPresetMissing": "Vybraná předvolba byla smazána, proto snímky z tohoto fotoaparátu opět používají předvolbu pro všechny fotoaparáty.",
+        "description": "Určuje, s čím začínají neupravené snímky a k čemu se vrací „Obnovit úpravy“; upravené snímky si ponechají své nastavení. S výchozími hodnotami se náhledy RAW vykreslují místo použití vloženého náhledu z fotoaparátu a zpočátku se načítají pomaleji.",
+        "lensCorrection": "Korekce objektivu",
+        "noCamerasFound": "Žádné další fotoaparáty nenalezeny. Otevřete složku se snímky z fotoaparátu nebo klikněte pravým tlačítkem na předvolbu při úpravě některého z jeho snímků.",
+        "noPreset": "Žádná (neutrální)",
+        "preset": "Výchozí předvolba",
+        "presetDesc": "Použije se na každý neupravený snímek. Masky, ořezy a transformace se vynechají, protože sedí jen na snímek, na kterém vznikly.",
+        "presetMissing": "Vybraná předvolba byla smazána, proto neupravené snímky opět používají neutrální hodnoty.",
+        "removeCamera": "Odebrat fotoaparát",
+        "sameAsAllCameras": "Stejně jako všechny fotoaparáty",
+        "scope": "Platí pro",
+        "sliderReset": "Obnovení posuvníků",
+        "sliderResetDefaults": "Výchozí úpravy",
+        "sliderResetDesc": "Hodnota, na kterou se posuvník vrátí při obnovení, například dvojklikem nebo v rychlých úpravách. Posuvníky masek se vždy vrací na neutrální hodnotu.",
+        "sliderResetNeutral": "Neutrální hodnota",
+        "title": "Výchozí úpravy"
+      },
       "displayColor": {
         "chooseFile": "Vybrat profil…",
         "description": "Převádí zobrazení úprav ze sRGB do barevného profilu monitoru, aby odpovídalo aplikacím se správou barev. Exporty nejsou ovlivněny.",
@@ -2206,7 +2277,8 @@
           "notFound": "Profil monitoru nenalezen – předpokládá se sRGB",
           "off": "Bez převodu – zobrazení úprav předpokládá monitor sRGB",
           "srgb": "{{name}} odpovídá sRGB – převod není potřeba",
-          "unnamed": "Nepojmenovaný profil"
+          "unnamed": "Nepojmenovaný profil",
+          "wgpu": "Nepoužije se, dokud je zapnuté přímé vykreslování WGPU"
         },
         "title": "Správa barev monitoru"
       },
@@ -2255,7 +2327,7 @@
         "baselineExposure": "Základní expozice",
         "baselineExposureAmount": "Velikost základu",
         "baselineExposureAmountDesc": "Expozice přidaná k souborům RAW. darktable používá +0,7 EV.",
-        "baselineExposureDesc": "Zesvětlí všechny soubory RAW o pevnou hodnotu, podobně jako výchozí nastavení darktable pro scene-referred zpracování, a přičte značku DNG BaselineExposure, pokud ji soubor obsahuje. Snímky upravené před zavedením této volby nejsou ovlivněny.",
+        "baselineExposureDesc": "Zesvětlí soubory RAW o pevnou hodnotu, nebo místo ní o hodnotu značky DNG BaselineExposure, pokud existuje.",
         "colorNr": "Redukce šumu základní barvy",
         "colorNrDesc": "Aplikuje křížový bilaterální filtr na začátku procesu k odstranění barevného šumu. Vyšší hodnota = silnější redukce šumu.",
         "defaultNonRawTonemapper": "Výchozí Non-RAW Tonemapper",
@@ -2268,7 +2340,7 @@
         "enablePreprocessingNonRaws": "Povolit pro soubory bez RAW",
         "enableTonemapperOverride": "Povolte přepsání Tonemapperu",
         "highlightPreservation": "Kompenzace ochrany světel",
-        "highlightPreservationDesc": "Vrátí expozici, kterou fotoaparát ubral v režimech ochrany světel, načtenou ze souboru RAW (Fujifilm DR200/DR400, Canon Priorita jasných tónů a Auto Lighting Optimizer, Nikon Active D-Lighting, gradace Olympus, rozšíření dynamického rozsahu Pentax). Snímky upravené před zavedením této volby nejsou ovlivněny.",
+        "highlightPreservationDesc": "Vrátí expozici sníženou režimy ochrany světel fotoaparátu, např. Fujifilm DR200/DR400 nebo Nikon Active D-Lighting.",
         "highlightRecovery": "RAW Highlight Recovery",
         "highlightRecoveryDesc": "Řídí, kolik detailů se obnoví z přepálených světel v souborech RAW. Vyšší hodnoty obnoví více detailů, ale mohou způsobit fialové artefakty.",
         "linearOptions": {
@@ -2303,15 +2375,14 @@
       "smallThumbnailRes": "Rozlišení miniatur mřížky",
       "smallThumbnailResDesc": "Rozlišení miniatur zobrazených v mřížce knihovny.",
       "staticDesc": "Editor vykresluje snímek v pevném rozlišení. Tento režim je nejrychlejší a nejkonzistentnější, takže je ideální pro slabší hardware, kde je plynulý výkon důležitější než pixelově přesné přiblížení.",
-      "staticPreviewRes": "Rozlišení statického náhledu",
-      "staticPreviewResDesc": "Nastaví rozlišení pro statické náhledy, jako je režim oříznutí, korekce objektivu a nástroje perspektivy. Neovlivňuje hlavní náhled editoru.",
       "threads": "Vlákna",
       "thumbnailRes": "Rozlišení miniatur",
       "thumbnailResDesc": "Určuje rozlišení generovaných miniatur knihovny. Vyšší hodnoty produkují ostřejší snímky během načítání.",
       "title": "Engine zpracování",
       "wgpu": "Přímé vykreslování WGPU",
       "wgpuDescAndroid": "Obchází kódování prohlížeče pro okamžitě reagující živé náhledy. (Na Androidu zakázáno: nativní tvorba povrchů WGPU není v současnosti podporována vedle mobilního webview.)",
-      "wgpuDescLinux": "Obchází kódování prohlížeče pro okamžitě reagující živé náhledy. (Na Linuxu zakázáno: Tauri používá GTK pro webview, což je v konfliktu s WGPU na stejném povrchu X11 a způsobuje blikání.)",
+      "wgpuDescLinuxExperimental": "Experimentální na Linuxu a může být nestabilní.",
+      "wgpuDescLinuxX11": "Není k dispozici na X11.",
       "wgpuDescRecommended": "Obchází kódování prohlížeče pro okamžitě reagující živé náhledy. Důrazně doporučeno pro výkon.",
       "wgpuLabel": "Povolit přímé vykreslování WGPU",
       "workerThreads": "Pracovní vlákna miniatur",
@@ -2353,6 +2424,7 @@
         "mediapipe": "Za rychlé modely obličejových bodů a segmentace, které pohánějí AI masky obličeje.",
         "negpy": "Pro inspiraci negativní konverzní logiky.",
         "nind": "Za poskytování modelů AI, které pohánějí funkce redukce šumu AI v RapidRAW.",
+        "span": "Za základní model AI pro RapidRes, 2x AI zvětšování v RapidRAW, který RapidRAW doladil na vlastním zpracování RAW (autor Philip Hofmann, CC BY 4.0).",
         "rawler": "Za vynikající přepravku Rust, která poskytuje základ pro zpracování souborů RAW v tomto projektu.",
         "sam2": "Za poskytnutí základního modelu používaného pro schopnosti detekce předmětů AI.",
         "spektrafilm": "Pro spektrálně založené filmové emulační LUT od Andrey Volpata, použité pro vestavěné filmové emulace v RapidRAW. Licence CC BY-SA 4.0.",
@@ -2428,13 +2500,11 @@
     "bottomBar": {
       "imagesSelected": "{{current}} z {{total}} vybrané snímky",
       "tooltips": {
-        "collapseFilmstrip": "Sbalit filmový pás",
         "collapseLeft": "Sbalit levý panel",
         "collapseRight": "Sbalit pravý panel",
         "copyPasteSettings": "Nastavení kopírování a vkládání",
         "copySettings": "Kopírovat úpravy",
         "customZoom": "Kliknutím zadejte vlastní procento přiblížení",
-        "expandFilmstrip": "Rozbalit filmový pás",
         "expandLeft": "Rozbalit levý panel",
         "expandRight": "Rozbalit pravý panel",
         "export": "Export",
@@ -2445,7 +2515,9 @@
         "rateStars_one": "Hodnotit 1 hvězdičkou",
         "rateStars_other": "Hodnotit {{count}} hvězdičkami",
         "resetZoom": "Obnovit přiblížení na okno",
-        "selectToRate": "Vyberte snímek, který chcete ohodnotit"
+        "selectToRate": "Vyberte snímek, který chcete ohodnotit",
+        "sortFilmstripByFolder": "Řadit filmový pás podle složek",
+        "sortFilmstripByName": "Řadit filmový pás podle názvu"
       },
       "zoomLabel": "Přiblížení",
       "zoomLabelReset": "Obnovit přiblížení"

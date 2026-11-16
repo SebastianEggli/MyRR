@@ -1,4 +1,5 @@
-import { GroupPreference, GroupingMode, ImageFile, LibraryViewMode } from '../components/ui/AppProperties';
+import { GroupPreference, GroupingMode, LibraryViewMode } from '../types/settings';
+import { ImageFile } from '../types/library';
 
 export type GroupId = string;
 

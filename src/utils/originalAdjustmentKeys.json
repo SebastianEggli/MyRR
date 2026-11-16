@@ -10,7 +10,6 @@
     "lensDistortionAmount",
     "lensVignetteAmount",
     "lensTcaAmount",
-    "lensDistortionParams",
     "lensDistortionEnabled",
     "lensTcaEnabled",
     "lensVignetteEnabled"
