@@ -2402,7 +2402,9 @@
         "rateStars_one": "評分 1 星",
         "rateStars_other": "評分 {{count}} 星",
         "resetZoom": "重置縮放以適應視窗",
-        "selectToRate": "選擇一張影像以評分"
+        "selectToRate": "選擇一張影像以評分",
+        "sortFilmstripByFolder": "依資料夾排序底片列",
+        "sortFilmstripByName": "依名稱排序底片列"
       },
       "zoomLabel": "縮放",
       "zoomLabelReset": "重置縮放"

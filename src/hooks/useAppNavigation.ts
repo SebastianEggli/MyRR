@@ -20,6 +20,7 @@ import { notifyEmbeddedPreview } from './useImageLoader';
 import { clearLibrarySelection } from './useLibraryActions';
 import { computeSortedLibrary } from './useSortedLibrary';
 import { getImmichAlbumImages, isImmichAlbumId } from '../utils/immichApi';
+import { getReturnSelection } from '../utils/librarySelection';
 
 export interface AppNavigationProps {
   clearThumbnailQueue: () => void;
@@ -155,15 +156,13 @@ export function useAppNavigation({ clearThumbnailQueue, refs }: AppNavigationPro
     debouncedSave.flush();
     debouncedSetHistory.cancel();
 
-    const lastActivePath = selectedImage?.path ?? null;
-    const isStillVisible =
-      lastActivePath !== null &&
-      computeSortedLibrary(useLibraryStore.getState(), useSettingsStore.getState()).some(
-        (img) => img.path === lastActivePath,
-      );
+    const returnSelection = getReturnSelection(
+      selectedImage?.path,
+      computeSortedLibrary(useLibraryStore.getState(), useSettingsStore.getState()),
+    );
 
-    if (isStillVisible) {
-      setLibrary({ libraryActivePath: lastActivePath });
+    if (returnSelection) {
+      setLibrary({ ...returnSelection, pendingRevealPath: returnSelection.libraryActivePath });
     } else {
       clearLibrarySelection();
     }
@@ -355,6 +354,7 @@ export function useAppNavigation({ clearThumbnailQueue, refs }: AppNavigationPro
       const { setProcess } = useProcessStore.getState();
       const { selectedImage, resetHistory, setEditor } = useEditorStore.getState();
       const libraryViewMode = appSettings?.libraryViewMode;
+      const lastActivePath = selectedImage?.path ?? useLibraryStore.getState().libraryActivePath;
 
       if (!skipHistory && path) {
         useLibraryStore.getState().pushNavHistory({ type: 'folder', path });
@@ -442,6 +442,14 @@ export function useAppNavigation({ clearThumbnailQueue, refs }: AppNavigationPro
         await loadExifForImages(files, path, sortCriteria.key, setLibrary);
 
         if (!preserveEditor) {
+          const returnSelection = getReturnSelection(
+            lastActivePath,
+            computeSortedLibrary(useLibraryStore.getState(), useSettingsStore.getState()),
+          );
+          if (returnSelection) {
+            setLibrary({ ...returnSelection, pendingRevealPath: returnSelection.libraryActivePath });
+          }
+
           invoke(Invokes.StartBackgroundIndexing, { folderPath: path }).catch((err) => {
             console.error('Failed to start background indexing:', err);
           });

@@ -2494,7 +2494,9 @@
         "rateStars_one": "Oceń na 1 gwiazdkę",
         "rateStars_other": "Oceń na {{count}} gwiazdek",
         "resetZoom": "Dopasuj do okna",
-        "selectToRate": "Zaznacz obraz, aby ocenić"
+        "selectToRate": "Zaznacz obraz, aby ocenić",
+        "sortFilmstripByFolder": "Sortuj pasek miniatur według folderu",
+        "sortFilmstripByName": "Sortuj pasek miniatur według nazwy"
       },
       "zoomLabel": "Przybliżenie",
       "zoomLabelReset": "Zresetuj powiększenie"

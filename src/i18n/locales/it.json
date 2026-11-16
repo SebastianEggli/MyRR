@@ -2451,7 +2451,9 @@
         "rateStars_one": "Valuta 1 stella",
         "rateStars_other": "Valuta {{count}} stelle",
         "resetZoom": "Ripristina Zoom per Adattare alla Finestra",
-        "selectToRate": "Seleziona un'immagine da valutare"
+        "selectToRate": "Seleziona un'immagine da valutare",
+        "sortFilmstripByFolder": "Ordina la pellicola per cartella",
+        "sortFilmstripByName": "Ordina la pellicola per nome"
       },
       "zoomLabel": "Zoom",
       "zoomLabelReset": "Ripristina Zoom"

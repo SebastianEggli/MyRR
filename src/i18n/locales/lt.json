@@ -2545,7 +2545,9 @@
         "rateStars_one": "Įvertinti {{count}} žvaigždute",
         "rateStars_other": "Įvertinti {{count}} žvaigždute",
         "resetZoom": "Atstatyti mastelį pagal langą",
-        "selectToRate": "Pasirinkite nuotrauką įvertinimui"
+        "selectToRate": "Pasirinkite nuotrauką įvertinimui",
+        "sortFilmstripByFolder": "Rikiuoti juostą pagal aplanką",
+        "sortFilmstripByName": "Rikiuoti juostą pagal pavadinimą"
       },
       "zoomLabel": "Mastelis",
       "zoomLabelReset": "Atstatyti mastelį"

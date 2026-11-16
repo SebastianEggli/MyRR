@@ -2402,7 +2402,9 @@
         "rateStars_one": "星1に評価",
         "rateStars_other": "星 {{count}} に評価",
         "resetZoom": "ズームをウィンドウサイズに合わせる",
-        "selectToRate": "画像を選択して評価を設定"
+        "selectToRate": "画像を選択して評価を設定",
+        "sortFilmstripByFolder": "フィルムストリップをフォルダー順に並べる",
+        "sortFilmstripByName": "フィルムストリップを名前順に並べる"
       },
       "zoomLabel": "ズーム",
       "zoomLabelReset": "ズームをリセット"

@@ -2451,7 +2451,9 @@
         "rateStars_one": "Puntuar amb 1 estrella",
         "rateStars_other": "Puntuar amb {{count}} estrelles",
         "resetZoom": "Restablir zoom per ajustar a la finestra",
-        "selectToRate": "Seleccioneu una imatge per puntuar"
+        "selectToRate": "Seleccioneu una imatge per puntuar",
+        "sortFilmstripByFolder": "Ordena la tira per carpeta",
+        "sortFilmstripByName": "Ordena la tira per nom"
       },
       "zoomLabel": "Zoom",
       "zoomLabelReset": "Restablir zoom"

@@ -2402,7 +2402,9 @@
         "rateStars_one": "1점 평가",
         "rateStars_other": "{{count}}점 평가",
         "resetZoom": "창에 맞게 확대/축소 초기화",
-        "selectToRate": "평가할 이미지를 선택하세요"
+        "selectToRate": "평가할 이미지를 선택하세요",
+        "sortFilmstripByFolder": "필름스트립을 폴더별로 정렬",
+        "sortFilmstripByName": "필름스트립을 이름순으로 정렬"
       },
       "zoomLabel": "확대/축소",
       "zoomLabelReset": "확대/축소 초기화"

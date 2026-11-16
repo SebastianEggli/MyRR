@@ -2404,7 +2404,9 @@
         "rateStars_one": "1 ster beoordelen",
         "rateStars_other": "{{count}} sterren beoordelen",
         "resetZoom": "Zoom herstellen om venster te passen",
-        "selectToRate": "Selecteer een afbeelding om te beoordelen"
+        "selectToRate": "Selecteer een afbeelding om te beoordelen",
+        "sortFilmstripByFolder": "Filmstrip sorteren op map",
+        "sortFilmstripByName": "Filmstrip sorteren op naam"
       },
       "zoomLabel": "Zoom",
       "zoomLabelReset": "Zoom herstellen"

@@ -2452,7 +2452,9 @@
         "rateStars_one": "Noter 1 étoile",
         "rateStars_other": "Noter {{count}} étoiles",
         "resetZoom": "Réinitialiser le zoom pour ajuster à la fenêtre",
-        "selectToRate": "Sélectionnez une image à noter"
+        "selectToRate": "Sélectionnez une image à noter",
+        "sortFilmstripByFolder": "Trier le film par dossier",
+        "sortFilmstripByName": "Trier le film par nom"
       },
       "zoomLabel": "Zoom",
       "zoomLabelReset": "Réinitialiser le zoom"

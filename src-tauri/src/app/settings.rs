@@ -753,6 +753,8 @@ pub struct AppSettings {
     #[serde(default)]
     pub grouping: Option<String>,
     #[serde(default)]
+    pub filmstrip_sort_by_folder: Option<bool>,
+    #[serde(default)]
     pub require_matching_exif: Option<bool>,
     #[serde(default)]
     pub group_edited_files: Option<bool>,
@@ -948,6 +950,7 @@ impl Default for AppSettings {
             folder_tree_sort: Some(FolderTreeSort::default()),
             library_display_mode: Some("grid".to_string()),
             grouping: Some("off".to_string()),
+            filmstrip_sort_by_folder: None,
             require_matching_exif: Some(false),
             group_edited_files: Some(true),
             group_associated_files: Some(false),

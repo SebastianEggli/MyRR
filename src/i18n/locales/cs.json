@@ -2494,7 +2494,9 @@
         "rateStars_one": "Hodnotit 1 hvězdičkou",
         "rateStars_other": "Hodnotit {{count}} hvězdičkami",
         "resetZoom": "Obnovit přiblížení na okno",
-        "selectToRate": "Vyberte snímek, který chcete ohodnotit"
+        "selectToRate": "Vyberte snímek, který chcete ohodnotit",
+        "sortFilmstripByFolder": "Řadit filmový pás podle složek",
+        "sortFilmstripByName": "Řadit filmový pás podle názvu"
       },
       "zoomLabel": "Přiblížení",
       "zoomLabelReset": "Obnovit přiblížení"

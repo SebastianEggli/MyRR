@@ -2451,7 +2451,9 @@
         "rateStars_one": "Avaliar com 1 estrela",
         "rateStars_other": "Avaliar com {{count}} estrelas",
         "resetZoom": "Redefinir Zoom para Caber na Janela",
-        "selectToRate": "Selecione uma imagem para avaliar"
+        "selectToRate": "Selecione uma imagem para avaliar",
+        "sortFilmstripByFolder": "Ordenar a tira por pasta",
+        "sortFilmstripByName": "Ordenar a tira por nome"
       },
       "zoomLabel": "Zoom",
       "zoomLabelReset": "Redefinir Zoom"

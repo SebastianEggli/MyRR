@@ -2451,7 +2451,9 @@
         "rateStars_one": "Puntuar 1 estrella",
         "rateStars_other": "Puntuar con {{count}} estrellas",
         "resetZoom": "Restablecer zoom a Ajustar a la ventana",
-        "selectToRate": "Selecciona una imagen para puntuarla"
+        "selectToRate": "Selecciona una imagen para puntuarla",
+        "sortFilmstripByFolder": "Ordenar la tira por carpeta",
+        "sortFilmstripByName": "Ordenar la tira por nombre"
       },
       "zoomLabel": "Zoom",
       "zoomLabelReset": "Restablecer Zoom"

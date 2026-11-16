@@ -54,6 +54,7 @@ interface LibraryState {
   isTreeLoading: boolean;
   isViewLoading: boolean;
   libraryScrollTop: number;
+  pendingRevealPath: string | null;
   listColumnWidths: ColumnWidths;
   libraryGridRows: Array<Array<{ path: string; center: number }>>;
 
@@ -97,6 +98,7 @@ export const useLibraryStore = create<LibraryState>((set) => ({
   isViewLoading: false,
   libraryScrollTop: 0,
   libraryGridRows: [],
+  pendingRevealPath: null,
   listColumnWidths: {
     thumbnail: 4,
     name: 20,

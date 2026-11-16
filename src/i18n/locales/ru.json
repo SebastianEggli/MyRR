@@ -2494,7 +2494,9 @@
         "rateStars_one": "Оценить в {{count}} звезду",
         "rateStars_other": "Оценить в {{count}} звезд",
         "resetZoom": "Сбросить масштаб (по размеру окна)",
-        "selectToRate": "Выберите снимок, чтобы выставить ему оценку"
+        "selectToRate": "Выберите снимок, чтобы выставить ему оценку",
+        "sortFilmstripByFolder": "Сортировать ленту по папкам",
+        "sortFilmstripByName": "Сортировать ленту по имени"
       },
       "zoomLabel": "Масштаб",
       "zoomLabelReset": "Сбросить масштаб"

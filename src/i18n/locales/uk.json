@@ -2492,7 +2492,9 @@
         "rateStars_one": "Оцінити на {{count}} зірку",
         "rateStars_other": "Оцінити на {{count}} зірки",
         "resetZoom": "Скинути масштаб до розміру вікна",
-        "selectToRate": "Виберіть зображення, щоб оцінити"
+        "selectToRate": "Виберіть зображення, щоб оцінити",
+        "sortFilmstripByFolder": "Сортувати стрічку за папками",
+        "sortFilmstripByName": "Сортувати стрічку за назвою"
       },
       "zoomLabel": "Масштаб",
       "zoomLabelReset": "Скинути масштаб"
