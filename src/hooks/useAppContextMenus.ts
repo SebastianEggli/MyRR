@@ -51,6 +51,7 @@ import {
   Album as AlbumIcon,
   PencilSparkles,
   ScanLine,
+  PaintBucket,
   MonitorUp,
   AppWindow,
 } from 'lucide-react';
@@ -75,6 +76,7 @@ import {
   INITIAL_ADJUSTMENTS,
 } from '../utils/adjustments';
 import TaggingSubMenu from '../components/panel/library/TaggingSubMenu';
+import BackgroundColorSubMenu from '../components/panel/editor/BackgroundColorSubMenu';
 import {
   buildAutoAdjustModeOptions,
   debouncedSave,
@@ -433,6 +435,11 @@ export function useAppContextMenus(latestProps: UseAppContextMenusProps) {
             { disabled: true, icon: Images, label: t('contextMenus.editor.mergeHdr') },
             { disabled: true, icon: Layers, label: t('contextMenus.merge.focusStack') },
           ],
+        },
+        {
+          label: t('contextMenus.editor.backgroundColor'),
+          icon: PaintBucket,
+          submenu: [{ customComponent: BackgroundColorSubMenu, customProps: {} }],
         },
         { type: OPTION_SEPARATOR },
         {
